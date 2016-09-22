@@ -1,0 +1,28 @@
+This is a simple game made with pygame. Hopefully, it may one day implment a
+d20-like system. The title is short for "double dungeons rogue" because i
+wanted a quick name. Improvements are welcome.
+
+So far:
+    Movement        [\]
+    Combat          [ ]
+    Classes         [ ]
+    Enemies         [ ]
+    Map creation    [ ]
+    Items           [ ]
+
+guide: 
+    \: half done
+    x: done
+
+
+
+Development notes:
+
+The key to everything right now is the EventHandler class, which takes the
+player and a path to a keymap, then creates a map from the keys to the
+functions they belong to. Then when the EventHandler.end_round method is
+called, the program waits for any key input. When it recieves it, it tries to
+match the key pressed to a known action and perform that action. Current
+actions are square movement (up, down, left and right) and exiting the game.
+
+Next to be developed is likely combat or map creation.
