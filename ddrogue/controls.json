@@ -1,0 +1,15 @@
+        {
+            "keycode": {
+                "273": "move_up",
+                "274": "move_down",
+                "275": "move_right",
+                "276": "move_left",
+                "27": "quit"
+            },
+            "unicode": {
+                "h": "move_left",
+                "k": "move_down",
+                "j": "move_up",
+                "l": "move_right"
+            }
+        }
