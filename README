@@ -15,6 +15,13 @@ guide:
     x: done
 
 
+Controls:
+    <-, h: move left
+    /\, j: move up
+    \/, k: move down
+    ->, l: move right
+    ESC: quit
+
 
 Development notes:
 
