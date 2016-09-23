@@ -2,25 +2,21 @@ from random import randint
 from itertools import repeat
 
 
-def roll(sides):
-    """ Roll a die and return the results """
-    return randint(1, sides)
+def roll(die_formula):
+    """
+    Expects traditional die formula; ex. 1d20. Rolls the die and returns the
+    total results.
+    """
+    roll = 0
+    times, sides = die_formula.split('d')
+    for _ in repeat(None, times):  # TODO Find out why i copypasta'd None
+        roll += randint(1, sides)
+    return roll
 
 
 def perform_action(bonus, difficulty):
     """
-    As per pathfinder rules, to do anything you must roll a d20 to accomplish
-    the feat
+    As per pathfinder OGC rules, to do anything you must roll a d20 to
+    accomplish the feat
     """
-    return (roll(20) + bonus) > difficulty
-
-
-def attack_damage(die_size, damage_bonus, no_of_die=1):
-    """
-    Requires the size of the attack die, the damage bonus, the defender armor
-    class, and optionally the number of attack dice, default 1.
-    """
-    dmg = damage_bonus
-    for _ in repeat(None, no_of_die):
-        dmg += roll(die_size)
-    return dmg
+    return (roll('1d20') + bonus) > difficulty
