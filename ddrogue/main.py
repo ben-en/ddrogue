@@ -2,8 +2,10 @@
 
 import pygame
 
-from .player import Player
+from .classes import Fighter
+from .dice import roll
 from .event_management import EventHandler
+from .player import Player
 
 
 TILE_SIZE = 32
@@ -31,6 +33,19 @@ def game_loop(screen, player, event_handler):
             break
 
 
+def init_player():
+    player = Player()
+    player.sprite.rect.x = WIDTH/2 - player.width/2
+    player.sprite.rect.y = HEIGHT/2 - player.height/2
+    player._class = Fighter()
+    player.bab = player._class.bab[player.level]
+    player.saves = player._class.saves[player.level]
+    player.hp = player.stats.con.bonus + sum(
+        [roll(player._class.hd) for _ in xrange(0, player.level)]
+    )
+    return player
+
+
 def main():
     pygame.init()
 
@@ -38,9 +53,7 @@ def main():
     screen = pygame.display.set_mode(SIZE)
 
     # Set up the player
-    player = Player()
-    player.sprite.rect.x = WIDTH/2 - player.width/2
-    player.sprite.rect.y = HEIGHT/2 - player.height/2
+    player = init_player()
 
     # Initialize the event handler
     event_handler = EventHandler(player, KEYMAP_FILE)
