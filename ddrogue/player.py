@@ -1,6 +1,8 @@
 import pygame
 from pygame.sprite import Sprite, Group
 
+from .mechanics import Stat, StatBlock
+
 
 BLACK = 0, 0, 0
 
@@ -10,12 +12,21 @@ class Player(object):
     Creates a player sprite and group, and attaches them to itself.
     """
     def __init__(self):
-        self.width = self.height = 32
+        self.width = self.height = 32  # TODO only define this once
         self.group = PlayerGroup()
         self.sprite = PlayerSprite(self.width, self.height,
                                    groups=[self.group])
         self.rect = self.sprite.rect
         self.image = self.sprite.image
+        self.level = 1
+        self.stats = self.init_stats()
+
+    def init_stats(self):
+        stats = StatBlock(
+            str=Stat(17, 3), dex=Stat(13, 1), con=Stat(14, 2), int=Stat(9, -1),
+            wis=Stat(10, 0), cha=Stat(12, 1),
+        )
+        return stats
 
 
 class PlayerSprite(Sprite):
