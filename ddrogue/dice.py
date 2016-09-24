@@ -2,16 +2,17 @@ from random import randint
 from itertools import repeat
 
 
-def roll(die_formula):
+def roll(die_formula, split_results=False):
     """
     Expects traditional die formula; ex. 1d20. Rolls the die and returns the
-    total results.
+    total results as default.
     """
-    roll = 0
     times, sides = die_formula.split('d')
-    for _ in repeat(None, times):  # TODO Find out why i copypasta'd None
-        roll += randint(1, sides)
-    return roll
+    roll = [randint(1, int(sides)) for _ in repeat(None, int(times))]
+
+    if split_results:
+        return roll
+    return sum(roll)  # TODO sum
 
 
 def perform_action(bonus, difficulty):
