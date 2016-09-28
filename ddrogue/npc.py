@@ -1,8 +1,7 @@
-import pygame
 from pygame.sprite import Sprite, Group
 
 from .dice import roll
-from .mechanics import stat_bonus, Stat
+from .mechanics import Stat
 
 
 BLACK = 0, 0, 0
