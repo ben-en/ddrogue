@@ -9,10 +9,26 @@ MOVEMENT_EVENTS = 'UP DOWN LEFT RIGHT'.split()
 ALPHA_RE = re.compile("[a-zA-Z0-9]")
 
 
+class State:
+    def __init__(self, m, player, npcs=[]):
+        self.map = m
+        self.player = player
+        self.npcs = npcs
+        self.characters = npcs[:] + [player]
+        self.visible = self.characters
+        self.quit = False
+
+
 def set_events():
     """ Prevent events we aren't interested in from being used later """
     pygame.event.set_blocked([pygame.ACTIVEEVENT, pygame.MOUSEMOTION,
                               pygame.MOUSEBUTTONUP, pygame.MOUSEBUTTONDOWN, ])
+
+
+def attack(attacker, defender):
+    print('attacker', attacker)
+    print('defender', defender)
+    return False  # Whether defender was destroyed
 
 
 class EventHandler(object):
@@ -54,42 +70,50 @@ class EventHandler(object):
         }
         self.keymap = self.load_keymap(keymap_file)
 
-    def end_round(self):
+    def end_round(self, state):
         """
         Wait for an event, try to execute a command and return True to quit.
         """
+        self.state = state
         event = pygame.event.wait()
         if event.type == pygame.QUIT:
-            return self.quit()
+            self.quit()
         elif event.type == pygame.KEYDOWN:
-            return self.key_pressed(event)
+            self.process_key_press(event)
         elif event.type == pygame.KEYUP:
             # As this is turn based, it is possible we don't care so much about
             # this
-            return
+            pass
         else:
             print('Unknown event')
             print(event)
             print(dir(event))
             import ipdb; ipdb.set_trace()
+        return self.state
 
-    def key_pressed(self, event):
+    def process_key_press(self, event):
         # TODO: Logging really needs to be fixed
-        print('Key pressed')
-        print('unicode: ', event.unicode, bool(event.unicode))
-        print('keycode: ', event.key)
+        key_pressed = self.get_key_pressed(event)
+        print('Key pressed', key_pressed)
         try:
-            action = self.get_action(event)
-            print('action taken: ', action.__name__)
-            return action()
+            action = self.keymap[key_pressed]
         except KeyError:
             print('Unknown key')
-
-    def get_action(self, event):
-        if event.unicode and ALPHA_RE.match(event.unicode):
-            return self.keymap['unicode'][event.unicode]
+            return
+        if action.__name__[0:4] == "move":
+            self.move_character_to(self.state.player,
+                                   action(self.state.player.pos))
         else:
-            return self.keymap['keycode'][event.key]
+            action()
+        print('action taken: ', action.__name__)
+
+    def get_key_pressed(self, event):
+        if event.unicode and ALPHA_RE.match(event.unicode):
+            print('unicode: ', event.unicode, bool(event.unicode))
+            return event.unicode
+        else:
+            print('keycode: ', event.key)
+            return event.key
 
     def load_keymap(self, file_path):
         """
@@ -97,10 +121,7 @@ class EventHandler(object):
         key mappings to known functions
         """
         print("Loading keymap...")
-        skel = {
-            'keycode': {},
-            'unicode': {}
-        }
+        skel = {}
         with open(file_path, 'r') as json_file:
             control_dict = json.load(json_file)
         for name, d in control_dict.items():
@@ -109,33 +130,44 @@ class EventHandler(object):
                     # JSON requires key names to be strings
                     key = int(key)
                 action_func = self.player_actions[value.lower()]
-                skel[name][key] = action_func
-        print(skel)
+                skel[key] = action_func
         return skel
 
     #####################
     #  Event Functions  #
     #####################
-    def quit(self):
-        print('Got quit signal')
-        return 'QUIT'
+    def move_character_to(self, mover, new_pos):
+        print('trying to move to', new_pos)
+        move_ok = True
+        if self.state.map.is_wall(new_pos):
+            return
+        for character in self.state.characters:
+            if character.rect.collidepoint(new_pos):
+                # Attack returns whether the defender was destroyed
+                move_ok = attack(mover, character)
+        if move_ok:
+            mover.pos = new_pos
+            print('move success')
 
-    def move_down(self):
+    def quit(self):
+        self.state.quit = True
+
+    def move_down(self, pos):
         """ Move the player down by adding one unit to its y value.
         """
-        self.player.rect.y += self.unit
+        return (pos[0], pos[1] + self.unit)
 
-    def move_up(self):
+    def move_up(self, pos):
         """ Move the player up by subracting one unit from its y value.
         """
-        self.player.rect.y -= self.unit
+        return (pos[0], pos[1] - self.unit)
 
-    def move_left(self):
+    def move_left(self, pos):
         """ Move the player left by subracting one unit from its x value.
         """
-        self.player.rect.x -= self.unit
+        return (pos[0] - self.unit, pos[1])
 
-    def move_right(self):
+    def move_right(self, pos):
         """ Move the player right by adding one unit to its x value.
         """
-        self.player.rect.x += self.unit
+        return (pos[0] + self.unit, pos[1])
