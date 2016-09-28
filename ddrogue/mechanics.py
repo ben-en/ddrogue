@@ -24,10 +24,6 @@ def stat_bonus(stat):
     # (23, 6)
     return (stat - 10) / 2
 
-# I wonder if i should add the type of stat it is? eg dex, str, con
-Stat = namedtuple('Stat', ['base', 'bonus'])
-StatBlock = namedtuple('StatBlock', 'str dex con int wis cha'.split())
-
 
 def expand_bab(high_bab):
     """
@@ -78,6 +74,10 @@ def compile_saves(fort, ref, wis):
         compiled.append((fort[i], ref[i], wis[i]))
     return compiled
 
+
+# I wonder if i should add the type of stat it is? eg dex, str, con
+Stat = namedtuple('Stat', ['base', 'bonus'])
+StatBlock = namedtuple('StatBlock', 'str dex con int wis cha'.split())
 
 #########
 # Saves #
