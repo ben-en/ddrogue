@@ -43,7 +43,7 @@ class NonPlayerGroup(Group):
     pass
 
 
-class Goblin(NonPlayerCharacter):
+class Goblin:
     def __init__(self):
         # Create an image of the block, and fill it with a color.
         # This could also be an image loaded from the disk.
