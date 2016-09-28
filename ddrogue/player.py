@@ -4,7 +4,7 @@ from pygame.sprite import Sprite, Group
 from .mechanics import Stat, StatBlock
 
 
-BLACK = 0, 0, 0
+PLAYER_COLOR = 255, 255, 100
 
 
 class Player(object):
@@ -40,7 +40,7 @@ class PlayerSprite(Sprite):
         # Create an image of the block, and fill it with a color.
         # This could also be an image loaded from the disk.
         self.image = pygame.Surface([width, height])
-        self.image.fill(BLACK)
+        self.image.fill(PLAYER_COLOR)
 
         # Fetch the rectangle object that has the dimensions of the image
         # Update the position of this object by setting the values of rect.x
