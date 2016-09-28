@@ -1,7 +1,7 @@
 import pygame
 from pygame.sprite import Sprite, Group
 
-from .mechanics import Stat, StatBlock
+from .mechanics.stats import Stat, StatBlock
 
 
 PLAYER_COLOR = 255, 255, 100
