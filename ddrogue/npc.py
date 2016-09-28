@@ -44,13 +44,11 @@ class NonPlayerGroup(Group):
 
 
 class Goblin:
-    def __init__(self):
+    def __init__(self, image):
         # Create an image of the block, and fill it with a color.
         # This could also be an image loaded from the disk.
-        self.groups = [NonPlayerGroup(), MonsterGroup()]
-        self.sprite = NonPlayerSprite(pygame.Surface([WIDTH, HEIGHT]),
-                                      groups=self.group)
-        self.sprite.image.fill(BLUE)
+        self.image = image
+        self.rect = image.get_rect()
         self.stats = self.init_stats()
         self.hp = roll('1d4') + self.stats['con'].bonus
         self.ac = 10 + self.stats['dex'].bonus
