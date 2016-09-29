@@ -19,19 +19,14 @@ def init_player(tile_size):
 
     player.stats = player.init_stats()
     player.size = Medium()
-    player._class = Fighter()
-    player.levelup(level=1)
+    player.set_class(Fighter)
 
-    player.bab = player._class.bab[player.level]
-    print(player.bab)
-    print(player._class.bab)
-    player.base_saves = player._class.saves[player.level]
     player.hp = player.stats.con.bonus + sum(
         [roll(player._class.hd) for _ in xrange(0, player.level)]
     )
 
-    player.weapons = [Fist(player)]
-    player.equipped = 0
+    player.add_weapon(Fist)
+    player.equip(0)
 
     return player
 
@@ -43,7 +38,9 @@ class Player(Sprite):
         self.image = image
         self.rect = self.image.get_rect()
 
-        self.level = 0
+        self.level = 1
+        self.weapons = []
+        self.equipped = -1
 
     def init_stats(self):
         stats = StatBlock(
@@ -63,6 +60,18 @@ class Player(Sprite):
 
     def _levelup(self):
         self.level += 1
+
+    def set_class(self, _class):
+        self._class = Fighter()
+        self.bab = self._class.bab[self.level - 1]
+        print(self.bab)
+        self.base_saves = self._class.saves[self.level]
+
+    def add_weapon(self, weapon):
+        self.weapons.append(Fist(self))
+
+    def equip(self, weapon):
+        self.equipped = weapon
 
     def setup_skills(self):
         self.skills = {}
