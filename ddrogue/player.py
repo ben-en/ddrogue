@@ -68,9 +68,3 @@ class Player(Sprite):
         self.skills = {}
         for skill in SKILL_LIST:
             self.skill[skill] = [0, 0]  # [ranks, bonus]
-
-    def setup_feats(self):
-        pass
-
-    def setup_magic(self):
-        pass
