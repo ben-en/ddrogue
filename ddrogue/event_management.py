@@ -3,7 +3,7 @@ import json
 
 import pygame
 
-from .dice import roll
+from .mechanics.dice import roll
 
 
 MOVEMENT_EVENTS = 'UP DOWN LEFT RIGHT'.split()

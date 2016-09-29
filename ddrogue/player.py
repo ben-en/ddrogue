@@ -1,7 +1,7 @@
 from pygame.sprite import Sprite
 
-from .dice import roll
-from .classes import Fighter
+from .mechanics.classes import Fighter
+from .mechanics.dice import roll
 from .mechanics.stats import Stat, StatBlock
 from .mechanics.skills import SKILL_LIST
 from .mechanics.sizes import Medium

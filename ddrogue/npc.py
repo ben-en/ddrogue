@@ -1,6 +1,6 @@
 from pygame.sprite import Sprite, Group
 
-from .dice import roll
+from .mechanics.dice import roll
 from .mechanics.stats import Stat, StatBlock
 from .mechanics.sizes import Small
 from .mechanics.weapons import Unarmed
