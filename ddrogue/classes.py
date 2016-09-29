@@ -1,4 +1,5 @@
-from .mechanics.stats import HIGH_BAB, GOOD_SAVE, BAD_SAVE, compile_saves
+from .mechanics.bab import HIGH_BAB
+from .mechanics.saves import GOOD_SAVE, BAD_SAVE, compile_saves
 
 
 class Fighter(object):
