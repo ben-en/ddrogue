@@ -76,7 +76,7 @@ def compile_saves(fort, ref, wis):
 
 
 # I wonder if i should add the type of stat it is? eg dex, str, con
-Stat = namedtuple('Stat', ['base', 'bonus'])
+Stat = namedtuple('Stat', ['val', 'bonus'])
 StatBlock = namedtuple('StatBlock', 'str dex con int wis cha'.split())
 
 #########
