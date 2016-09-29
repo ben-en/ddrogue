@@ -50,3 +50,18 @@ def iterate_stat_list(highest_value, dup_test, start=1, expand_func=None):
 Stat = namedtuple('Stat', ['val', 'bonus'])
 StatBlock = namedtuple('StatBlock', 'str dex con int wis cha'.split())
 
+
+class StatBlock(dict):
+    """ Mutable, accessible with both attributes and dict items """
+    def __init__(self, str, dex, con, int, wis, cha):
+        self.str = str
+        self.dex = dex
+        self.con = con
+        self.int = int
+        self.wis = wis
+        self.cha = cha
+
+    def __setattr__(self, key, val):
+        print(key, val)
+        dict.__setattr__(self, key, val)
+        dict.__setitem__(self, key, val)
