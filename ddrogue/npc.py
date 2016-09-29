@@ -10,38 +10,6 @@ BLUE = 0, 255, 0
 WIDTH = HEIGHT = 32  # TODO only define this once
 
 
-class NonPlayerCharacter:
-    """
-    Creates a player sprite and group, and attaches them to itself.
-    """
-    def __init__(self):
-        self.width = self.height = 32  # TODO only define this once
-        self.group = NonPlayerGroup()
-        self.sprite = NonPlayerSprite(self.width, self.height,
-                                      groups=[self.group])
-
-
-class NonPlayerSprite(Sprite):
-    """
-    NonPlayer sprite, expects an image object and a width/height assignment
-    """
-    def __init__(self, image, groups=[]):
-        # Call the parent class (Sprite) constructor which takes no arguments
-        Sprite.__init__(self, groups)
-
-        self.image = image
-
-        # Fetch the rectangle object that has the dimensions of the image
-        self.rect = self.image.get_rect()
-
-        # Update the position of this object by setting the values of rect.x
-        # and rect.y
-
-
-class NonPlayerGroup(Group):
-    pass
-
-
 class Goblin:
     def __init__(self, image):
         # Create an image of the block, and fill it with a color.
