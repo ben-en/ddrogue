@@ -17,13 +17,12 @@ def init_player(tile_size):
     player_image = create_tile(PLAYER_COLOR, [tile_size, tile_size])
     player = Player(player_image)
 
-    player.stats = player.init_stats()
+    # TODO add races
+    # player.set_race(Human)
     player.size = Medium()
     player.set_class(Fighter)
 
-    player.hp = player.stats.con.bonus + sum(
-        [roll(player._class.hd) for _ in xrange(0, player.level)]
-    )
+    player.init_stats(interactive=True)
 
     player.add_weapon(Fist)
     player.equip(0)
@@ -42,12 +41,17 @@ class Player(Sprite):
         self.weapons = []
         self.equipped = -1
 
-    def init_stats(self):
-        stats = StatBlock(
+    def init_stats(self, interactive=False):
+        if interactive:
+            print('tough luck buddy')
+        self.stats = StatBlock(
             str=Stat(17, 3), dex=Stat(13, 1), con=Stat(14, 2), int=Stat(9, -1),
             wis=Stat(10, 0), cha=Stat(12, 1),
         )
-        return stats
+        self.hp = self.stats.con.bonus + sum(
+            [roll(self._class.hd or self.race.hd) for _ in
+                xrange(0, self.level)]
+        )
 
     def levelup(self, level=-1):
         """ Levels the character up to kwarg level, default current level +1
