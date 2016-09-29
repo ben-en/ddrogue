@@ -5,7 +5,7 @@ from .classes import Fighter
 from .mechanics.stats import Stat, StatBlock
 from .mechanics.skills import SKILL_LIST
 from .mechanics.sizes import Medium
-from .mechanics.weapons import Fist
+from .mechanics.weapons import Unarmed
 from .map import create_tile
 
 
@@ -54,7 +54,7 @@ class Creature(Sprite):
         self.base_saves = self._class.saves[self.level]
 
     def add_weapon(self, weapon):
-        self.weapons.append(Fist(self))
+        self.weapons.append(weapon(self))
 
     def equip(self, weapon):
         self.equipped = weapon
@@ -77,5 +77,5 @@ class Player(Creature):
 
         self.init_stats(interactive=True)
 
-        self.add_weapon(Fist)
+        self.add_weapon(Unarmed)
         self.equip(0)

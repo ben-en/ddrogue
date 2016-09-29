@@ -3,7 +3,7 @@ from pygame.sprite import Sprite, Group
 from .dice import roll
 from .mechanics.stats import Stat, StatBlock
 from .mechanics.sizes import Small
-from .mechanics.weapons import Fist
+from .mechanics.weapons import Unarmed
 
 
 BLACK = 0, 0, 0
@@ -22,7 +22,7 @@ class Goblin(Sprite):
         self.ac = 10 + self.stats.dex.bonus
         self.bab = 1
         self.size = Small()
-        self.weapons = [Fist(self)]
+        self.weapons = [Unarmed(self)]
         self.equipped = 0
         # TODO add armor and size values
 
