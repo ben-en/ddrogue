@@ -18,7 +18,15 @@ def set_events():
 def attack(attacker, defender):
     print('attacker', attacker)
     print('defender', defender)
-    return False  # Whether defender was destroyed
+    weapon = attacker.weapons[attacker.equipped]
+    base_dmg = roll(weapon.damage)
+    print('rolled damage', base_dmg)
+    total_dmg = base_dmg + attacker.dmg_bonus
+    print('total', total_dmg)
+    print('initial hp', defender.hp)
+    defender.hp -= total_dmg
+    print('remaining hp', defender.hp)
+    return defender.hp <= 0  # Whether defender was destroyed
 
 
 class State:
