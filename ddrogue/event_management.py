@@ -3,6 +3,8 @@ import json
 
 import pygame
 
+from .dice import roll
+
 
 MOVEMENT_EVENTS = 'UP DOWN LEFT RIGHT'.split()
 
@@ -66,7 +68,7 @@ class EventHandler(object):
     def __init__(self, player, keymap_file):
         set_events()
         self.player = player
-        self.unit = player.height  # Tiles are all the same size
+        self.unit = player.rect[2]  # Tiles are all the same size
         self.event_types = [self.quit, self.move_up, self.move_down,
                             self.move_left, self.move_right]
         self.player_actions = {
