@@ -12,25 +12,7 @@ from .map import create_tile
 PLAYER_COLOR = 255, 255, 100
 
 
-def init_player(tile_size):
-    """ Returns a player object """
-    player_image = create_tile(PLAYER_COLOR, [tile_size, tile_size])
-    player = Player(player_image)
-
-    # TODO add races
-    # player.set_race(Human)
-    player.size = Medium()
-    player.set_class(Fighter)
-
-    player.init_stats(interactive=True)
-
-    player.add_weapon(Fist)
-    player.equip(0)
-
-    return player
-
-
-class Player(Sprite):
+class Creature(Sprite):
     def __init__(self, image):
         Sprite.__init__(self)
         self.groups = []
@@ -81,3 +63,19 @@ class Player(Sprite):
         self.skills = {}
         for skill in SKILL_LIST:
             self.skill[skill] = [0, 0]  # [ranks, bonus]
+
+
+class Player(Creature):
+    def __init__(self, tile_size):
+        player_image = create_tile(PLAYER_COLOR, [tile_size, tile_size])
+        Creature.__init__(self, player_image)
+
+        # TODO add races
+        # player.set_race(Human)
+        self.size = Medium()
+        self.set_class(Fighter)
+
+        self.init_stats(interactive=True)
+
+        self.add_weapon(Fist)
+        self.equip(0)

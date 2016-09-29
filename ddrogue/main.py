@@ -3,7 +3,7 @@
 import pygame
 
 from .event_management import EventHandler, State
-from .player import init_player
+from .player import Player
 from .map import Map, create_map_matrix, create_tile
 from .npc import Goblin
 
@@ -40,7 +40,7 @@ def init_state():
     m = Map(create_map_matrix())
     goblin_image = create_tile(GREEN, [m.unit, m.unit])
     goblin = Goblin(goblin_image)
-    state = State(m, init_player(m.unit), npcs=[goblin])
+    state = State(m, Player(m.unit), npcs=[goblin])
     state.player.pos = [state.map.width/2 * state.map.unit,
                         state.map.height/2 * state.map.unit]
     state.npcs[0].pos = [state.player.pos[0] - state.map.unit * 2,
