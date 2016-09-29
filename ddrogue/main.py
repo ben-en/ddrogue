@@ -2,10 +2,8 @@
 
 import pygame
 
-from .classes import Fighter
-from .dice import roll
 from .event_management import EventHandler, State
-from .player import Player
+from .player import init_player
 from .map import Map, create_map_matrix, create_tile
 from .npc import Goblin
 
@@ -42,23 +40,12 @@ def init_state():
     m = Map(create_map_matrix())
     goblin_image = create_tile(GREEN, [m.unit, m.unit])
     goblin = Goblin(goblin_image)
-    state = State(m, init_player(), npcs=[goblin])
+    state = State(m, init_player(m.unit), npcs=[goblin])
     state.player.pos = [state.map.width/2 * state.map.unit,
                         state.map.height/2 * state.map.unit]
     state.npcs[0].pos = [state.player.pos[0] - state.map.unit * 2,
                          state.player.pos[1]]
     return state
-
-
-def init_player():
-    player = Player()
-    player._class = Fighter()
-    player.bab = player._class.bab[player.level]
-    player.saves = player._class.saves[player.level]
-    player.hp = player.stats.con.bonus + sum(
-        [roll(player._class.hd) for _ in xrange(0, player.level)]
-    )
-    return player
 
 
 def main():
