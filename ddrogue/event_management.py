@@ -9,16 +9,6 @@ MOVEMENT_EVENTS = 'UP DOWN LEFT RIGHT'.split()
 ALPHA_RE = re.compile("[a-zA-Z0-9]")
 
 
-class State:
-    def __init__(self, m, player, npcs=[]):
-        self.map = m
-        self.player = player
-        self.npcs = npcs
-        self.characters = npcs[:] + [player]
-        self.visible = self.characters
-        self.quit = False
-
-
 def set_events():
     """ Prevent events we aren't interested in from being used later """
     pygame.event.set_blocked([pygame.ACTIVEEVENT, pygame.MOUSEMOTION,
@@ -29,6 +19,16 @@ def attack(attacker, defender):
     print('attacker', attacker)
     print('defender', defender)
     return False  # Whether defender was destroyed
+
+
+class State:
+    def __init__(self, m, player, npcs=[]):
+        self.map = m
+        self.player = player
+        self.npcs = npcs
+        self.characters = npcs[:] + [player]
+        self.visible = self.characters
+        self.quit = False
 
 
 class EventHandler(object):
