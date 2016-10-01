@@ -3,10 +3,10 @@ d20-like system. The title is short for "double dungeons rogue" because i
 wanted a quick name. Improvements are welcome.
 
 So far:
-    Movement        [\]
-    Combat          [ ]
-    Classes         [ ]
-    Enemies         [ ]
+    Movement        [x]
+    Combat          [\]
+    Classes         [\]
+    Enemies         [\]
     Map creation    [ ]
     Items           [ ]
 
@@ -23,13 +23,61 @@ Controls:
     ESC: quit
 
 
-Development notes:
+Thoughts:
+This is starting to look more like a 2d neverwinter nights than a roguelike.
+Having a library which accessed the rule set would be a nice abstraction later
+so i could do both. Not sure which would be simpler to get off the ground, a
+nwn clone could be done with a dungeon and a city and pronounced version 0.1,
+whereas map generation may take a lot of coding.
 
-The key to everything right now is the EventHandler class, which takes the
-player and a path to a keymap, then creates a map from the keys to the
-functions they belong to. Then when the EventHandler.end_round method is
-called, the program waits for any key input. When it recieves it, it tries to
-match the key pressed to a known action and perform that action. Current
-actions are square movement (up, down, left and right) and exiting the game.
+## Planned Features ##
 
-Next to be developed is likely combat or map creation.
++ Character creation
+    This would be a series of user prompts, such as:
+        - Race
+        - Class
+        - Roll Stats
+        - Select Skills
+        - Select Feats
+        - Start off in town to purchase initial gear from shops, or a tutorial
+          world?
+
++ Races
+    Initially just the classic few, Humans, Dwarves, Gnomes, Halfings, Elves.
+    Ideally monsters would be implemented in a way that they could be given
+    class leveles.
+
++ Classes
+    Ideally all base classes, the differences between a wizard and a sorcerer
+    are quite pronounced in a game.
+    Theoretically prestige classes as well once there's enough content to get
+    to level 10.
+
++ Equpment
+    Such as swords, spears, bows, armor, shields, rope, camping gear, etc.
+
++ Skills
+    Skills must be examined for usefulness. Some, like spellcraft or climb,
+    present obvious merit in certain circumstances.
+
++ Feats
+    Feats likewise must be examined for simple to implement cases such as skill
+    boosts, metamagic feats, or item creation feats.
+
++ Spells
+    Spell per day system sounds fine, but doing it this way may make soloing
+    less desireable.
+
++ Combat rules
+    All things available in pathfinder should be available, reach based on size
+    or weapons, tripping, falling prone, etc. Iirc pathfinder also has stances,
+    which might be interesting.
+
++ Craft/Magic Item creation
+    System already exists, requires XP, knowledge of the spells, gold and
+    ingredients.
+
++ Map Generation
+    Unsure if completely generated or hand made.
+    A global map so more non-combat equipment and skills are useful, with
+    cities where you can purchase, steal, and interact normally.
