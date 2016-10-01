@@ -3,12 +3,13 @@ d20-like system. The title is short for "double dungeons rogue" because i
 wanted a quick name. Improvements are welcome.
 
 So far:
-    Movement        [x]
-    Combat          [\]
-    Classes         [\]
-    Enemies         [\]
-    Map creation    [ ]
-    Items           [ ]
+    Movement                        [x]
+    Information display             [ ]
+    Combat                          [\]
+    Classes                         [\]
+    Enemies                         [\]
+    Map creation                    [ ]
+    Items                           [ ]
 
 guide: 
     \: half done
