@@ -24,6 +24,11 @@ Controls:
     ESC: quit
 
 
+Next on the list is flush out controls, add UI for combat and skill choices. 
+Once UI is in place, special weapon functions such as trip or bull rushing can 
+be implemented.
+
+
 Thoughts:
 This is starting to look more like a 2d neverwinter nights than a roguelike.
 Having a library which accessed the rule set would be a nice abstraction later

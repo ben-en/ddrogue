@@ -4,56 +4,6 @@ from .bab import HIGH_BAB
 from .saves import GOOD_SAVE, BAD_SAVE, compile_saves
 
 
-class Character(object):
-    def __init__(self, name, cclass, race, stats, interactive=False):
-        self.name = name
-        self.cclass = cclass
-        self.race = race
-        self.stats = stats
-
-        # Setup null attributes with appropriate typed info
-        self.hp = 0
-        self.bab = [0]
-        self.saves = 0, 0, 0
-        self.initiative = 0
-        self.ac = (10, 10, 10)
-        self.sr = 0
-        self.cmb = 0
-        self.cmd = 0
-        self.stats = StatBlock(*(Stat((10, 0)) for x in range(6)))
-        self.skills = SkillBlock(*(0 for x in SKILL_LIST))
-        self.feats = {
-            'levelup': [],
-            'combat': [],
-            'free': [],
-            'persistent': [],
-        }
-
-        self.abilities = {
-            'levelup': [],
-            'combat': [],
-            'free': [],
-            'persistent': [],
-        }
-        self.abilities.extend(race.abilities)
-        self.equipment = []
-        self.backpack = []
-        self.gold = 0
-
-        self.level = 0
-        self = self.levelup(interactive=interactive)
-
-    def levelup(self, interactive=False):
-        """ level the character up and return a new Character object """
-        new = self.copy()
-        new.level += 1
-        new.hp += (roll(self.cclass.hd) + self.stats.con.bonus)
-        new.bab = self.cclass.bab[new.level]
-        new.abilities += self.cclass.features[new.level]
-        return new
-
-
-
 BaseClass = namedtuple('BaseClass', [
     'hd',
     'bab',
@@ -66,6 +16,59 @@ BaseClass = namedtuple('BaseClass', [
 ])
 
 
+def fighter_feat(character, npc=False):
+    """ pick a feat from the list of fighter feats """
+    character.features.update(pick(feats, npc=npc))
+    return None
+
+
+def bravery(character, npc=False):
+    """ increase the character's save against fear """
+    try:
+        character.fear_bonus += 1
+    except AttributeError:
+        character.fear_bonus = 1
+
+
+def armor_training(character, npc=False):
+    """ reduce the arcmor check penalty for armor for each level of this """
+    try:
+        character.acp_bonuse -= 1
+    except AttributeError:
+        character.acp_bonuse = -1
+
+
+def weapon_training(character, npc=False):
+    """ pick a group of weapons to specialize in """
+    # TODO finish this, its supposed to add one bonus to each previously
+    # selected. eg, at level 10, first group would be +2, second group would be
+    # +1
+    character.features += pick(groUP, npc)
+
+
+fighter_abilities += [
+    {'level_up': [fighter_feat]},
+    {'level_up': [fighter_feat], 'passive': [bravery]},
+    {'level_up': [armor_training]},
+    {'level_up': [fighter_feat]},
+    {'level_up': [weapon_training]},
+    {'level_up': [fighter_feat], 'passive': [bravery]},
+    {'level_up': [armor_training]},
+    {'level_up': [fighter_feat]},
+    {'level_up': [weapon_training]},
+    {'LEVEL_UP': [fighter_feat], 'passive': [bravery]},
+    {'level_up': [armor_training]},
+    {'level_up': [fighter_feat]},
+    {'level_up': [weapon_training]},
+    {'level_up': [fighter_feat], 'passive': [bravery]},
+    {'level_up': [armor_training]},
+    {'level_up': [fighter_feat]},
+    {'level_up': [weapon_training]},
+    {'level_up': [fighter_feat], 'passive': [bravery]},
+    {},  # TODO armor mastery
+    {'level_up': [fighter_feat]},  # TODO weapon mastery
+]
+
 Fighter = BaseClass(
     '1d10',
     HIGH_BAB,
@@ -75,5 +78,5 @@ Fighter = BaseClass(
     'dungeoneering engineering'.split(),
     2, # implies intelligence + 2
     '5d6',
-    [{} for x in range(20)]
+    fighter_abilities
 )

@@ -1,20 +1,50 @@
+from collections import namedtuple
 
 
-class Unarmed:
-    def __init__(self, char):
-        """ Expects a character as the first argument """
-        self.damages = {
-            'small': '1d2',
-            'medium': '1d3',
-            'large': '1d4'
-        }
-        self.crit = '20'
-        self.range = 0
-        self.hit_stat = 'str'
-        self.dmg_stat = 'str'
-        self.calculate_bonuses(char)
+Weapon = namedtuple('Weapon', [
+    'cost',
+    'dmg',
+    'crit_r',
+    'crit_m',
+    'range',
+    'weight',
+    'hands',
+    'type',
+    'tags'
+])
 
-    def calculate_bonuses(self, char):
-        self.damage = self.damages[char.size.name]
-        self.hit_bonus = char.stats[self.hit_stat].bonus + char.size.atk_bonus
-        self.dmg_bonus = char.stats[self.dmg_stat].bonus
+bolas = Weapon(
+    5,
+    '1d4',
+    20,
+    2,
+    10,
+    2,
+    2,
+    'b',
+    'ranged nonlethal trip'.split()
+)
+
+quarterstaff = Weapon(
+    0,
+    ['1d6', '1d6'],
+    20,
+    2,
+    0,
+    4,
+    2
+    'b',
+    'double monk'.split()
+)
+
+longspear = Weapon(
+    5,
+    '1d8',
+    20,
+    3,
+    0,
+    9,
+    2,
+    'p',
+    'brace reach'.split()
+)
