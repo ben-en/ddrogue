@@ -129,8 +129,6 @@ class Character(Sprite):
         self.equipped = self.equipment.index(
             sorted(self.equipment, key=lambda x: die_to_val(x.dam))[0]
         )
-        print(self.equipment)
-        print(self.equipped)
 
         self.level = 0
         self.rolled_hp = 0
@@ -151,12 +149,20 @@ class Character(Sprite):
 
         features = self.char_class.features
 
-        self.abilities += features[index]['active']
-        new_features = features[index]['passive']
-        # Apply new features to the character
-        for func in new_features:
-            self = func(self)
-        self.features += new_features
+        print(features)
+
+        try:
+            self.abilities += features[index]['active']
+        except KeyError:
+            pass
+        try:
+            new_features = features[index]['passive']
+            # Apply new features to the character
+            for func in new_features:
+                self = func(self)
+            self.features += new_features
+        except KeyError:
+            pass
 
         if features[index].get('spells', False):
             self.add_spells()
