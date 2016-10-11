@@ -1,10 +1,14 @@
+from collections import OrderedDict
+import sys
+from textwrap import wrap
+
 import pygame
 
 from .colors import WHITE, GREEN
 from .map import Map, create_map_matrix, create_tile
+from .menu import fullscreen_menu
 from .npc import Goblin
-from .player import Player
-from .event_management import EventHandler, State
+from .event_management import State, end_round
 
 from .mechanics.classes import Fighter
 from .mechanics.dice import roll
@@ -12,10 +16,62 @@ from .mechanics.skills import SKILL_LIST
 from .mechanics.chargen import Character
 from .mechanics.races import Human
 
-
 PLAYER_COLOR = 255, 255, 100
 
 KEYMAP_FILE = './controls.json'
+
+
+def load_text(screen, text_file):
+    text_font = pygame.font.Font(None, 18)
+    characters = (screen.get_width() - 10) / 7
+
+    text = ['loaded from: %s' % text_file, '']
+    with open(text_file, 'r') as input:
+        for l in input.readlines():
+            text += wrap(l, characters)
+            text += ['']
+
+    image = pygame.surface.Surface((screen.get_width(), len(text) * 15))
+
+    x, y = 0, 0
+    for t in text:
+        image.blit(text_font.render(t, False, (255, 255, 255)), (x, y))
+        y += 15
+
+    x, y = cursor = 5, 5
+    bottom = image.get_height() - screen.get_height()
+    while 1:
+        screen.blit(image, (x, y))
+        pygame.display.flip()
+        event = pygame.event.wait()
+        if event.type == pygame.KEYUP:
+            if event.key in [27, 13]:
+                break
+            if event.key == 273:
+                y += 30
+                if y >= 0:
+                    y = cursor[0]
+            if event.key == 274:
+                y -= 30
+                if y <= - bottom:
+                    y = - (bottom + 5)
+
+
+def settings(screen):
+    pass
+
+
+def guide(screen):
+    load_text(screen, './ogc/mechanics.txt')
+
+
+def legal(screen):
+    """ Loads legal text """
+    load_text(screen, './ogc/license.txt')
+
+
+def quit(_):
+    sys.exit()
 
 
 class StatusBox(pygame.sprite.Sprite):
@@ -46,7 +102,7 @@ class StatusBox(pygame.sprite.Sprite):
         self.cursor = (x, y)
 
 
-def game_loop(state, screen, event_handler):
+def game_loop(state, screen):
     while not state.quit:
         state.output._print('loaded new frame')
 
@@ -65,7 +121,8 @@ def game_loop(state, screen, event_handler):
         pygame.display.flip()
 
         # Wait for the next state
-        state = event_handler.end_round(state)
+        while not end_round(state):
+            pass
 
 
 def init_state():
@@ -85,7 +142,7 @@ def init_state():
                      'feats_known': [],
                  },
                  description=None)
-    state = State(m, player, npcs=[goblin])
+    state = State(m, KEYMAP_FILE, player, npcs=[goblin])
     state.player.pos = [state.map.width/2 * state.map.unit,
                         state.map.height/2 * state.map.unit]
     state.npcs[0].pos = [state.player.pos[0] - state.map.unit * 2,
@@ -98,8 +155,15 @@ def new_game(screen):
     # Setup the initial game
     state = init_state()
 
-    # Initialize the event handler
-    event_handler = EventHandler(state.player, KEYMAP_FILE)
-
     # Start the game
-    game_loop(state, screen, event_handler)
+    game_loop(state, screen)
+
+
+def main_menu(screen):
+    options = OrderedDict()
+    options["New Game"] = new_game
+    options["Settings"] = settings
+    options["Guide"] = guide
+    options["Legal"] = legal
+    options["Exit"] = quit
+    fullscreen_menu(screen, options)

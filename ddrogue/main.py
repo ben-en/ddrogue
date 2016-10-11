@@ -1,8 +1,18 @@
-#!/bin/python
+from collections import OrderedDict
 
 import pygame
 
-from .menu import main_menu
+from .menu import fullscreen_menu
+
+
+def main_menu(screen):
+    options = OrderedDict()
+    options["New Game"] = new_game
+    options["Settings"] = settings
+    options["Guide"] = guide
+    options["Legal"] = legal
+    options["Exit"] = quit
+    fullscreen_menu(screen, options)
 
 
 def main():
