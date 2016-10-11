@@ -1,3 +1,9 @@
+from collections import namedtuple
+
+
+Feat = namedtuple('Feat', 'title desc requirements tags func'.split())
+
+
 def acrobatic():
     """ +2 to acrobatics and fly """
     pass
@@ -43,3 +49,12 @@ def silent_spell():
     metamagic
     """
     pass
+
+
+FEAT_LIST = [
+    Feat('Acrobatic', '+2 to acrobatics and fly', {}, [], acrobatic),
+    Feat('Agile Maneuvers', 'use dex instead of str for cmb', {}, ['fighter'],
+         agile_maneuvers),
+    Feat('Brew Potion', 'allows crafting potions', {'CL': 3}, ['craft'],
+         brew_potion)
+]
