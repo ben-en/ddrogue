@@ -18,12 +18,31 @@ def set_events():
 
 
 def attack(attacker, defender):
+    """ Runs one _attack() for every attack bonus in attacker.bab """
     print('attacker', attacker)
     print('defender', defender)
     weapon = attacker.weapons[attacker.equipped]
+
+    print('attacker base attack bonus', attacker.bab)
+    for bab in attacker.bab:
+        print('rolling to hit')
+        attack_bonus = bab + weapon.attack_bonus
+        if not attempt_hit(attack_bonus, defender.ac):
+            print('attack missed')
+            continue
+        if resolve_damage(attacker, defender):
+            return True  # Destroyed the monster
+
+
+def attempt_hit(bonus, ac):
+    return (roll('1d20') + bonus) > ac
+
+
+def resolve_damage(weapon, defender):
+    print('rolling damage')
     base_dmg = roll(weapon.damage)
-    print('rolled damage', base_dmg)
-    total_dmg = base_dmg + attacker.dmg_bonus
+    print('base', base_dmg)
+    total_dmg = base_dmg + weapon.dmg_bonus
     print('total', total_dmg)
     print('initial hp', defender.hp)
     defender.hp -= total_dmg
