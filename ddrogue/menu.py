@@ -1,3 +1,4 @@
+from collections import OrderedDict
 import sys
 from textwrap import wrap
 
@@ -61,26 +62,48 @@ def quit(_):
 
 
 def main_menu(screen):
-    options = ["New Game", "Settings", "Guide", "Legal", "Exit"]
-    option_funcs = [new_game, settings, guide, legal, quit]
+    options = OrderedDict()
+    options["New Game"] = new_game
+    options["Settings"] = settings
+    options["Guide"] = guide
+    options["Legal"] = legal
+    options["Exit"] = quit
+    fullscreen_menu(screen, options)
 
-    menu_font = pygame.font.Font(None, 24)
-    selected = 0
-    images = [menu_font.render(x, False, (255, 255, 255)) for x in options]
-    image_positions = []
-    cursor_start = (screen.get_width()/2 - 50, screen.get_height()/3)
+
+def fullscreen_menu(screen, options):
+    """
+    Creates a menu centered on screen with the options provided.
+
+    Options is expected to be an ordered dict, eg:
+        options = OrderedDict()
+        options["New Game"] = new_game
+        options["Settings"] = settings
+        options["Exit"] = quit
+    """
+    # Create a blank surface to draw the menu on
     menu = pygame.surface.Surface((screen.get_width(), screen.get_height()))
+    # Assume the font is initialized, and create a new font object
+    menu_font = pygame.font.Font(None, 24)
+    # Create images for each option provided
+    images = [menu_font.render(x, False, (255, 255, 255)) for x in options]
+    # Find the optimal location to start writing the menu
+    cursor_start = (screen.get_width()/2 - 50, screen.get_height()/3)
 
-    # Get image positions
+    image_positions = []  # Empty list to hold rects of the images
     x, y = cursor_start
+    # Get image positions and blit options onto menu
     for i in images:
         image_positions.append(pygame.rect.Rect([x - 4, y - 4], [100, 20]))
         menu.blit(i, (x, y))
         y += 20
 
+    selected = 0
     # Enter main loop
     while 1:
+        # Draw the menu on the screen
         screen.blit(menu, [0, 0])
+        # Draw the selection box on the screen
         pygame.draw.rect(screen, WHITE, image_positions[selected], 2)
         # Flip the staging area to the display
         pygame.display.flip()
@@ -92,7 +115,7 @@ def main_menu(screen):
             # TODO DRY
             for i in image_positions:
                 if i.collidepoint(event.pos):
-                    func = option_funcs[image_positions.index(i)]
+                    func = options.values()[image_positions.index(i)]
                     func(screen)
         elif event.type == pygame.MOUSEMOTION:
             for i in image_positions:
@@ -108,10 +131,10 @@ def main_menu(screen):
                 if selected >= len(image_positions):
                     selected = 0
             elif event.key == 13:  # enter
-                func = option_funcs[selected]
+                func = options.values()[selected]
                 func(screen)
             elif event.key == 27:  # esc
                 break
         else:
             pass
-            #print(event)
+            # print(event)
