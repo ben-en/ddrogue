@@ -127,7 +127,7 @@ class Character(Sprite):
         self.gold = roll(char_class.gold) * 10
         self.equipment = char_class.equipment + race.natural_weapons
         self.equipped = self.equipment.index(
-            self.equipment.sort(key=lambda x: die_to_val(x.dam))[0]
+            sorted(self.equipment, key=lambda x: die_to_val(x.dam))[0]
         )
         print(self.equipment)
         print(self.equipped)
