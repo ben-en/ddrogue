@@ -2,8 +2,8 @@ from pygame.sprite import Sprite, Group
 
 from .mechanics.dice import roll
 from .mechanics.stats import Stat, StatBlock
-from .mechanics.sizes import Small
-from .mechanics.weapons import Unarmed
+from .mechanics.sizes import small
+from .mechanics.weapons import sml_unarmed
 
 
 BLACK = 0, 0, 0
@@ -21,8 +21,8 @@ class Goblin(Sprite):
         self.hp = roll('1d4') + self.stats.con.bonus
         self.ac = 10 + self.stats.dex.bonus
         self.bab = 1
-        self.size = Small()
-        self.weapons = [Unarmed(self)]
+        self.size = small
+        self.weapons = [sml_unarmed]
         self.equipped = 0
         # TODO add armor and size values
 

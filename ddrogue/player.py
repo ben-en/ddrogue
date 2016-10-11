@@ -4,8 +4,8 @@ from .mechanics.classes import Fighter
 from .mechanics.dice import roll
 from .mechanics.stats import Stat, StatBlock
 from .mechanics.skills import SKILL_LIST
-from .mechanics.sizes import Medium
-from .mechanics.weapons import Unarmed
+from .mechanics.sizes import medium
+from .mechanics.weapons import med_unarmed
 from .map import create_tile
 
 
@@ -60,9 +60,7 @@ class Creature(Sprite):
         self.equipped = weapon
 
     def setup_skills(self):
-        self.skills = {}
-        for skill in SKILL_LIST:
-            self.skill[skill] = [0, 0]  # [ranks, bonus]
+        self.skills = {'skill': 0 for skill in SKILL_LIST}
 
 
 class Player(Creature):
@@ -72,10 +70,10 @@ class Player(Creature):
 
         # TODO add races
         # player.set_race(Human)
-        self.size = Medium()
+        self.size = medium
         self.set_class(Fighter)
 
         self.init_stats(interactive=True)
 
-        self.add_weapon(Unarmed)
+        self.add_weapon(med_unarmed)
         self.equip(0)
