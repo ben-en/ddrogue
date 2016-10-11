@@ -1,6 +1,9 @@
 from collections import namedtuple
 
 
+Stat = namedtuple('Stat', ['val', 'bonus'])
+
+
 def stat_bonus(stat):
     """ Returns the bonus for a given stat (int) """
     # Values for use in creating tests
@@ -33,7 +36,7 @@ def iterate_stat_list(highest_value, dup_test, start=1, expand_func=None):
     """
     stat_list = []
     for i in xrange(start, highest_value):
-        if expand_func:
+        if expand_func:  # Used in bab calculations, replacing 9 with [9, 4]
             stat_val = expand_func(i)
         else:
             stat_val = i
@@ -46,22 +49,41 @@ def iterate_stat_list(highest_value, dup_test, start=1, expand_func=None):
     return stat_list
 
 
-# I wonder if i should add the type of stat it is? eg dex, str, con
-Stat = namedtuple('Stat', ['val', 'bonus'])
-StatBlock = namedtuple('StatBlock', 'str dex con int wis cha'.split())
+def ensure_stat(stat):
+    if type(stat) == int:
+        return Stat(stat, stat_bonus(stat))
+    try:
+        if 'val' in stat._fields and 'bonus' in stat._fields:
+            return stat
+    except AttributeError:
+        pass
+    try:
+        i = int(stat)
+        return Stat(i, stat_bonus(i))
+    except TypeError as e:
+        # TODO use logging for this
+        print('ERROR: unable to coerce value %s to Stat object' % stat)
+        raise e
 
 
 class StatBlock(dict):
     """ Mutable, accessible with both attributes and dict items """
-    def __init__(self, str, dex, con, int, wis, cha):
-        self.str = str
-        self.dex = dex
-        self.con = con
-        self.int = int
-        self.wis = wis
-        self.cha = cha
+    def __init__(self, l=None, str=0, dex=0, con=0, int=0, wis=0, cha=0):
+        if l and len(l) == 6:
+            self.str = ensure_stat(l[0])
+            self.dex = ensure_stat(l[1])
+            self.con = ensure_stat(l[2])
+            self.int = ensure_stat(l[3])
+            self.wis = ensure_stat(l[4])
+            self.cha = ensure_stat(l[5])
+        elif str and dex and con and int and wis and cha:
+            self.str = ensure_stat(str)
+            self.dex = ensure_stat(dex)
+            self.con = ensure_stat(con)
+            self.int = ensure_stat(int)
+            self.wis = ensure_stat(wis)
+            self.cha = ensure_stat(cha)
 
     def __setattr__(self, key, val):
-        print(key, val)
         dict.__setattr__(self, key, val)
         dict.__setitem__(self, key, val)

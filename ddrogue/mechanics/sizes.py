@@ -1,25 +1,6 @@
+from collections import namedtuple
 
 
-class Size(object):
-    def initialize_size(self):
-        self.name = type(self).__name__.lower()
-        self.ac_bonus = 0
-        self.atk_bonus = 0
-        self.cmb_bonus = 0
-        self.cmd_bonus = 0
-        self.skill_bonus = {}
-
-
-class Medium(Size):
-    def __init__(self):
-        self.initialize_size()
-
-
-class Small(Size):
-    def __init__(self):
-        self.initialize_size()
-        self.ac_bonus = 1
-        self.atk_bonus = 1
-        self.cmb_bonus = -1
-        self.cmd_bonus = -1
-        self.skill_bonus['stealth'] = 4
+Size = namedtuple('Size', ['name', 'ac', 'atk', 'cmb', 'cmd', 'skills'])
+medium = Size('medium', 0, 0, 0, 0, {})
+small = Size('small', 1, 1, -1, -1, {'stealth': 4})
