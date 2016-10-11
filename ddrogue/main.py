@@ -12,5 +12,8 @@ def main():
     # Set up the screen
     screen = pygame.display.set_mode((0, 0))
 
+    from .game import new_game
+    new_game(screen)
+
     # Start the main menu
-    main_menu(screen)
+    #main_menu(screen)

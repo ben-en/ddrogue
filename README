@@ -3,8 +3,9 @@ d20-like system. The title is short for "double dungeons rogue" because i
 wanted a quick name. Improvements are welcome.
 
 So far:
-    Movement                        [x]
-    Information display             [ ]
+    Menu                            [x]
+    Movement                        [\]
+    Information display             [\]
     Combat                          [\]
     Classes                         [\]
     Enemies                         [\]

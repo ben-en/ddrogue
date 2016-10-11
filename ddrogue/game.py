@@ -6,6 +6,15 @@ from .npc import Goblin
 from .player import Player
 from .event_management import EventHandler, State
 
+from .mechanics.classes import Fighter
+from .mechanics.dice import roll
+from .mechanics.skills import SKILL_LIST
+from .mechanics.chargen import Character
+from .mechanics.races import Human
+
+
+PLAYER_COLOR = 255, 255, 100
+
 KEYMAP_FILE = './controls.json'
 
 
@@ -63,7 +72,20 @@ def init_state():
     m = Map(create_map_matrix())
     goblin_image = create_tile(GREEN, [m.unit, m.unit])
     goblin = Goblin(goblin_image)
-    state = State(m, Player(m.unit), npcs=[goblin])
+    player_image = create_tile(PLAYER_COLOR, [m.unit, m.unit])
+    player = Character(
+                 player_image,
+                 Human,
+                 abilities=(roll('4d6') for x in range(6)),
+                 char_class=Fighter,
+                 skills={'skill': 1 for skill in SKILL_LIST},
+                 features={
+                     'active': [],
+                     'passive': [],
+                     'feats_known': [],
+                 },
+                 description=None)
+    state = State(m, player, npcs=[goblin])
     state.player.pos = [state.map.width/2 * state.map.unit,
                         state.map.height/2 * state.map.unit]
     state.npcs[0].pos = [state.player.pos[0] - state.map.unit * 2,
