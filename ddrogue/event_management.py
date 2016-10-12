@@ -83,6 +83,18 @@ def move_right(state, event):
     return state
 
 
+def move_to(state, pos):
+    path = astar(state.map.floor.transpose(),
+                 tuple(state.map.grid_pos(state.player.pos)),
+                 tuple(state.map.grid_pos(pos)))
+    path.reverse()
+    for step in path:
+        state.player.pos = state.map.pixel_pos(step)
+        state.draw()
+        sleep(0.1)
+    return state
+
+
 # TODO: Logging really needs to be fixed
 # TODO: How does duplicating an object work? for state
 def process_key_press(state, event):
@@ -99,18 +111,6 @@ def process_key_press(state, event):
 
 def process_click(state, event):
     move_to(state, event.pos)
-    return state
-
-
-def move_to(state, pos):
-    path = astar(state.map.floor.transpose(),
-                 tuple(state.map.grid_pos(state.player.pos)),
-                 tuple(state.map.grid_pos(pos)))
-    path.reverse()
-    for step in path:
-        state.player.pos = state.map.pixel_pos(step)
-        state.draw()
-        sleep(0.1)
     return state
 
 
