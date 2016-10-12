@@ -24,11 +24,13 @@ def action(func):
 @action
 def quit(state, event):
     """ Tell the state to exit after user dialog """
+    state.quit = True
+    return state
     # TODO user dialog
     options = OrderedDict()
     options['Yes'] = lambda x: True
     options['No'] = lambda x: False
-    if fullscreen_menu(options):
+    if fullscreen_menu(state.screen, options):
         state.quit = True
     return state
 
