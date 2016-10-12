@@ -83,13 +83,13 @@ def move_right(state, event):
     return state
 
 
-def move_to(state, pos):
+def move_to(state, char, pos, steps=-1):
     path = astar(state.map.floor.transpose(),
-                 tuple(state.map.grid_pos(state.player.pos)),
+                 tuple(state.map.grid_pos(char.pos)),
                  tuple(state.map.grid_pos(pos)))
     path.reverse()
-    for step in path:
-        state.player.pos = state.map.pixel_pos(step)
+    for step in path[:steps]:
+        char.pos = state.map.pixel_pos(step)
         state.draw()
         sleep(0.1)
     return state
@@ -110,7 +110,7 @@ def process_key_press(state, event):
 
 
 def process_click(state, event):
-    move_to(state, event.pos)
+    move_to(state, state.player, event.pos)
     return state
 
 
