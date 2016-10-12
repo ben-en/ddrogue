@@ -1,5 +1,6 @@
 from pygame.sprite import Sprite, Group
 
+from .event_management import move_to
 from .mechanics.dice import roll
 from .mechanics.stats import Stat, StatBlock
 from .mechanics.sizes import small
@@ -36,6 +37,9 @@ class Goblin(Sprite):
             cha=Stat(9, -1),
         )
         return stats
+
+    def act(self, state):
+        move_to(state, self, state.player.pos, steps=2)
 
 
 class MonsterGroup(Group):

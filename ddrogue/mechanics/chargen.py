@@ -1,5 +1,6 @@
 from pygame.sprite import Sprite
 
+from ..event_management import player_turn
 from .dice import roll, die_to_val
 from .skills import SKILL_LIST
 from .stats import StatBlock, Stat, stat_bonus
@@ -201,3 +202,8 @@ class Character(Sprite):
         self.init = self.compute_init()
         self.fort, self.ref, self.wis = self.compute_saves()
         self.cmb, self.cmd = self.compute_cms()
+
+    def act(self, state):
+        # TODO void any kepresses while rendering
+        state = player_turn(state)
+        return state

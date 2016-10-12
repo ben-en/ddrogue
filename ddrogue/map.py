@@ -136,3 +136,6 @@ class Map:
         # print('grid position', grid)
         # print('returned position', (grid[0] * self.unit, grid[1] * self.unit))
         return (grid[0] * self.unit, grid[1] * self.unit)
+
+    def center(self, state):
+        pass

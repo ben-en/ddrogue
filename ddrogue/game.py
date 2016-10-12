@@ -8,7 +8,7 @@ from .colors import GREEN
 from .map import Map, create_map_matrix, create_tile
 from .menu import fullscreen_menu
 from .npc import Goblin
-from .event_management import State, end_round
+from .event_management import State
 
 from .mechanics.classes import Fighter
 from .mechanics.dice import roll
@@ -80,10 +80,8 @@ def game_loop(state):
 
         state.draw()
 
-        # TODO void any kepresses while rendering
-        # Wait for the next state
-        while not end_round(state):
-            pass
+        for char in state.characters:
+            char.act(state)
 
 
 def init_state(screen):
