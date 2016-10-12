@@ -1,3 +1,4 @@
+import numpy
 import pygame
 
 
@@ -10,7 +11,7 @@ BLUE = 0, 0, 255
 
 BLANK_MAP = [[0 for i in range(12)] for i in range(12)]
 
-MAP = [
+MAP = numpy.array([
     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
@@ -27,7 +28,7 @@ MAP = [
     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-]
+])
 
 
 def create_map_matrix():
@@ -124,3 +125,14 @@ class Map:
         print(pos_rect, self.walls[ret])
         print(self.walls[ret].colliderect(pos_rect))
         return True
+
+    def grid_pos(self, pos):
+        # print('pixel position', pos)
+        # print('returned position', [((p / self.unit) + 0 if p % self.unit else
+        #                            1) for p in pos])
+        return [p / self.unit for p in pos]
+
+    def pixel_pos(self, grid):
+        # print('grid position', grid)
+        # print('returned position', (grid[0] * self.unit, grid[1] * self.unit))
+        return (grid[0] * self.unit, grid[1] * self.unit)

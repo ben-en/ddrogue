@@ -1,10 +1,12 @@
 from collections import OrderedDict
 from copy import deepcopy
 import json
+from time import sleep
 import re
 
 import pygame
 
+from .pathfinding import astar
 from .menu import fullscreen_menu
 from .mechanics.dice import roll
 
@@ -95,21 +97,35 @@ def process_key_press(state, event):
     return state
 
 
+def process_click(state, event):
+    move_to(state, event.pos)
+    return state
+
+
+def move_to(state, pos):
+    path = astar(state.map.floor.transpose(),
+                 tuple(state.map.grid_pos(state.player.pos)),
+                 tuple(state.map.grid_pos(pos)))
+    path.reverse()
+    for step in path:
+        state.player.pos = state.map.pixel_pos(step)
+        state.draw()
+        sleep(0.1)
+    return state
+
+
 EVENT_MAP = {
     pygame.QUIT: quit,
     pygame.KEYDOWN: process_key_press,
-    pygame.KEYUP: lambda x: None,
+    pygame.KEYUP: lambda x, y: None,
+    pygame.MOUSEBUTTONUP: process_click,
 }
-print('\n'.join(['%s:\t%s' % (k, v) for k, v in EVENT_MAP.items()]))
 
 
 def end_round(state):
     """
     Wait for an event, try to execute a command and return True to quit.
     """
-    # Assign "state" variable to a new copy of the state variable, resulting in
-    # NO modification to the original state, allowing for "undo" and so forth
-    state = state.copy()
     # Wait for an event
     event = pygame.event.wait()
     func = EVENT_MAP[event.type]
@@ -168,7 +184,7 @@ class State:
 def set_events():
     """ Prevent events we aren't interested in from being used later """
     pygame.event.set_blocked([pygame.ACTIVEEVENT, pygame.MOUSEMOTION,
-                              pygame.MOUSEBUTTONUP, pygame.MOUSEBUTTONDOWN, ])
+                              pygame.MOUSEBUTTONDOWN, ])
 
 
 def attack(attacker, defender):
