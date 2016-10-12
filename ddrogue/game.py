@@ -4,7 +4,7 @@ from textwrap import wrap
 
 import pygame
 
-from .colors import WHITE, GREEN
+from .colors import GREEN
 from .map import Map, create_map_matrix, create_tile
 from .menu import fullscreen_menu
 from .npc import Goblin
@@ -74,34 +74,6 @@ def quit(_):
     sys.exit()
 
 
-class StatusBox(pygame.sprite.Sprite):
-    def __init__(self, x, y):
-        self.width = x
-        self.height = y
-        self.image = create_tile(WHITE, [x, y])
-        self.rect = self.image.get_rect()
-        self.font = pygame.font.Font(None, 12)
-
-        self.cursor = (5, 5)
-
-    def _print(self, s):
-        tmp = pygame.display.get_surface()
-        x, y = self.cursor
-
-        for l in s:
-            render = self.font.render(l, False, (0, 0, 0))
-            tmp.blit(render, (x, y))
-            self.image.blit(render, (x, y))
-            x += 10
-
-            if (x > self.image.get_width()-5):
-                x = self.rect.left+5
-                y += 10
-        x = 5
-        y += 10  # CR
-        self.cursor = (x, y)
-
-
 def game_loop(state):
     while not state.quit:
         state.output._print('loaded new frame')
@@ -136,7 +108,6 @@ def init_state(screen):
                         state.map.height/2 * state.map.unit]
     state.npcs[0].pos = [state.player.pos[0] - state.map.unit * 2,
                          state.player.pos[1]]
-    state.output = StatusBox(state.map.pixel_width, 100)
     return state
 
 
