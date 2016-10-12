@@ -9,11 +9,14 @@ import pygame
 from .pathfinding import astar
 from .menu import fullscreen_menu
 from .mechanics.dice import roll
+from .ui import StatusBox, HUD
 
 
 MOVEMENT_EVENTS = 'UP DOWN LEFT RIGHT'.split()
 
 ALPHA_RE = re.compile("[a-zA-Z0-9]")
+
+UI_SIZE = 400
 
 ACTIONS = {}
 
@@ -122,7 +125,7 @@ EVENT_MAP = {
 }
 
 
-def end_round(state):
+def player_turn(state):
     """
     Wait for an event, try to execute a command and return True to quit.
     """
@@ -155,6 +158,11 @@ class State:
         set_events()  # TODO remove this
         self.screen = screen
         self.map = m
+        s_width, s_height = screen.get_width(), screen.get_height()
+        self.output = StatusBox((0, s_height - UI_SIZE / 2), s_width - UI_SIZE,
+                                UI_SIZE / 2)
+        self.hud = HUD((s_width - UI_SIZE, 0), UI_SIZE, s_height)
+        self.ui = [self.output, self.hud]
         self.keymap = load_keymap(keymap_path)
         self.player = player
         self.npcs = npcs
@@ -163,16 +171,19 @@ class State:
         self.quit = False
 
     def draw(self):
+        # Center the map, needs to see the state
+        self.map.center(self)
         # Write the map to screen
         self.screen.blit(self.map.image, [0, 0])
 
         # Write the text box to screen
-        self.screen.blit(self.output.image, [0, self.map.pixel_height])
+        for ui in self.ui:
+            self.screen.blit(ui.image, ui.pos)
 
         # Add visible objects
         for obj in self.visible:
             self.screen.blit(obj.image, obj.pos)
-            obj.rect.x, obj.rect.y = obj.pos
+            obj.rect.x, obj.rect.y = obj.pos  # TODO remove this
 
         # Flip the staging area to the display
         pygame.display.flip()
