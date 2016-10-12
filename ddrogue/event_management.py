@@ -130,9 +130,12 @@ def load_keymap(file_path):
     return skel
 
 
+# TODO: State should duplicate itself and store its history somewhere whenever
+# something changes, without events having to do something themselves.
 class State:
-    def __init__(self, m, keymap_path, player, npcs=[]):
+    def __init__(self, screen, m, keymap_path, player, npcs=[]):
         set_events()  # TODO remove this
+        self.screen = screen
         self.map = m
         self.keymap = load_keymap(keymap_path)
         self.player = player
@@ -140,6 +143,21 @@ class State:
         self.characters = npcs[:] + [player]
         self.visible = self.characters
         self.quit = False
+
+    def draw(self):
+        # Write the map to screen
+        self.screen.blit(self.map.image, [0, 0])
+
+        # Write the text box to screen
+        self.screen.blit(self.output.image, [0, self.map.pixel_height])
+
+        # Add visible objects
+        for obj in self.visible:
+            self.screen.blit(obj.image, obj.pos)
+            obj.rect.x, obj.rect.y = obj.pos
+
+        # Flip the staging area to the display
+        pygame.display.flip()
 
     def copy(self):
         return deepcopy(self)

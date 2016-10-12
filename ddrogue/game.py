@@ -102,30 +102,19 @@ class StatusBox(pygame.sprite.Sprite):
         self.cursor = (x, y)
 
 
-def game_loop(state, screen):
+def game_loop(state):
     while not state.quit:
         state.output._print('loaded new frame')
 
-        # Write the map to screen
-        screen.blit(state.map.image, [0, 0])
+        state.draw()
 
-        # Write the text box to screen
-        screen.blit(state.output.image, [0, state.map.pixel_height])
-
-        # Add visible objects
-        for obj in state.visible:
-            screen.blit(obj.image, obj.pos)
-            obj.rect.x, obj.rect.y = obj.pos
-
-        # Flip the staging area to the display
-        pygame.display.flip()
-
+        # TODO void any kepresses while rendering
         # Wait for the next state
         while not end_round(state):
             pass
 
 
-def init_state():
+def init_state(screen):
     m = Map(create_map_matrix())
     goblin_image = create_tile(GREEN, [m.unit, m.unit])
     goblin = Goblin(goblin_image)
@@ -142,7 +131,7 @@ def init_state():
                      'feats_known': [],
                  },
                  description=None)
-    state = State(m, KEYMAP_FILE, player, npcs=[goblin])
+    state = State(screen, m, KEYMAP_FILE, player, npcs=[goblin])
     state.player.pos = [state.map.width/2 * state.map.unit,
                         state.map.height/2 * state.map.unit]
     state.npcs[0].pos = [state.player.pos[0] - state.map.unit * 2,
@@ -153,10 +142,10 @@ def init_state():
 
 def new_game(screen):
     # Setup the initial game
-    state = init_state()
+    state = init_state(screen)
 
     # Start the game
-    game_loop(state, screen)
+    game_loop(state)
 
 
 def main_menu(screen):
