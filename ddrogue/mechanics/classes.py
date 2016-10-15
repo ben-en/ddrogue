@@ -6,6 +6,7 @@ from .feats import FEAT_LIST
 
 
 BaseClass = namedtuple('BaseClass', [
+    'name',         # title of the class
     'hd',           # hit dice rolled for HP each level
     'bab',          # base attack bonus for the class
     'saves',        # saves to be used for a given level (under dev)
@@ -83,6 +84,7 @@ fighter_abilities = [
 ]
 
 Fighter = BaseClass(
+    'Fighter',
     '1d10',
     HIGH_BAB,
     compile_saves(GOOD_SAVE, BAD_SAVE, BAD_SAVE),

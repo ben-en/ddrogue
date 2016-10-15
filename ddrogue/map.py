@@ -137,5 +137,33 @@ class Map:
         # print('returned position', (grid[0] * self.unit, grid[1] * self.unit))
         return (grid[0] * self.unit, grid[1] * self.unit)
 
-    def center(self, state):
-        pass
+    def draw_grid(self, grid, color):
+        """ Draws a grid of the chosen color.
+
+        Example grid:
+            [
+                [0, 0, 1, 1, 1, 1, 0, 0],
+                [0, 1, 1, 1, 1, 1, 1, 0],
+                [1, 1, 1, 1, 1, 1, 1, 1],
+                [1, 1, 1, 1, 1, 1, 1, 1],
+                [1, 1, 1, 1, 1, 1, 1, 1]
+                [1, 1, 1, 1, 1, 1, 1, 1],
+                [0, 1, 1, 1, 1, 1, 1, 0],
+                [0, 0, 1, 1, 1, 1, 0, 0],
+            ]
+        """
+        total_x = len(grid[0]) * self.unit
+        total_y = len(grid) * self.unit
+        tile = create_tile(color, (self.unit, self.unit))
+        new = create_tile(WHITE, (total_x, total_y))
+        y = 0
+        for row in grid:
+            y += 1
+            x = 0
+            for point in row:
+                x += 1
+                if not point == 1:
+                    continue
+                rect = pygame.Rect([x, y, self.unit, self.unit])
+                new.blit(tile, rect)
+        return new

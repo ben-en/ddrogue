@@ -93,7 +93,7 @@ def init_state(screen):
                  player_image,
                  Human,
                  abilities=(roll('4d6') for x in range(6)),
-                 char_class=Fighter,
+                 cclass=Fighter,
                  skills={'skill': 1 for skill in SKILL_LIST},
                  features={
                      'active': [],

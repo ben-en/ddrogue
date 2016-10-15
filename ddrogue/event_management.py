@@ -87,9 +87,13 @@ def move_right(state, event):
 
 
 def move_to(state, char, pos, steps=None):
+    """
+    Using state's access to the map, move given `char` to `pos`, max `steps`
+    """
     path = astar(state.map.floor.transpose(),
                  tuple(state.map.grid_pos(char.pos)),
                  tuple(state.map.grid_pos(pos)))
+    # For some reason astar figures the path backwards. Dunno why,
     path.reverse()
     if steps:
         path = path[:steps]
@@ -161,10 +165,6 @@ class State:
         self.screen = screen
         self.map = m
         s_width, s_height = screen.get_width(), screen.get_height()
-        self.output = StatusBox((0, s_height - UI_SIZE / 2), s_width - UI_SIZE,
-                                UI_SIZE / 2)
-        self.hud = HUD((s_width - UI_SIZE, 0), UI_SIZE, s_height)
-        self.ui = [self.output, self.hud]
         self.keymap = load_keymap(keymap_path)
         self.player = player
         self.npcs = npcs
@@ -172,11 +172,25 @@ class State:
         self.visible = self.characters
         self.quit = False
 
+        self.output = StatusBox((0, s_height - UI_SIZE / 2), s_width - UI_SIZE,
+                                UI_SIZE / 2)
+        # initialize UI second, as HUD depends on access to attributes through
+        # state
+        self.hud = HUD(self, (s_width - UI_SIZE, 0), UI_SIZE, s_height)
+        self.ui = [self.output, self.hud]
+
     def draw(self):
-        # Center the map, needs to see the state
-        self.map.center(self)
+        print(self.player.pos)
+        offset = (
+            self.player.pos[0],
+            self.player.pos[1]
+        )
+        offset = (self.map.image.get_width() / 2,
+                  self.map.image.get_height() / 2)
         # Write the map to screen
-        self.screen.blit(self.map.image, [0, 0])
+        self.screen.blit(self.map.image,
+                         self.map.image.get_rect(
+                             center=(offset)))
 
         # Write the text box to screen
         for ui in self.ui:

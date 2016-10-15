@@ -1,5 +1,6 @@
 from pygame.sprite import Sprite
 
+from ..colors import BLUE
 from ..event_management import player_turn
 from .dice import roll, die_to_val
 from .skills import SKILL_LIST
@@ -91,7 +92,7 @@ class Character(Sprite):
                  image,
                  race,
                  abilities=(roll('3d6') for x in range(6)),
-                 char_class=None,
+                 cclass=None,
                  skills={'skill': 0 for skill in SKILL_LIST},
                  features={
                      'active': [],
@@ -99,6 +100,7 @@ class Character(Sprite):
                      'spells': [],
                      'feats_known': [],
                  },
+                 name='foo',
                  description=None):
         """
         initializes a level one character
@@ -117,16 +119,17 @@ class Character(Sprite):
 
         self.stats = StatBlock([Stat(i, stat_bonus(i)) for i in abilities])
         self.race = race
-        self.char_class = char_class
+        self.cclass = cclass
         self.speed = race.speed
 
         self.desc = (
             (description or 'missing unique description') + '\n\n\n' +
-            char_class.desc + '\n\n\n' + race.desc
+            cclass.desc + '\n\n\n' + race.desc
         )
+        self.name = name
 
-        self.gold = roll(char_class.gold) * 10
-        self.equipment = char_class.equipment + race.natural_weapons
+        self.gold = roll(cclass.gold) * 10
+        self.equipment = cclass.equipment + race.natural_weapons
         self.equipped = self.equipment.index(
             sorted(self.equipment, key=lambda x: die_to_val(x.dam))[0]
         )
@@ -142,13 +145,13 @@ class Character(Sprite):
         """ Increase a character's level by one """
         self.level += 1
         index = self.level - 1  # because indices start at 0
-        self.rolled_hp += roll(self.char_class.hd)
-        self.bab = self.char_class.bab[index]
-        self.fort, self.ref, self.wis = self.char_class.saves[0]
+        self.rolled_hp += roll(self.cclass.hd)
+        self.bab = self.cclass.bab[index]
+        self.fort, self.ref, self.wis = self.cclass.saves[0]
         self.speed = self.race.speed
         self.skill_ranks.update(self.skill_up())
 
-        features = self.char_class.features
+        features = self.cclass.features
 
         print(features)
 
@@ -187,11 +190,11 @@ class Character(Sprite):
         """ Adds spells and spells per day in place if applicable """
         # TODO make level based
         # TODO make spellbook/spell known based
-        self.spells = self.char_class.features['spells']['known']
+        self.spells = self.cclass.features['spells']['known']
 
-        spd = self.char_class.features['spells']['per_day']
+        spd = self.cclass.features['spells']['per_day']
         index = self.level - 1
-        bonus = self.stats[self.char_class.features['spells']['attr']].bonus
+        bonus = self.stats[self.cclass.features['spells']['attr']].bonus
         self.spd = [(spd[index] + bonus_spells(bonus, i)) for i in range(10)]
 
     def combat_ready(self):

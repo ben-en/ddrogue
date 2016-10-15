@@ -2,6 +2,7 @@ from collections import OrderedDict
 
 import pygame
 
+from .game import new_game, settings, guide, legal, quit
 from .menu import fullscreen_menu
 
 
@@ -22,8 +23,6 @@ def main():
     # Set up the screen
     screen = pygame.display.set_mode((0, 0))
 
-    from .game import new_game
-    new_game(screen)
-
     # Start the main menu
-    #main_menu(screen)
+    new_game(screen)
+    # main_menu(screen)
