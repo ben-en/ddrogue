@@ -69,11 +69,8 @@ class CharBox(object):
 
 
 def mini_map(state):
-    """
-    Scale the map to the width of the HUD, then chop off anything but the
-    center 190 pixels
-    """
-    return chop(scale(state.map.image, (389, 389)), Rect((5, 150), (390, 190)))
+    #TODO
+    pass
 
 
 def char_hp(state):
@@ -91,15 +88,17 @@ def char_saves(state):
     top = 'AC: %s\tTouch: %s\tFlat: %s' % (p.ac, p.touch_ac, p.flat_ac)
     mid = 'BAB: %s\tCMB: %s\tCMD: %s' % (p.bab, p.cmb, p.cmd)
     bot = 'Ref: %s\tFort: %s\tWis: %s' % (p.ref, p.fort, p.wis)
-    full_image = create_tile(BLACK, [30, state.hud.width])
+    full_image = create_tile(BLACK, [state.hud.width, 30])
     full_image.blit(state.font.render(top, False, (255, 255, 255)), (0, 0))
-    full_image.blit(state.font.render(mid, False, (255, 255, 255)), (10, 0))
-    full_image.blit(state.font.render(bot, False, (255, 255, 255)), (20, 0))
+    full_image.blit(state.font.render(mid, False, (255, 255, 255)), (0, 10))
+    full_image.blit(state.font.render(bot, False, (255, 255, 255)), (0, 20))
     return full_image
 
 
 def equipment(state):
-    return state.font.render(state.player.equipped, False, (255, 255, 255))
+    item = state.player.equipment[state.player.equipped]
+    image = state.font.render('Weapon: %s' % item.name, False, (255, 255, 255))
+    return image
 
 
 class HUD(pygame.sprite.Sprite):
@@ -118,6 +117,7 @@ class HUD(pygame.sprite.Sprite):
         self.height = y
         self.image = create_tile(BLACK, [x, y])
         self.rect = self.image.get_rect()
+        # TODO find a decent standard font
         self.font = pygame.font.Font(None, 18)
 
         self.elements = [
@@ -133,7 +133,8 @@ class HUD(pygame.sprite.Sprite):
             ),
             (char_saves, (5, 20)),
             (equipment, (5, 50)),
-            (mini_map, (5, 300)),
+            # TODO finish mini map
+            # (mini_map, (5, 300)),
             (lambda x: create_tile(GREY, (389, 389)), (5, 500)),
         ]
 
@@ -141,6 +142,7 @@ class HUD(pygame.sprite.Sprite):
         self.image = create_tile(BLACK, [self.width, self.height])
         for e in self.elements:
             img = e[0](self._state)
+            print(e[1])
             self.image.blit(img, e[1])
 
 
