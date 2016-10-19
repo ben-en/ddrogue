@@ -22,6 +22,7 @@ def render_text(screen, text_file):
     with open(text_file, 'r') as input:
         for l in input.readlines():
             text += wrap(l, characters)
+            # Add an extra space to clearly show a new line in the file
             text += ['']
 
     # Create an image the size of the text
@@ -33,6 +34,10 @@ def render_text(screen, text_file):
         image.blit(text_font.render(t, False, (255, 255, 255)), (x, y))
         y += 15
 
+    navigable_loop(screen, image)
+
+
+def navigable_loop(screen, image):
     # Disply the image
     x, y = 5, 5
     bottom = image.get_height() - screen.get_height()
@@ -41,8 +46,11 @@ def render_text(screen, text_file):
         pygame.display.flip()
         event = pygame.event.wait()
         if event.type == pygame.KEYUP:
+            # Esc key or ??
+            # TODO figure out keycode 13
             if event.key in [27, 13]:
                 break
+            # Arrow keys
             if event.key == 273:
                 y += 30
                 if y >= 0:
@@ -137,6 +145,7 @@ class HUD(pygame.sprite.Sprite):
 
 
 class StatusBox(pygame.sprite.Sprite):
+    # TODO on click, run navigable_loop on statusbox image starting at bottom
     # TODO scroll as output is displayed
     def __init__(self, pos, x, y):
         self.pos = pos
