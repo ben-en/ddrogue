@@ -1,9 +1,58 @@
+from textwrap import wrap
+
 import pygame
 from pygame.rect import Rect
 from pygame.transform import scale, chop
 
 from .colors import BLACK, GREY
 from .map import create_tile
+
+
+def render_text(screen, text_file):
+    """ Render the text file on the screen in a readable format """
+    # Initialize the font
+    text_font = pygame.font.Font(None, 18)
+    # Calculate the number of characters that can be shown on one row
+    characters = (screen.get_width() - 10) / 7
+
+    # Add a header that shows the path of the text file so the user can look it
+    # up for manual inspection at their discretion
+    text = ['loaded from: %s' % text_file, '']
+    # Open and read the text file into a list of rows
+    with open(text_file, 'r') as input:
+        for l in input.readlines():
+            text += wrap(l, characters)
+            text += ['']
+
+    # Create an image the size of the text
+    image = pygame.surface.Surface((screen.get_width(), len(text) * 15))
+
+    # Write the text onto the image
+    x, y = 0, 0
+    for t in text:
+        image.blit(text_font.render(t, False, (255, 255, 255)), (x, y))
+        y += 15
+
+    # Disply the image
+    x, y = 5, 5
+    bottom = image.get_height() - screen.get_height()
+    while 1:
+        screen.blit(image, (x, y))
+        pygame.display.flip()
+        event = pygame.event.wait()
+        if event.type == pygame.KEYUP:
+            if event.key in [27, 13]:
+                break
+            if event.key == 273:
+                y += 30
+                if y >= 0:
+                    # If you're trying to scroll too high, reset to 0
+                    y = 0
+            if event.key == 274:
+                y -= 30
+                if y <= - bottom:
+                    # If you're trying to scroll to low, reset to bottom
+                    y = - bottom
 
 
 class CharBox(object):
