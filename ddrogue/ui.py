@@ -19,6 +19,32 @@ def mini_map(state):
     return chop(scale(state.map.image, (389, 389)), Rect((5, 150), (390, 190)))
 
 
+def char_hp(state):
+    """ Should show the HP for the currently selected character """
+    # TODO add graphical bar
+    total = state.player.max_hp
+    current = state.player.hp
+    image = state.font.render('HP: %s/%s' % (current, total), False,
+                              (255, 255, 255))
+    return image
+
+
+def char_saves(state):
+    p = state.player
+    top = 'AC: %s\tTouch: %s\tFlat: %s' % (p.ac, p.touch_ac, p.flat_ac)
+    mid = 'BAB: %s\tCMB: %s\tCMD: %s' % (p.bab, p.cmb, p.cmd)
+    bot = 'Ref: %s\tFort: %s\tWis: %s' % (p.ref, p.fort, p.wis)
+    full_image = create_tile(BLACK, [30, state.hud.width])
+    full_image.blit(state.font.render(top, False, (255, 255, 255)), (0, 0))
+    full_image.blit(state.font.render(mid, False, (255, 255, 255)), (10, 0))
+    full_image.blit(state.font.render(bot, False, (255, 255, 255)), (20, 0))
+    return full_image
+
+
+def equipment(state):
+    return state.font.render(state.player.equipped, False, (255, 255, 255))
+
+
 class HUD(pygame.sprite.Sprite):
     """
     Ideals:
@@ -38,15 +64,21 @@ class HUD(pygame.sprite.Sprite):
         self.font = pygame.font.Font(None, 18)
 
         self.elements = [
-            (lambda x: self.font.render(
-                '%s the level %s %s' % (x.player.name, x.player.level,
-                                        x.player.cclass.name),
-                False, (255, 255, 255)),
-             (5, 5)),
+            (
+                lambda x:
+                self.font.render('%s the level %s %s %s' % (
+                                     x.player.name,
+                                     x.player.level,
+                                     x.player.race.name,
+                                     x.player.cclass.name
+                                 ), False, (255, 255, 255)),
+                (5, 5)
+            ),
+            (char_saves, (5, 20)),
+            (equipment, (5, 50)),
             (mini_map, (5, 300)),
             (lambda x: create_tile(GREY, (389, 389)), (5, 500)),
         ]
-        self.update()
 
     def update(self):
         self.image = create_tile(BLACK, [self.width, self.height])
@@ -66,6 +98,9 @@ class StatusBox(pygame.sprite.Sprite):
         self.font = pygame.font.Font(None, 12)
 
         self.cursor = (5, 5)
+
+    def update(self):
+        pass
 
     def _print(self, s):
         tmp = pygame.display.get_surface()
