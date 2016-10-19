@@ -88,16 +88,34 @@ def char_saves(state):
     top = 'AC: %s\tTouch: %s\tFlat: %s' % (p.ac, p.touch_ac, p.flat_ac)
     mid = 'BAB: %s\tCMB: %s\tCMD: %s' % (p.bab, p.cmb, p.cmd)
     bot = 'Ref: %s\tFort: %s\tWis: %s' % (p.ref, p.fort, p.wis)
-    full_image = create_tile(BLACK, [state.hud.width, 30])
-    full_image.blit(state.font.render(top, False, (255, 255, 255)), (0, 0))
-    full_image.blit(state.font.render(mid, False, (255, 255, 255)), (0, 10))
-    full_image.blit(state.font.render(bot, False, (255, 255, 255)), (0, 20))
+    full_image = pygame.Surface([state.hud.element_width, 100])
+    y = 0
+    for row in [top, mid, bot]:
+        x = 0
+        img = pygame.Surface([state.hud.element_width, 20])
+        for field in row.split('\t'):
+            img.blit(state.font.render(field, False, (255, 255, 255)), (x, 0))
+            x += 60
+        full_image.blit(img, (0, y))
+        y += 12
     return full_image
 
 
 def equipment(state):
-    item = state.player.equipment[state.player.equipped]
-    image = state.font.render('Weapon: %s' % item.name, False, (255, 255, 255))
+    """ List equipped items """
+    image = pygame.Surface([state.hud.element_width, 100])
+    weapon = state.player.equipment[state.player.equipped]
+    # TODO player armor
+    from .mechanics.armor import leather_armor
+    armor = leather_armor
+    equip_strs = [
+        'Weapon: %s' % weapon.name,
+        'Armor: %s' % armor.name or 'none',
+    ]
+    y = 0
+    for s in equip_strs:
+        image.blit(state.font.render(s, False, (255, 255, 255)), (0, y))
+        y += 12
     return image
 
 
@@ -114,11 +132,12 @@ class HUD(pygame.sprite.Sprite):
         self._state = state
         self.pos = pos
         self.width = x
+        self.element_width = x - 6
         self.height = y
         self.image = create_tile(BLACK, [x, y])
         self.rect = self.image.get_rect()
         # TODO find a decent standard font
-        self.font = pygame.font.Font(None, 18)
+        self.font = state.font
 
         self.elements = [
             (
@@ -132,7 +151,7 @@ class HUD(pygame.sprite.Sprite):
                 (5, 5)
             ),
             (char_saves, (5, 20)),
-            (equipment, (5, 50)),
+            (equipment, (5, 60)),
             # TODO finish mini map
             # (mini_map, (5, 300)),
             (lambda x: create_tile(GREY, (389, 389)), (5, 500)),
