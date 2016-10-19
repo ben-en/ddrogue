@@ -134,6 +134,12 @@ class Character(Sprite):
             sorted(self.equipment, key=lambda x: die_to_val(x.dam))[0]
         )
 
+        self.ac = 10
+        self.touch_ac = 10
+        self.flat_ac = 10
+        self.sr = 0
+        self.cmb = 0
+        self.cmd = 0
         self.level = 0
         self.rolled_hp = 0
         self.skill_ranks = {'skill': 0 for skill in SKILL_LIST}
