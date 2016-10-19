@@ -2,6 +2,7 @@ from collections import namedtuple
 
 
 Armor = namedtuple('Armor', [
+    'name',
     'cost',
     'bonus',
     'max_dex',
@@ -12,5 +13,5 @@ Armor = namedtuple('Armor', [
     'weight'
 ])
 
-leather_armor = Armor(5, 2, 6, 0, 10, 0, 'body', 15)
-buckler = Armor(5, 1, None, -1, 5, 0, 'arm', 5)
+leather_armor = Armor('Leather Armor', 5, 2, 6, 0, 10, 0, 'body', 15)
+buckler = Armor('Buckler', 5, 1, None, -1, 5, 0, 'arm', 5)
