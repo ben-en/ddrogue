@@ -11,6 +11,7 @@ Race = namedtuple('Race', [
     'features',     # any racial features
     'base_langs',   # free languages, probably unused at first
     'natural_weapons',      # natural weapons (must be iterable)
+    'name',         # What the race is as a string
     'desc'          # description
 ])
 
@@ -44,5 +45,6 @@ Human = Race(
     },
     [],             # racial languages
     [med_unarmed],
+    'Human',
     'Human racial description'
 )
