@@ -171,6 +171,7 @@ class State:
         self.characters = npcs[:] + [player]
         self.visible = self.characters
         self.quit = False
+        self.font = pygame.font.Font(None, 12)
 
         self.output = StatusBox((0, s_height - UI_SIZE / 2), s_width - UI_SIZE,
                                 UI_SIZE / 2)
@@ -194,6 +195,7 @@ class State:
 
         # Write the text box to screen
         for ui in self.ui:
+            ui.update()
             self.screen.blit(ui.image, ui.pos)
 
         # Add visible objects
