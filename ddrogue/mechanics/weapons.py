@@ -2,19 +2,7 @@ from collections import namedtuple
 
 
 Weapon = namedtuple('Weapon', [
-    'dam',
-    'crit',
-    'range',
-    'h_stat',
-    'd_stat',
-])
-
-
-sml_unarmed = Weapon('1d2', 20, 0, 'str', 'str')
-med_unarmed = Weapon('1d3', 20, 0, 'str', 'str')
-lrg_unarmed = Weapon('1d4', 20, 0, 'str', 'str')
-
-Weapon = namedtuple('Weapon', [
+    'name',
     'cost',
     'dmg',
     'crit_r',
@@ -26,7 +14,12 @@ Weapon = namedtuple('Weapon', [
     'tags'
 ])
 
+sml_unarmed = Weapon('Unarmed', 0, '1d2', 20, 2, 0, 0, 1, 'b', ['nonlethal'])
+med_unarmed = Weapon('Unarmed', 0, '1d3', 20, 2, 0, 0, 1, 'b', ['nonlethal'])
+lrg_unarmed = Weapon('Unarmed', 0, '1d4', 20, 2, 0, 0, 1, 'b', ['nonlethal'])
+
 bolas = Weapon(
+    'Bolas',
     5,
     '1d4',
     20,
@@ -39,6 +32,7 @@ bolas = Weapon(
 )
 
 quarterstaff = Weapon(
+    'Quarterstaff',
     0,
     ['1d6', '1d6'],
     20,
@@ -51,6 +45,7 @@ quarterstaff = Weapon(
 )
 
 longspear = Weapon(
+    'Longspear',
     5,
     '1d8',
     20,

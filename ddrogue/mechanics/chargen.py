@@ -1,6 +1,5 @@
 from pygame.sprite import Sprite
 
-from ..colors import BLUE
 from ..event_management import player_turn
 from .dice import roll, die_to_val
 from .skills import SKILL_LIST
@@ -131,7 +130,7 @@ class Character(Sprite):
         self.gold = roll(cclass.gold) * 10
         self.equipment = cclass.equipment + race.natural_weapons
         self.equipped = self.equipment.index(
-            sorted(self.equipment, key=lambda x: die_to_val(x.dam))[0]
+            sorted(self.equipment, key=lambda x: die_to_val(x.dmg))[0]
         )
 
         self.ac = 10
