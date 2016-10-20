@@ -85,6 +85,14 @@ class Character(Sprite):
         [ ] weight
         [ ] money
         [ ] xp/rate of leveling
+
+
+    property functions to do:
+        fort
+        ref
+        wis
+        cmb
+        cmd
     """
 
     def __init__(self,
@@ -133,13 +141,14 @@ class Character(Sprite):
             sorted(self.equipment, key=lambda x: die_to_val(x.dmg))[0]
         )
 
-        self.ac = 10
         self.touch_ac = 10
         self.flat_ac = 10
         self.sr = 0
+        self.dr = 0
         self.cmb = 0
         self.cmd = 0
         self.level = 0
+        self.xp = 0
         self.rolled_hp = 0
         self.skill_ranks = {'skill': 0 for skill in SKILL_LIST}
         self.abilities = race.features['active']
@@ -151,6 +160,7 @@ class Character(Sprite):
         self.level += 1
         index = self.level - 1  # because indices start at 0
         self.rolled_hp += roll(self.cclass.hd)
+        self.hp = self.max_hp
         self.bab = self.cclass.bab[index]
         self.fort, self.ref, self.wis = self.cclass.saves[0]
         self.speed = self.race.speed
@@ -202,14 +212,17 @@ class Character(Sprite):
         bonus = self.stats[self.cclass.features['spells']['attr']].bonus
         self.spd = [(spd[index] + bonus_spells(bonus, i)) for i in range(10)]
 
-    def combat_ready(self):
-        """ Compute initial values for combat variables """
-        # TODO add current state (standing/prone etc)
-        self.ac = self.compute_ac()
-        self.hp = self.compute_hp()
-        self.init = self.compute_init()
-        self.fort, self.ref, self.wis = self.compute_saves()
-        self.cmb, self.cmd = self.compute_cms()
+    @property
+    def ac(self):
+        return 10
+
+    @property
+    def init(self):
+        return self.stats['dex'].bonus
+
+    @property
+    def max_hp(self):
+        return self.rolled_hp + (self.stats['con'].bonus * self.level)
 
     def act(self, state):
         # TODO void any kepresses while rendering
