@@ -83,22 +83,81 @@ def char_hp(state):
     return image
 
 
+def char_xp(state):
+    """ Shows xp """
+    next_level = 'na'
+    current = state.player.xp
+    image = state.font.render('XP: %s/%s' % (current, next_level), False,
+                              (255, 255, 255))
+    return image
+
+
+def render_column(font, (x, y), rows, row_height=20):
+    img = pygame.Surface([x, y])
+    y = 0
+    for field in rows:
+        img.blit(font.render(field, False, (255, 255, 255)), (0, y))
+        y += row_height
+    return img
+
+
+def str_bonus(val, just=3):
+    """ Returns a justified stringed bonus. eg '3' returns ' +3' by default """
+    if val >= 0:
+        bonus = '+%s' % val
+    else:
+        bonus = str(val)
+    return bonus.rjust(just)
+
+
+def char_stats(state):
+    rows = []
+    for stat in 'str dex con int wis cha'.split():
+        tup = state.player.stats[stat]
+        val = tup[0]
+        bonus = str_bonus(tup[1], just=2)
+        rows.append('%s: [%s] (%s)' % (stat, str(val).rjust(2), bonus))
+    return render_column(state.font, (120, 120), rows)
+
+
+def char_defense(state):
+    p = state.player
+    rows = [
+        'AC:    %s' % p.ac,
+        'Touch: %s' % p.touch_ac,
+        'Flat:  %s' % p.flat_ac
+    ]
+    return render_column(state.font, (65, 300), rows)
+
+
+def char_offense(state):
+    p = state.player
+    rows = [
+        'BAB:  %s' % p.bab,
+        'CMB:    %s' % p.cmb,
+        'CMD:    %s' % p.cmd
+    ]
+    return render_column(state.font, (65, 300), rows)
+
+
 def char_saves(state):
     p = state.player
-    top = 'AC: %s\tTouch: %s\tFlat: %s' % (p.ac, p.touch_ac, p.flat_ac)
-    mid = 'BAB: %s\tCMB: %s\tCMD: %s' % (p.bab, p.cmb, p.cmd)
-    bot = 'Ref: %s\tFort: %s\tWis: %s' % (p.ref, p.fort, p.wis)
-    full_image = pygame.Surface([state.hud.element_width, 100])
-    y = 0
-    for row in [top, mid, bot]:
-        x = 0
-        img = pygame.Surface([state.hud.element_width, 20])
-        for field in row.split('\t'):
-            img.blit(state.font.render(field, False, (255, 255, 255)), (x, 0))
-            x += 60
-        full_image.blit(img, (0, y))
-        y += 12
-    return full_image
+    rows = [
+        'Ref:  %s' % str_bonus(p.ref),
+        'Fort: %s' % str_bonus(p.fort),
+        'Wis:  %s' % str_bonus(p.wis)
+    ]
+    return render_column(state.font, (65, 300), rows)
+
+
+def char_misc(state):
+    p = state.player
+    rows = [
+        'Init: %s' % str_bonus(p.init),
+        'SR:     %s' % p.sr,
+        'DR:     %s' % p.dr
+    ]
+    return render_column(state.font, (65, 300), rows)
 
 
 def equipment(state):
@@ -122,11 +181,18 @@ def equipment(state):
 class HUD(pygame.sprite.Sprite):
     """
     Ideals:
-        character stats
         equipped weapons
         map
         tabbed interface containing inventory, spells, abilities, etc
         actions
+
+
+    TODOs:
+        Spell resistance
+        speed
+        damage resistance
+        action status (used actions, move points, etc)
+        initiative (roll, bonus?)
     """
     def __init__(self, state, pos, x, y):
         self._state = state
@@ -150,8 +216,14 @@ class HUD(pygame.sprite.Sprite):
                                  ), False, (255, 255, 255)),
                 (5, 5)
             ),
-            (char_saves, (5, 20)),
-            (equipment, (5, 60)),
+            (char_xp, (285, 5)),
+            (char_hp, (5, 32)),
+            (char_stats, (5, 60)),
+            (char_defense, (215, 60)),
+            (char_offense, (215, 120)),
+            (char_saves, (315, 60)),
+            (char_misc, (315, 120)),
+            (equipment, (5, 200)),
             # TODO finish mini map
             # (mini_map, (5, 300)),
             (lambda x: create_tile(GREY, (389, 389)), (5, 500)),
@@ -161,7 +233,6 @@ class HUD(pygame.sprite.Sprite):
         self.image = create_tile(BLACK, [self.width, self.height])
         for e in self.elements:
             img = e[0](self._state)
-            print(e[1])
             self.image.blit(img, e[1])
 
 
