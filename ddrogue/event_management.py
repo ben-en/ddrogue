@@ -12,6 +12,9 @@ from .mechanics.dice import roll
 from .ui import StatusBox, HUD
 
 
+FONT_NAME = 'ubuntumono'
+FONT_SIZE = 14
+
 MOVEMENT_EVENTS = 'UP DOWN LEFT RIGHT'.split()
 
 ALPHA_RE = re.compile("[a-zA-Z0-9]")
@@ -171,7 +174,7 @@ class State:
         self.characters = npcs[:] + [player]
         self.visible = self.characters
         self.quit = False
-        self.font = pygame.font.SysFont('ubuntumono', 12)
+        self.font = pygame.font.SysFont(FONT_NAME, FONT_SIZE)
 
         self.output = StatusBox((0, s_height - UI_SIZE / 2), s_width - UI_SIZE,
                                 UI_SIZE / 2)
