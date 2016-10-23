@@ -3,7 +3,14 @@ from textwrap import wrap
 import pygame
 
 from .colors import BLACK, GREY
-from .map import create_tile
+
+
+def create_tile(color, xy):
+    """ Takes a color and a height/width pair and returns a surface object """
+    new_image = pygame.Surface(xy)
+    new_image.fill(GREY)
+    new_image.fill(color, rect=[1, 1, xy[0] - 2, xy[1] - 2])
+    return new_image
 
 
 def pick(screen, lines):

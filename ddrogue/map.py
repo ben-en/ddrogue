@@ -1,5 +1,6 @@
 import numpy
 import pygame
+from pygame.transform import scale
 
 
 BLACK = 0, 0, 0
@@ -49,14 +50,6 @@ def create_map_matrix():
     return MAP
 
 
-def create_tile(color, xy):
-    """ Takes a color and a height/width pair and returns a surface object """
-    new_image = pygame.Surface(xy)
-    new_image.fill(GREY)
-    new_image.fill(color, rect=[1, 1, xy[0] - 2, xy[1] - 2])
-    return new_image
-
-
 # TODO make map completely grid based, shouldn't be dealing with pixels when
 # putting things onto the map.
 # see game.py l83
@@ -80,7 +73,7 @@ class EncounterMap:
         self.floor = floorplan
         self.floor_color = GREY
         self.wall_color = BLACK
-        self.wall_tile = create_tile(BLACK, [self.unit, self.unit])
+        self.wall_tile = self.create_tile(color=self.wall_color)
         self.wall_character = 1
 
         # Create the image
@@ -97,8 +90,8 @@ class EncounterMap:
             self.floor_color    Containing the color of the floor
             self.wall_tile      Containing an Image object with a wall tile
         """
-        new_map = create_tile(self.floor_color,
-                              [self.pixel_width, self.pixel_height])
+        new_map = self.create_tile(color=self.floor_color,
+                                   xy=[self.pixel_width, self.pixel_height])
         for wall_rect in self.walls:
             new_map.blit(self.wall_tile, wall_rect)
         return new_map
@@ -160,8 +153,8 @@ class EncounterMap:
         """
         total_x = len(grid[0]) * self.unit
         total_y = len(grid) * self.unit
-        tile = create_tile(color, (self.unit, self.unit))
-        new = create_tile(WHITE, (total_x, total_y))
+        tile = self.create_tile(color=color)
+        new = self.create_tile(color=WHITE, xy=(total_x, total_y))
         y = 0
         for row in grid:
             y += 1
@@ -173,3 +166,17 @@ class EncounterMap:
                 rect = pygame.Rect([x, y, self.unit, self.unit])
                 new.blit(tile, rect)
         return new
+
+    def create_tile(self, color=BLACK, edge_color=GREY, img=None, xy=None):
+        """
+        Creates a tile default the size of one grid square
+        """
+        if not xy:
+            xy = (self.unit, self.unit)
+        if img:
+            # If an image for the tile, shrink it to the size of a tile
+            return scale(img, xy)
+        new_image = pygame.Surface(xy)
+        new_image.fill(edge_color)
+        new_image.fill(color, rect=[1, 1, xy[0] - 2, xy[1] - 2])
+        return new_image

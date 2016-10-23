@@ -4,7 +4,7 @@ import shelve
 import sys
 
 from .colors import GREEN
-from .map import EncounterMap, create_map_matrix, create_tile
+from .map import EncounterMap, create_map_matrix
 from .menu import fullscreen_menu
 from .npc import Goblin
 from .event_management import CombatState
@@ -63,9 +63,9 @@ def game_loop(state):
 
 def init_state(screen):
     m = EncounterMap(create_map_matrix())
-    goblin_image = create_tile(GREEN, [m.unit, m.unit])
+    goblin_image = m.create_tile(color=GREEN)
     goblin = Goblin(goblin_image)
-    player_image = create_tile(PLAYER_COLOR, [m.unit, m.unit])
+    player_image = m.create_tile(color=PLAYER_COLOR)
     player = Character(
         player_image,
         Human,
