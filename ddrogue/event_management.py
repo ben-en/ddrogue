@@ -22,6 +22,16 @@ ALPHA_RE = re.compile("[a-zA-Z0-9]")
 UI_SIZE = 400
 
 ACTIONS = {}
+SAVE_DIR = './saves'
+
+
+def save_game(state, filename=None):
+    """ write game to file """
+    if not filename:
+        filename = state.player.name + '.save'
+    f = shelve.open(SAVE_DIR + filename, 'n')
+    f['state'] = state
+    f.close
 
 
 def action(func):
@@ -33,6 +43,7 @@ def action(func):
 def quit(state, event):
     """ Tell the state to exit after user dialog """
     state.quit = True
+    save_game(state)
     return state
     # TODO user dialog
     options = OrderedDict()

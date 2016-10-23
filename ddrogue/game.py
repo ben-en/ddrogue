@@ -20,6 +20,7 @@ PLAYER_COLOR = 255, 255, 100
 
 # TODO relative file paths
 KEYMAP_FILE = './controls.json'
+SAVE_DIR = './saves'
 
 
 def settings(screen):
@@ -96,17 +97,11 @@ def new_game(screen):
     game_loop(state)
 
 
-def save_game(state, filename=None):
-    """ write game to file """
-    if not filename:
-        filename = state.player.name + '.save'
-    with shelve.open(filename, 'w') as f:
-        f['state'] = state
-
-
 def load_game(_):
     """ Offer a selection of files that exist that are loadable """
-    load_dir = './saves'
+    import ipdb
+    ipdb.set_trace()
+    load_dir = SAVE_DIR
     loadable_files = [os.basename(f) for f in os.path.walk(load_dir)]
     index = pick(loadable_files)
     with shelve.open(loadable_files[index], 'r') as f:
@@ -116,6 +111,7 @@ def load_game(_):
 def main_menu(screen):
     options = OrderedDict()
     options["New Game"] = new_game
+    options["Load Game"] = load_game
     options["Settings"] = settings
     options["Guide"] = guide
     options["Legal"] = legal
