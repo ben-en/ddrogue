@@ -7,7 +7,7 @@ from .colors import GREEN
 from .map import EncounterMap, create_map_matrix
 from .menu import fullscreen_menu
 from .npc import Goblin
-from .event_management import CombatState
+from .event_management import EncounterState
 from .ui import render_text, pick
 
 from .mechanics.classes import Fighter
@@ -79,7 +79,7 @@ def init_state(screen):
         },
         description="player character"
     )
-    state = CombatState(screen, m, KEYMAP_FILE, player, npcs=[goblin])
+    state = EncounterState(screen, m, KEYMAP_FILE, player, npcs=[goblin])
     state.player.pos = [state.map.width/2,
                         state.map.height/2]
     state.npcs[0].pos = [state.player.pos[0] - 2,
