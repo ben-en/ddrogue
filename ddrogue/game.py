@@ -1,4 +1,6 @@
 from collections import OrderedDict
+import os
+import shelve
 import sys
 
 from .colors import GREEN
@@ -6,7 +8,7 @@ from .map import Map, create_map_matrix, create_tile
 from .menu import fullscreen_menu
 from .npc import Goblin
 from .event_management import CombatState
-from .ui import render_text
+from .ui import render_text, text_to_img, menu
 
 from .mechanics.classes import Fighter
 from .mechanics.dice import roll
@@ -92,6 +94,24 @@ def new_game(screen):
 
     # Start the game
     game_loop(state)
+
+
+def save_game(state, filename=None):
+    """ write game to file """
+    if not filename:
+        filename = state.player.name + '.save'
+    with shelve.open(filename, 'w') as f:
+        f['state'] = state
+
+
+def load_game(_):
+    """ Offer a selection of files that exist that are loadable """
+    load_dir = './saves'
+    loadable_files = [os.basename(f) for f in os.path.walk(load_dir)]
+    img = text_to_img(loadable_files)
+    index = menu(img)
+    with shelve.open(loadable_files[index], 'r') as f:
+        game_loop(f['state'])
 
 
 def main_menu(screen):
