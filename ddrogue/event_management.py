@@ -1,15 +1,15 @@
 from collections import OrderedDict
 from copy import deepcopy
 import json
+import shelve
 from time import sleep
 import re
 
 import pygame
 
 from .pathfinding import astar
-from .menu import fullscreen_menu
 from .mechanics.dice import roll
-from .ui import StatusBox, HUD
+from .ui import StatusBox, HUD, fullscreen_menu
 
 
 FONT_NAME = 'ubuntumono'
@@ -57,11 +57,12 @@ def quit(state, event):
 @action
 def debug(state, event):
     """ drop into ipdb to debug an unknown event. """
-    print('Unknown event')
-    print(event)
-    print(dir(event))
-    import ipdb
-    ipdb.set_trace()
+    print('Entered debug')
+    from .ui import fullscreen_menu
+    from .mechanics.feats import FEAT_LIST
+    f_names = [f.title for f in FEAT_LIST]
+    picked = FEAT_LIST[fullscreen_menu(state.screen, f_names)]
+    state._print(str(picked))
 
 
 @action
@@ -125,6 +126,7 @@ def process_key_press(state, event):
         func = state.keymap[event.key]
     except KeyError:
         print('Unknown key')
+        print(event.key, event.unicode)
         return
     state = func(state, event)
     # print('function executed', func.__name__)

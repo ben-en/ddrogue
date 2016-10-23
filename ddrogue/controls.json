@@ -3,5 +3,6 @@
                 "274": "move_down",
                 "275": "move_right",
                 "276": "move_left",
+		"59": "debug",
                 "27": "quit"
         }
