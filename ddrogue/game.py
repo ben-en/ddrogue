@@ -5,10 +5,9 @@ import sys
 
 from .colors import GREEN
 from .map import EncounterMap, create_map_matrix
-from .menu import fullscreen_menu
 from .npc import Goblin
 from .event_management import EncounterState
-from .ui import render_text, pick
+from .ui import render_text, pick, fullscreen_menu
 
 from .mechanics.classes import Fighter
 from .mechanics.dice import roll
@@ -127,4 +126,8 @@ def main_menu(screen):
     options["Guide"] = guide
     options["Legal"] = legal
     options["Exit"] = quit
-    fullscreen_menu(screen, options)
+    index = fullscreen_menu(screen, options)
+    print('index is', index)
+    func = options.values()[index]
+    print('func is', func.__name__)
+    func(screen)
