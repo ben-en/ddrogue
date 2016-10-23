@@ -29,19 +29,33 @@ Controls:
     click to move to that location
 
 
-Next on the list is flush out controls, add UI for combat and skill choices. 
-Once UI is in place, special weapon functions such as trip or bull rushing can 
-be implemented.
+First that probably needs to be done is the character objects. They need to be
+created properly the first time to implement all the features necessary to a
+classic DnD adventure. Specifically, multiple classes, efficient temporary and
+permanent effects on things like attributes which affect a wide range of
+character features from skills to spells per day.
+
+Next on the list is flush out the UI for the encounter scenes. This will
+include special abilities that all characters get, such as trip or bull rush.
+
+Once encounter combat is finished and character creation has been established,
+i will pronounce that version 0.1 and tag it as the most likely place to fork
+for a straight dungeon crawler.
 
 
-Thoughts:
-This is starting to look more like a 2d neverwinter nights than a roguelike.
-Having a library which accessed the rule set would be a nice abstraction later
-so i could do both. Not sure which would be simpler to get off the ground, a
-nwn clone could be done with a dungeon and a city and pronounced version 0.1,
-whereas map generation may take a lot of coding.
+This will be more of a 2d neverwinter nights roguelike. There will be a party
+system, a world travel system which utilizes skills like survival to mitigate
+circumstantial penalties like terrain or reduce the chances of running into a
+monster in the night. There will also be towns with quests and opportunities
+for skill usage, theivery, information gathering, etc. Ideally there would be
+some element of randomized dungeons as well as randomized encounters.
 
-## Planned Features ##
+There are a few open source dnd-esque python games that have been implemented.
+One of them, by tomzimmer, gave me the inspiration to use the standard library
+module `shelve` for saving and loading games.
+
+
+## Planned Feature Notes ##
 
 + Character creation
     This would be a series of user prompts, such as:
@@ -89,6 +103,11 @@ whereas map generation may take a lot of coding.
     ingredients.
 
 + Map Generation
-    Unsure if completely generated or hand made.
-    A global map so more non-combat equipment and skills are useful, with
-    cities where you can purchase, steal, and interact normally.
+    Optionally generated or hand made for adventures.
+
++ World map
+    Would allow sleeping, random encounters, skill/spell usage.
+    Height generated map with cities. Have presets like size of city, modifiers
+    based on location (swamp, mountains, etc), proximity to country capital.
+    Country mechanics would be cool down the road, hire on as a mercenary and
+    help one country take over the world.
