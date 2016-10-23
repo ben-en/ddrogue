@@ -4,17 +4,17 @@ import shelve
 import sys
 
 from .colors import GREEN
-from .map import Map, create_map_matrix, create_tile
+from .map import EncounterMap, create_map_matrix, create_tile
 from .menu import fullscreen_menu
 from .npc import Goblin
 from .event_management import CombatState
-from .ui import render_text, text_to_img, menu
+from .ui import render_text, pick
 
 from .mechanics.classes import Fighter
 from .mechanics.dice import roll
 from .mechanics.skills import SKILL_LIST
-from .mechanics.chargen import Character, PlainCharacter
 from .mechanics.races import Human
+from .player import Character
 
 PLAYER_COLOR = 255, 255, 100
 
@@ -62,11 +62,11 @@ def game_loop(state):
 
 
 def init_state(screen):
-    m = Map(create_map_matrix())
+    m = EncounterMap(create_map_matrix())
     goblin_image = create_tile(GREEN, [m.unit, m.unit])
     goblin = Goblin(goblin_image)
     player_image = create_tile(PLAYER_COLOR, [m.unit, m.unit])
-    player = PlainCharacter(
+    player = Character(
         player_image,
         Human,
         Fighter,
@@ -108,8 +108,7 @@ def load_game(_):
     """ Offer a selection of files that exist that are loadable """
     load_dir = './saves'
     loadable_files = [os.basename(f) for f in os.path.walk(load_dir)]
-    img = text_to_img(loadable_files)
-    index = menu(img)
+    index = pick(loadable_files)
     with shelve.open(loadable_files[index], 'r') as f:
         game_loop(f['state'])
 

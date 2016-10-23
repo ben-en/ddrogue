@@ -164,6 +164,18 @@ def load_keymap(file_path):
 # something changes, without events having to do something themselves.
 class CombatState:
     def __init__(self, screen, m, keymap_path, player, npcs=[]):
+        """
+        Has properties necessery to complete an encounter.
+
+        Properties include screen, map, screen width and height, a key map of
+        keys to functions, the player object, a list of npcs, a list of
+        characters, a list of visible objects, whether the player has chosen to
+        quit or  not, a font object from pygame, a text status box, and a heads
+        up display for things like player hitpoints and experience.
+
+        Some of these properties are redundant, it kind of got away from me and
+        i didn't plan it so much as slap stuff on as i wanted it.
+        """
         set_events()  # TODO remove this
         self.screen = screen
         self.map = m
@@ -178,6 +190,9 @@ class CombatState:
 
         self.output = StatusBox((0, s_height - UI_SIZE / 2), s_width - UI_SIZE,
                                 UI_SIZE / 2)
+        # Assign _print method to self for easy access
+        self._print = self.output._print
+
         # initialize UI second, as HUD depends on access to attributes through
         # state
         self.hud = HUD(self, (s_width - UI_SIZE, 0), UI_SIZE, s_height)
@@ -208,6 +223,11 @@ class CombatState:
 
         # Flip the staging area to the display
         pygame.display.flip()
+
+        # TODO Handle end of round in state.
+        # Reasoning is that click events can be checked against HUD, statusbox,
+        # and map areas. If on map, then the active character does something
+        # with that click.
 
     def copy(self):
         return deepcopy(self)

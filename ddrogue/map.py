@@ -57,7 +57,10 @@ def create_tile(color, xy):
     return new_image
 
 
-class Map:
+# TODO make map completely grid based, shouldn't be dealing with pixels when
+# putting things onto the map.
+# see game.py l83
+class EncounterMap:
     """
     This class takes a floor plan and creates a completed map Image object that
     can be blitted onto the map as one object, as opposed to creating the map
@@ -117,7 +120,8 @@ class Map:
         return walls
 
     def is_wall(self, pos):
-        pos_rect = pygame.Rect(pos[0], pos[1], self.unit, self.unit)
+        # TODO only create a Rect if one hasn't been created already
+        pos_rect = pygame.Rect(pos[0], pos[1], 1, 1)
         ret = pos_rect.collidelist(self.walls)
         if ret == -1:
             return False
@@ -127,12 +131,14 @@ class Map:
         return True
 
     def grid_pos(self, pos):
+        """ Takes pixel coordinates and returns grid coordinates """
         # print('pixel position', pos)
         # print('returned position', [((p / self.unit) + 0 if p % self.unit else
         #                            1) for p in pos])
         return [p / self.unit for p in pos]
 
     def pixel_pos(self, grid):
+        """ Takes grid coordinates and returns pixel coordinates """
         # print('grid position', grid)
         # print('returned position', (grid[0] * self.unit, grid[1] * self.unit))
         return (grid[0] * self.unit, grid[1] * self.unit)
