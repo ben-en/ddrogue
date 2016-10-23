@@ -11,7 +11,7 @@ from .ui import render_text
 from .mechanics.classes import Fighter
 from .mechanics.dice import roll
 from .mechanics.skills import SKILL_LIST
-from .mechanics.chargen import Character
+from .mechanics.chargen import Character, PlainCharacter
 from .mechanics.races import Human
 
 PLAYER_COLOR = 255, 255, 100
@@ -64,18 +64,19 @@ def init_state(screen):
     goblin_image = create_tile(GREEN, [m.unit, m.unit])
     goblin = Goblin(goblin_image)
     player_image = create_tile(PLAYER_COLOR, [m.unit, m.unit])
-    player = Character(
-                 player_image,
-                 Human,
-                 abilities=(roll('4d6') for x in range(6)),
-                 cclass=Fighter,
-                 skills={'skill': 1 for skill in SKILL_LIST},
-                 features={
-                     'active': [],
-                     'passive': [],
-                     'feats_known': [],
-                 },
-                 description=None)
+    player = PlainCharacter(
+        player_image,
+        Human,
+        Fighter,
+        abilities=(roll('1d6') for x in range(6)),
+        skill_ranks={'skill': 1 for skill in SKILL_LIST},
+        features={
+            'active': [],
+            'passive': [],
+            'feats_known': [],
+        },
+        description="player character"
+    )
     state = State(screen, m, KEYMAP_FILE, player, npcs=[goblin])
     state.player.pos = [state.map.width/2 * state.map.unit,
                         state.map.height/2 * state.map.unit]

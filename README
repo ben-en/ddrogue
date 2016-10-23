@@ -7,13 +7,16 @@ So far:
     Movement                        [\]
     Information display             [\]
     Combat                          [\]
+    Feats                           [\]
+    Spells                          [ ]
+    Skills                          [\]
     Classes                         [\]
     Enemies                         [\]
     Map creation                    [ ]
     Items                           [ ]
 
 guide: 
-    \: half done
+    \: partially done
     x: done
 
 
@@ -23,6 +26,7 @@ Controls:
     \/, k: move down
     ->, l: move right
     ESC: quit
+    click to move to that location
 
 
 Next on the list is flush out controls, add UI for combat and skill choices. 

@@ -1,29 +1,39 @@
 from textwrap import wrap
 
 import pygame
-from pygame.rect import Rect
-from pygame.transform import scale, chop
 
 from .colors import BLACK, GREY
 from .map import create_tile
 
 
+def pick(screen, lines):
+    image = text_to_img(screen, lines)
+    navigable_loop(screen, image)
+
+
 def render_text(screen, text_file):
     """ Render the text file on the screen in a readable format """
+    # Add a header that shows the path of the text file so the user can look it
+    # up for manual inspection at their discretion
+    text = ['loaded from: %s' % text_file, '']
+    with open(text_file, 'r') as input:
+        for l in input.readlines():
+            text.append(l)
+    image = text_to_img(screen, text)
+    navigable_loop(screen, image)
+
+
+def text_to_img(screen, lines):
+    """ Put lines on an image that would fit within the screen """
     # Initialize the font
     text_font = pygame.font.Font(None, 18)
     # Calculate the number of characters that can be shown on one row
     characters = (screen.get_width() - 10) / 7
-
-    # Add a header that shows the path of the text file so the user can look it
-    # up for manual inspection at their discretion
-    text = ['loaded from: %s' % text_file, '']
-    # Open and read the text file into a list of rows
-    with open(text_file, 'r') as input:
-        for l in input.readlines():
-            text += wrap(l, characters)
-            # Add an extra space to clearly show a new line in the file
-            text += ['']
+    text = ['']
+    for l in lines:
+        text += wrap(l, characters)
+        # Add an extra space to clearly show a new line in the file
+        text += ['']
 
     # Create an image the size of the text
     image = pygame.surface.Surface((screen.get_width(), len(text) * 15))
@@ -34,7 +44,7 @@ def render_text(screen, text_file):
         image.blit(text_font.render(t, False, (255, 255, 255)), (x, y))
         y += 15
 
-    navigable_loop(screen, image)
+    return image
 
 
 def navigable_loop(screen, image):
@@ -69,7 +79,7 @@ class CharBox(object):
 
 
 def mini_map(state):
-    #TODO
+    # TODO
     pass
 
 
@@ -131,6 +141,7 @@ def char_defense(state):
 
 
 def char_offense(state):
+    # TODO fix negative number appearance
     p = state.player
     rows = [
         'BAB:  %s' % p.bab,
@@ -145,7 +156,7 @@ def char_saves(state):
     rows = [
         'Ref:  %s' % str_bonus(p.ref),
         'Fort: %s' % str_bonus(p.fort),
-        'Wis:  %s' % str_bonus(p.wis)
+        'Will: %s' % str_bonus(p.will)
     ]
     return render_column(state.font, (65, 300), rows)
 

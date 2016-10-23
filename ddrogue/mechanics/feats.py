@@ -1,14 +1,23 @@
 from collections import namedtuple
 
 
+FEATS = {}
+
 Feat = namedtuple('Feat', 'title desc requirements tags func'.split())
 
 
+def feat(func):
+    FEATS[func.__name__] = func
+    return func
+
+
+@feat
 def acrobatic():
     """ +2 to acrobatics and fly """
     pass
 
 
+@feat
 def agile_maneuvers():
     """
     use dex bonux instead of str for cmb
@@ -18,11 +27,13 @@ def agile_maneuvers():
     pass
 
 
+@feat
 def fleet():
     """ +5ft move speed """
     pass
 
 
+@feat
 def brew_potion():
     """
     craft potions
@@ -33,6 +44,7 @@ def brew_potion():
     pass
 
 
+@feat
 def enlarge_spell():
     """
     double spell range
@@ -42,6 +54,7 @@ def enlarge_spell():
     pass
 
 
+@feat
 def silent_spell():
     """
     cast spell silently
