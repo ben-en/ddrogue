@@ -108,8 +108,19 @@ def load_game(_):
         game_loop(f['state'])
 
 
+def debug(screen):
+    """ drop into ipdb to debug an unknown event. """
+    print('Entered debug')
+    from .mechanics.chargen import chargen
+    player = chargen(screen)
+    print(player)
+    import ipdb
+    ipdb.set_trace()
+
+
 def main_menu(screen):
     options = OrderedDict()
+    options["debug"] = debug
     options["New Game"] = new_game
     options["Load Game"] = load_game
     options["Settings"] = settings

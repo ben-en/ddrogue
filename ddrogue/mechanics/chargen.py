@@ -1,14 +1,83 @@
-
 from pygame.sprite import Sprite
 
 from ..event_management import player_turn
+from ..player import Character, PLAYER_COLOR
+from ..ui import fullscreen_menu, str_bonus, create_tile
+from .classes import CLASS_LIST
 from .dice import roll, die_to_val
+from .feats import FEAT_LIST
 from .skills import SKILL_LIST
 from .stats import StatBlock, Stat, stat_bonus
 from .spells import bonus_spells
+from .races import RACE_LIST
 
 
-class Character(Sprite):
+def chargen(screen):
+    """ Go through chargen steps """
+    img = create_tile(PLAYER_COLOR, (32, 32))
+    # Select stats
+    stats = roll_stats(screen)
+    print('stats', stats)
+    # Select race
+    race = select(screen, RACE_LIST)
+    print('race', race)
+    # Select class
+    cclass = select(screen, CLASS_LIST)
+    print('cclass', cclass)
+    # Select skills
+    skills = skill_select(screen)
+    print('skills', skills)
+    # Select feats
+    feats = feat_select(screen)
+    print('feats', feats)
+    # Select spells
+    # Select equipment
+    return Character(img, race, cclass, abilities=stats, skill_ranks=skills)
+
+
+def roll_stats(screen):
+    """ Allow swapping values and rerolling """
+    while 1:
+        rows = ['reroll']
+        stats = []
+        for stat in 'str dex con int wis cha'.split():
+            val = roll('3d6')
+            bonus = str_bonus(stat_bonus(val), just=2)
+            rows.append('%s: [%s] (%s)' % (stat, str(val).rjust(2), bonus))
+            stats.append(val)
+        if not fullscreen_menu(screen, rows) == 0:
+            return stats
+
+
+def select(screen, l):
+    """ expects a list of objects with a `s` property which is a string """
+    # Create a list of the strings the objects have
+    str_l = [i.s for i in l]
+    # Return the object with the selected string
+    return l[fullscreen_menu(screen, str_l)]
+
+
+def multi_select(screen, l, count):
+    selected = []
+    while len(selected) < count:
+        index = fullscreen_menu(screen, l)
+        selected.append(l.pop(index))
+    return selected
+
+
+def skill_select(screen):
+    """ Should be list of ints that can be +/-'d """
+    # TODO
+    return {}
+
+
+def feat_select(screen):
+    f_names = [f.s for f in FEAT_LIST]
+    picked = multi_select(screen, f_names, 2)
+    return picked
+
+
+class OldCharacter(Sprite):
     """
     Object that handles recalculating saves when attributes are modified,
     recalculating AC when armor is un/equipped, calculating weapon stats when

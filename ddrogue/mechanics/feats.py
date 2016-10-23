@@ -3,7 +3,7 @@ from collections import namedtuple
 
 FEATS = {}
 
-Feat = namedtuple('Feat', 'title desc requirements tags func'.split())
+Feat = namedtuple('Feat', 's desc requirements tags func'.split())
 
 
 def feat(func):

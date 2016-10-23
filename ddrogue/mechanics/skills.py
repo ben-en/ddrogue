@@ -1,7 +1,7 @@
 from collections import namedtuple
 
 
-Skill = namedtuple('Skill', ['name', 'stat', 'enc'])
+Skill = namedtuple('Skill', ['s', 'stat', 'enc'])
 
 SKILL_LIST = [
     Skill('acrobatics', 'dex', True),
@@ -32,7 +32,7 @@ SKILL_LIST = [
     Skill('use_magic_device', 'cha', False),
 ]
 
-SkillBlock = namedtuple('SkillBlock', [x.name for x in SKILL_LIST])
+SkillBlock = namedtuple('SkillBlock', [x.s for x in SKILL_LIST])
 
 KNOWLEDGE_LIST = (
     'arcana dungeoneering engineering geography history local nature nobility'
