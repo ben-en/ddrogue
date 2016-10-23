@@ -93,36 +93,35 @@ def move_to(state, char, pos, steps=None):
     """
     Using state's access to the map, move given `char` to `pos`, max `steps`
     """
-    path = astar(state.map.floor.transpose(),
-                 tuple(state.map.grid_pos(char.pos)),
-                 tuple(state.map.grid_pos(pos)))
+    path = astar(state.map.floor.transpose(), tuple(char.pos), tuple(pos))
     # For some reason astar figures the path backwards. Dunno why,
     path.reverse()
     if steps:
         path = path[:steps]
     for step in path:
-        char.pos = state.map.pixel_pos(step)
+        char.pos = step
         state.draw()
         sleep(0.1)
+    # TODO don't return state, you're modifying in place.
     return state
 
 
 # TODO: Logging really needs to be fixed
 # TODO: How does duplicating an object work? for state
 def process_key_press(state, event):
-    print('Key pressed', event.key)
+    # print('Key pressed', event.key)
     try:
         func = state.keymap[event.key]
     except KeyError:
         print('Unknown key')
         return
     state = func(state, event)
-    print('function executed', func.__name__)
+    # print('function executed', func.__name__)
     return state
 
 
 def process_click(state, event):
-    move_to(state, state.player, event.pos)
+    move_to(state, state.player, state.map.grid_pos(event.pos))
     return state
 
 
@@ -218,8 +217,7 @@ class CombatState:
 
         # Add visible objects
         for obj in self.visible:
-            self.screen.blit(obj.image, obj.pos)
-            obj.rect.x, obj.rect.y = obj.pos  # TODO remove this
+            self.screen.blit(obj.image, self.map.pixel_pos(obj.pos))
 
         # Flip the staging area to the display
         pygame.display.flip()

@@ -80,9 +80,9 @@ def init_state(screen):
         description="player character"
     )
     state = CombatState(screen, m, KEYMAP_FILE, player, npcs=[goblin])
-    state.player.pos = [state.map.width/2 * state.map.unit,
-                        state.map.height/2 * state.map.unit]
-    state.npcs[0].pos = [state.player.pos[0] - state.map.unit * 2,
+    state.player.pos = [state.map.width/2,
+                        state.map.height/2]
+    state.npcs[0].pos = [state.player.pos[0] - 2,
                          state.player.pos[1]]
     return state
 
