@@ -14,6 +14,7 @@ from .races import RACE_LIST
 
 def chargen(screen):
     """ Go through chargen steps """
+    # Name
     img = create_tile(PLAYER_COLOR, (32, 32))
     # Select stats
     stats = roll_stats(screen)

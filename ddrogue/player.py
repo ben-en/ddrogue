@@ -11,18 +11,47 @@ from .mechanics.skills import SKILL_LIST
 PLAYER_COLOR = 255, 255, 100
 
 
+blank_char_info = {
+    'image': create_tile(BLUE, (16, 16)),
+    'race': Human,
+    'char_levels': ((Fighter, 5), (Wizard, 5)),
+    'abilities': (roll('3d6') for x in range(6)),
+    'skill_ranks': {'skill': 0 for skill in SKILL_LIST},
+    'features': {
+            # All the abilities that would be gained from the class, processed
+            'active': [],
+            'passive': [],
+            'spells': [],
+            'spd': [],
+            'feats_known': [],
+        },
+    'name': 'foo',
+    'description': None,
+    'gold': 0,
+    'equipment': [],
+    'equipped': 0,
+    'xp': 0,
+    'hp': 29
+}
+
+
 class Character(Sprite):
+    """
+    TODO:
+        armor check penaltty
+    """
     def __init__(
         self,
         image,
         race,
-        cclass,
+        char_levels,
         abilities=(roll('3d6') for x in range(6)),
         skill_ranks={'skill': 0 for skill in SKILL_LIST},
         features={
             'active': [],
             'passive': [],
             'spells': [],
+            'spd': [],
             'feats_known': [],
         },
         name='foo',
