@@ -162,7 +162,7 @@ def load_keymap(file_path):
 
 # TODO: State should duplicate itself and store its history somewhere whenever
 # something changes, without events having to do something themselves.
-class State:
+class CombatState:
     def __init__(self, screen, m, keymap_path, player, npcs=[]):
         set_events()  # TODO remove this
         self.screen = screen
