@@ -1,79 +1,140 @@
+from collections import OrderedDict
+
 from pygame.sprite import Sprite
 
-from .mechanics.classes import Fighter
-from .mechanics.dice import roll
-from .mechanics.stats import Stat, StatBlock
+from .event_management import player_turn
+from .mechanics.dice import roll, die_to_val
+from .mechanics.stats import Stat, StatBlock, stat_bonus
 from .mechanics.skills import SKILL_LIST
-from .mechanics.sizes import medium
-from .mechanics.weapons import med_unarmed
-from .map import create_tile
 
 
 PLAYER_COLOR = 255, 255, 100
 
 
-class Creature(Sprite):
-    def __init__(self, image):
+class Character(Sprite):
+    def __init__(
+        self,
+        image,
+        race,
+        cclass,
+        abilities=(roll('3d6') for x in range(6)),
+        skill_ranks={'skill': 0 for skill in SKILL_LIST},
+        features={
+            'active': [],
+            'passive': [],
+            'spells': [],
+            'feats_known': [],
+        },
+        name='foo',
+        description=None,
+        gold=None,
+        equipment=None,
+        equipped=None,
+    ):
+        """ Creates a character object """
+        # Image related
         Sprite.__init__(self)
         self.groups = []
         self.image = image
         self.rect = self.image.get_rect()
 
-        self.level = 1
-        self.weapons = []
-        self.equipped = -1
+        self.race = race
+        self.cclass = cclass
+        self.speed = race.speed
 
-    def init_stats(self, interactive=False):
-        if interactive:
-            print('tough luck buddy')
-        self.stats = StatBlock(
-            str=Stat(17, 3), dex=Stat(13, 1), con=Stat(14, 2), int=Stat(9, -1),
-            wis=Stat(10, 0), cha=Stat(12, 1),
+        self.desc = (
+            (description or 'missing unique description') + '\n\n\n' +
+            cclass.desc + '\n\n\n' + race.desc
         )
-        self.hp = self.stats.con.bonus + sum(
-            [roll(self._class.hd or self.race.hd) for _ in
-                xrange(0, self.level)]
+        self.name = name
+
+        self.gold = gold or roll(cclass.gold) * 10
+        self.equipment = equipment or cclass.equipment + race.natural_weapons
+        self.equipped = equipped or self.equipment.index(
+            sorted(self.equipment, key=lambda x: die_to_val(x.dmg))[0]
         )
 
-    def levelup(self, level=-1):
-        """ Levels the character up to kwarg level, default current level +1
-        """
-        if level == -1:
-            level = self.level + 1
-        for i in xrange(self.level, level):
-            self._levelup()
-        pass
+        self.stats = StatBlock([Stat(i, stat_bonus(i)) for i in abilities])
+        self.skill_ranks = skill_ranks
+        self.features = features
 
-    def _levelup(self):
-        self.level += 1
+        self._fort_mods = [0]
+        self._ref_mods = [0]
+        self._will_mods = [0]
+        self._init_mods = [0]
+        self._ac_mods = [0]
+        self._hp_mods = [0]
+        self._speed_mods = [0]
 
-    def set_class(self, _class):
-        self._class = Fighter()
-        self.bab = self._class.bab[self.level - 1]
-        print(self.bab)
-        self.base_saves = self._class.saves[self.level]
+        self._stat_mods = {}
+        for stat in self.stats:
+            self._stat_mods[stat] = [0]
 
-    def add_weapon(self, weapon):
-        self.weapons.append(weapon(self))
+        self._skill_mods = {}
+        for skill in self.skill_ranks:
+            self._skill_mods[skill] = [0]
 
-    def equip(self, weapon):
-        self.equipped = weapon
+        self.sr = 0
+        self.dr = 0
+        self.level = 0
+        self.xp = 0
+        self._rolled_hd = 0
+        self.hp = self.max_hp
+        self.bab = self.cclass.bab[self.level]
 
-    def setup_skills(self):
-        self.skills = {'skill': 0 for skill in SKILL_LIST}
+    @property
+    def ac(self):
+        return 10 + self.stats['dex'].bonus + sum(self._ac_mods)
 
+    @property
+    def touch_ac(self):
+        return 10 + self.stats['dex'].bonus + sum(self._ac_mods)
 
-class Player(Creature):
-    def __init__(self, tile_size):
-        player_image = create_tile(PLAYER_COLOR, [tile_size, tile_size])
-        Creature.__init__(self, player_image)
+    @property
+    def flat_ac(self):
+        return 10 + sum(self._ac_mods)
 
-        # TODO add races
-        # player.set_race(Human)
-        self.size = medium
-        self.set_class(Fighter)
+    @property
+    def init(self):
+        return self.stats['dex'].bonus + sum(self._init_mods)
 
-        self.init_stats(interactive=True)
+    @property
+    def cmb(self):
+        return int(self.bab[0] + self.stats['str'].bonus)
 
-        self.add_weapon(med_unarmed)
-        self.equip(0)
+    @property
+    def cmd(self):
+        return self.bab[0] + self.stats['str'].bonus + self.stats['dex'].bonus
+
+    @property
+    def ref(self):
+        return self.stats['dex'].bonus + sum(self._ref_mods)
+
+    @property
+    def fort(self):
+        return self.stats['con'].bonus + sum(self._fort_mods)
+
+    @property
+    def will(self):
+        return self.stats['wis'].bonus + sum(self._will_mods)
+
+    @property
+    def max_hp(self):
+        return self._rolled_hd + (self.stats['con'].bonus * self.level)
+
+    @property
+    def skills(self):
+        skills = OrderedDict
+        for skill, attr, check in SKILL_LIST:
+            skills[skill] = sum((
+                self._skill_ranks[skill],
+                self._skill_mods[skill],
+                self.stats[attr].bonus,
+                self.check_penalty if check else 0
+            ))
+        return skills
+
+    def act(self, state):
+        # TODO void any kepresses while rendering
+        state = player_turn(state)
+        return state
