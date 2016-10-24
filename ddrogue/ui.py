@@ -262,6 +262,16 @@ def equipment(state):
         y += 12
     return image
 
+    # new body equip setup
+    image = pygame.Surface([state.hud.element_width, 100])
+    equipped = state.player.equipped
+    equip_strs = [': '.join((k, v)) for k, v in equipped]
+    y = 0
+    for s in equip_strs:
+        image.blit(state.font.render(s, False, (255, 255, 255)), (0, y))
+        y += 12
+    return image
+
 
 class HUD(pygame.sprite.Sprite):
     """

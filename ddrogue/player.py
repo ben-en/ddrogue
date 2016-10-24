@@ -11,6 +11,11 @@ from .mechanics.skills import SKILL_LIST
 PLAYER_COLOR = 255, 255, 100
 
 
+# active features should probably activate using similar mechanisms to casting
+# a spell.
+# passive features should apply at object creation, directly to the cha4acter
+# object. perhaps  haracters should maintain a list of effects that affect them
+# each phase or turn
 blank_char_info = {
     'image': create_tile(BLUE, (16, 16)),
     'race': Human,
@@ -28,17 +33,27 @@ blank_char_info = {
     'name': 'foo',
     'description': None,
     'gold': 0,
-    'equipment': [],
-    'equipped': 0,
+    'equipment': race_weapons,
+    'equipped': {
+        'hand': 0
+    },
     'xp': 0,
     'hp': 29
 }
 
 
+
+# The charaxter class will be a wrapper around the data that makes up the core
+# of rhe character, such as attributes, abilities, spells known and per day,
+# feats and so on.
+# methods it should have onclude a method to export the core info, properties,
+# a way for accessing skills with a calculated bonus, management for effects on
+# the character, perhaps equipment managementas well.
 class Character(Sprite):
     """
     TODO:
         armor check penaltty
+        body based equipment
     """
     def __init__(
         self,
