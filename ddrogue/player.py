@@ -49,6 +49,8 @@ blank_char_info = {
 # methods it should have onclude a method to export the core info, properties,
 # a way for accessing skills with a calculated bonus, management for effects on
 # the character, perhaps equipment managementas well.
+# active abilities should specify how much time they take to accomplish.
+# generic combat actions are being added to combat module
 class Character(Sprite):
     """
     TODO:

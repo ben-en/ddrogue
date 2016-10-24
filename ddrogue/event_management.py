@@ -44,6 +44,7 @@ def quit(state, event):
     """ Tell the state to exit after user dialog """
     state.quit = True
     save_game(state)
+    # TODO dont retur state if modifying in place
     return state
     # TODO user dialog
     options = OrderedDict()
@@ -65,12 +66,46 @@ def debug(state, event):
     state._print(str(picked))
 
 
+# TODO assign keys to spell, ability, and char info
+@action
+def spell(state, event):
+    """
+    offer a list of abilities to activate
+    """
+    ability_list = state.player.features['spells'].keys()
+    index = pick(state.screen, ability_list)
+    import ipdb
+    ipdb.set_trace()
+    state.player.features['spells'][abilitylist[index]]()
+
+
+@action
+def ability(state, event):
+    """
+    offer a list of abilities to activate
+    """
+    ability_list = state.player.features['active'].keys()
+    index = pick(state.screen, ability_list)
+    import ipdb
+    ipdb.set_trace()
+    state.player.features['active'][abilitylist[index]]()
+
+
+@action
+def char_info(state, event):
+    """
+    display a character sheet loke view
+    """
+    print('not implemented')
+
+
 @action
 def move_down(state, event):
     """ Move the player down by adding one unit to its y value.
     """
     state.player.pos = (state.player.pos[0],
                         state.player.pos[1] + state.map.unit)
+    # TODO dont retur state if modifying in place
     return state
 
 
@@ -80,6 +115,7 @@ def move_up(state, event):
     """
     state.player.pos = (state.player.pos[0],
                         state.player.pos[1] - state.map.unit)
+    # TODO dont retur state if modifying in place
     return state
 
 
@@ -89,6 +125,7 @@ def move_left(state, event):
     """
     state.player.pos = (state.player.pos[0] - state.map.unit,
                         state.player.pos[1])
+    # TODO dont retur state if modifying in place
     return state
 
 
@@ -98,6 +135,7 @@ def move_right(state, event):
     """
     state.player.pos = (state.player.pos[0] + state.map.unit,
                         state.player.pos[1])
+    # TODO dont retur state if modifying in place
     return state
 
 

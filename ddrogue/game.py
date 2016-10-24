@@ -58,6 +58,7 @@ def game_loop(state):
         state.draw()
 
         for char in state.characters:
+            # TODO a series of phases
             char.act(state)
 
 

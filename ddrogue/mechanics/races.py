@@ -36,7 +36,7 @@ Human = Race(
     '30',           # speed in feet per turn
     {},             # ability modifiers
     {               # racial features
-     'passive': [
+     'creation': [
         start_stat_bonus,
         free_start_feat,
         skilled,
@@ -47,6 +47,27 @@ Human = Race(
     [med_unarmed],
     'Human',
     'Human racial description'
+)
+
+
+Halfling = Race(
+    small,       # size
+    '20',           # speed in feet per turn
+    {'dex': 2,'cha': 2, 'str': -2},             # ability modifiers
+    {               # racial features
+     'persistent': [
+        fearless,
+        halfling_luck,
+        keen_senses,
+        sure_footes,
+     ],
+     'creation': [halfing_proficiency],
+     'active': []
+    },
+    [halfling],             # racial languages
+    [sml_unarmed],
+    'Halfling',
+    'Halfling racial description'
 )
 
 

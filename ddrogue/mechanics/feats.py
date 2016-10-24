@@ -28,6 +28,43 @@ def agile_maneuvers():
 
 
 @feat
+def alertness():
+    """ +2 to perception and sense motive """
+    pass
+
+
+@feat
+def animal_affinity():
+    """ +2 to handle animal and ride"""
+    pass
+
+
+@feat
+def arcane_armor_training():
+    """ arcane spell failure from armor -10% """
+    pass
+
+
+@feat
+def arcane_armor_mastery():
+    """ arcane spell failure from armor -10%
+    stacks with training, requires arcane armor training"""
+    pass
+
+
+@feat
+def athletic():
+    """ +2 to climb and swim"""
+    pass
+
+
+@feat
+def blind_fight():
+    """ reroll miss chance for concealment """
+    pass
+
+
+@feat
 def fleet():
     """ +5ft move speed """
     pass
