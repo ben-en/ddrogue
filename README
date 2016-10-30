@@ -29,6 +29,13 @@ Controls:
     click to move to that location
 
 
+immediate list:
+    OGC compliance: move all game content out of code and into text files
+    turn UI (5-ft step, move/swift/immediate/full round/standard actions)
+    functionality from standard character actions (move, bull rush, disarm)
+    rudimentary ai that will move and attack the closest/weakest character
+
+
 First that probably needs to be done is the character objects. They need to be
 created properly the first time to implement all the features necessary to a
 classic DnD adventure. Specifically, multiple classes, efficient temporary and
