@@ -1,7 +1,7 @@
 from collections import namedtuple
 
-from .sizes import medium
-from .weapons import med_unarmed
+from .sizes import small, medium
+from .weapons import sml_unarmed, med_unarmed
 
 
 Race = namedtuple('Race', [
@@ -39,6 +39,8 @@ Human = Race(
      'creation': [
         start_stat_bonus,
         free_start_feat,
+     ],
+     'levelup': [
         skilled,
      ],
      'active': []
@@ -50,25 +52,45 @@ Human = Race(
 )
 
 
+def fearless():
+    pass
+
+
+def halfling_luck():
+    pass
+
+
+def keen_senses():
+    pass
+
+
+def sure_footed():
+    pass
+
+
+def halfling_proficiency():
+    pass
+
+
 Halfling = Race(
     small,       # size
     '20',           # speed in feet per turn
-    {'dex': 2,'cha': 2, 'str': -2},             # ability modifiers
+    {'dex': 2, 'cha': 2, 'str': -2},             # ability modifiers
     {               # racial features
      'persistent': [
         fearless,
         halfling_luck,
         keen_senses,
-        sure_footes,
+        sure_footed,
      ],
-     'creation': [halfing_proficiency],
+     'creation': [halfling_proficiency],
      'active': []
     },
-    [halfling],             # racial languages
+    ['halfling'],             # racial languages
     [sml_unarmed],
     'Halfling',
     'Halfling racial description'
 )
 
 
-RACE_LIST = [Human]
+RACE_LIST = [Human, Halfling]

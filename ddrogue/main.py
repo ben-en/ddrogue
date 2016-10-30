@@ -1,6 +1,6 @@
 import pygame
 
-from .game import new_game, main_menu
+from .game import main_menu
 
 
 def main():
@@ -8,7 +8,8 @@ def main():
     pygame.font.init()
 
     # Set up the screen
-    screen = pygame.display.set_mode((0, 0))
+    # TODO use pygame.display.get_surface
+    screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
 
     # Start the main menu
     # new_game(screen)

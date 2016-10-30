@@ -35,8 +35,16 @@ classic DnD adventure. Specifically, multiple classes, efficient temporary and
 permanent effects on things like attributes which affect a wide range of
 character features from skills to spells per day.
 
-Next on the list is flush out the UI for the encounter scenes. This will
-include special abilities that all characters get, such as trip or bull rush.
+An object containing the state of the encounter will be necessary, though not 
+in the way it was currently implmented. The state will need to have things like
+initiative order, all the objects in the map, time based area effects, and so
+on. 
+
+Next on the list is flush out the UI for the encounter scenes. A basic UI has
+been implemented containing an event log, a map, and a heads up display
+containing player character information. An interface for abilities is required
+next. This will include special abilities that all characters get, such as trip
+or bull rush.
 
 Once encounter combat is finished and character creation has been established,
 i will pronounce that version 0.1 and tag it as the most likely place to fork

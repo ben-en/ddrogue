@@ -1,88 +1,209 @@
+from collections import OrderedDict
 from textwrap import wrap
 
 import pygame
+from pygame.rect import Rect
 
-from .colors import BLACK, GREY, WHITE
+from .colors import BLACK, GREY, WHITE, BLUE, LIGHT_BLUE
 
 
 def create_tile(color, xy):
     """ Takes a color and a height/width pair and returns a surface object """
-    new_image = pygame.Surface(xy)
-    new_image.fill(GREY)
-    new_image.fill(color, rect=[1, 1, xy[0] - 2, xy[1] - 2])
-    return new_image
+    new_img = pygame.Surface(xy)
+    new_img.fill(GREY)
+    new_img.fill(color, rect=[1, 1, xy[0] - 2, xy[1] - 2])
+    return new_img
 
 
-def fullscreen_menu(screen, options):
+def str_bonus(val, just=3):
+    """ Returns a justified stringed bonus. eg '3' returns ' +3' by default """
+    if val >= 0:
+        bonus = '+%s' % val
+    else:
+        bonus = str(val)
+    return bonus.rjust(just)
+
+
+def confirm(screen):
+    """ user dialog, ask yes/no """
+    options = OrderedDict()
+    options['Yes'] = True
+    options['No'] = False
+    res = fullscreen_menu(screen, options)
+    return options.get(res, False)
+
+
+def multi_panel_ui(screen, panels):
     """
-    Creates a menu centered on screen with the options provided. Returns an
-    index.
+    For each panel presented, expect a panel that functions similarly to pick
+    or the player HUD.
 
-    Screen is expected to be a pygame screen (Surface) object and options is
-    expected to be an iterable.
+    Attributes:
+        pos
+        img
+    Methods:
+        event_handler
+        resolve
+
+
+    Specifically, they should have size/location rects, a list of clickable
+    areas coupled with the function to execute if the area is clicked, and
+    probably their own selections.
+
+    Primary use case is in character generation, where skills need to be
+    +/-'able, abilities should be rerollable, classess and races need to be
+    selectable, and most fields need a hover feature to display help info
+
+    In theory if implemented properly, could also handle the main game screen.
+    Or something that copies a lot of the main functionality could handle the
+    main game screen.
+
     """
-    # Create a blank surface to draw the menu on
-    menu = pygame.surface.Surface((screen.get_width(), screen.get_height()))
-    # Assume the font is initialized, and create a new font object
-    menu_font = pygame.font.Font(None, 24)
-    # Create images for each option provided
-    images = [menu_font.render(x, False, (255, 255, 255)) for x in options]
-    # TODO Find the optimal location to start writing the menu
-    cursor_start = (menu.get_width()/2 - 50, menu.get_height()/3)
+    # TODO this is more complicated, should be Rect(pos, img.xy)
+    panel_areas = [Rect(p.pos, p.img.get_size()) for p in panels]
+    area = 0
+    # Enter main loop
+    while 1:
+        screen.fill(BLACK)
+        # Draw the panels on the screen
+        for p in panels:
+            screen.blit(p.img, p.pos)
+        pygame.draw.rect(screen, LIGHT_BLUE, panel_areas[area], 2)
+        pygame.display.flip()
 
-    image_positions = []  # Empty list to hold rects of the images
-    x, y = cursor_start
-    # Get image positions and blit options onto menu
-    for i in images:
-        image_positions.append(pygame.rect.Rect([x - 4, y - 4], [100, 20]))
-        menu.blit(i, (x, y))
-        y += 20
+        # Wait for the next state
+        event = pygame.event.wait()
+        if event.type == pygame.KEYUP:
+            print('keycode: ', event.key)
+            print('key: ', chr(event.key))
+            if event.key == 27:  # esc
+                if confirm(screen):
+                    break
+            elif event.key == ord('\t'):
+                area += 1
+                if area >= len(panels):
+                    area = 0
+                elif area < 0:
+                    area = len(panels) - 1
+                continue
+        elif event.type == pygame.QUIT:
+            break
+        elif event.type in [pygame.MOUSEMOTION, pygame.MOUSEBUTTONUP]:
+            for index in range(len(panel_areas)):
+                if panel_areas[index].collidepoint(event.pos):
+                    area = index
+                    panels[index].event_handler(event)
+                    continue
+        panels[area].event_handler(event)
+    # When finished in the while loop, return selected values
+    return [p.resolve() for p in panels]
 
+
+def select_loop(screen, selectable):
     selected = 0
     # Enter main loop
     while 1:
-        # Draw the menu on the screen
-        screen.blit(menu, [0, 0])
+        screen.fill(BLACK)
+        # Draw the img on the screen
+        screen.blit(selectable.img, selectable.top_left)
         # Draw the selection box on the screen
-        pygame.draw.rect(screen, WHITE, image_positions[selected], 2)
+        pygame.draw.rect(screen, selectable.select_color,
+                         selectable.positions[selected], 2)
         # Flip the staging area to the display
         pygame.display.flip()
+
+        # TODO make action loop separate from the menu so controls can be
+        # customized
         # Wait for the next state
         event = pygame.event.wait()
         if event.type == pygame.QUIT:
             break
         elif event.type == pygame.MOUSEBUTTONUP:
             # TODO DRY
-            for i in image_positions:
+            for i in selectable.positions:
                 if i.collidepoint(event.pos):
-                    return image_positions.index(i)
+                    return selectable.positions.index(i)
         elif event.type == pygame.MOUSEMOTION:
-            for i in image_positions:
+            for i in selectable.positions:
                 if i.collidepoint(event.pos):
-                    selected = image_positions.index(i)
+                    selected = selectable.positions.index(i)
         elif event.type == pygame.KEYUP:
             print('keycode', event.key)
             if event.key == 273:  # up
                 selected -= 1
                 if selected < 0:
-                    selected = len(image_positions) - 1
+                    selected = len(selectable.positions) - 1
             elif event.key == 274:  # down
                 selected += 1
-                if selected >= len(image_positions):
+                if selected >= len(selectable.positions):
                     selected = 0
             elif event.key == 13:  # enter
                 return selected
             elif event.key == 27:  # esc
-                break
+                return None
         else:
             pass
             # print(event)
 
 
-def pick(screen, lines):
-    """ Returns the index of the selected line """
-    selected = fullscreen_menu(screen, lines)
-    return lines[selected]
+class Selectable(object):
+    """
+    Object that has an img, a list of selectable areas mapped to functions,
+    """
+    def __init__(self, img, positions, top_left=(0, 0), text_color=WHITE,
+                 select_color=BLUE):
+        self.img = img
+        self.positions = positions
+        self.top_left = top_left
+        self.text_color = text_color
+        self.select_color = select_color
+
+
+def fullscreen_menu(screen, options, **kwargs):
+    # blank the screen
+    screen.fill(BLACK)
+    return menu(screen, options, **kwargs)
+
+
+def menu(screen, options, xy=(1000, 1000), top_left=(0, 0), text_color=WHITE,
+         font=None, select_color=BLUE,
+         loop_func=select_loop):
+    """
+    Generic selection menu
+
+    TODO make more generic
+
+    TODO make selected separate from highlighted, allowing user to hover over
+    other elements and view descriptions for them and preserve their selection.
+
+    TODO use txt_to_img to create the img instead of duplicating
+    """
+    # Font
+    font = font or pygame.font.Font(None, 24)
+    # Create a blank surface to draw the menu on
+    menu_img = pygame.surface.Surface(xy)
+    # Create imgs for each option provided
+    option_keys = options.keys()
+    imgs = [font.render(x, False, text_color) for x in options]
+    # TODO Find the optimal location to start writing the menu
+    cursor_start = (10, 10)
+    img_positions = []  # Empty list to hold rects of the imgs
+    x, y = cursor_start
+    # Get img positions and blit options onto menu
+    for i in imgs:
+        select_box = Rect(x - 4 + top_left[0], y - 4 + top_left[1], 100, 20)
+        img_positions.append(select_box)
+        menu_img.blit(i, (x, y))
+        y += 20
+
+    selectable = Selectable(menu_img, img_positions, top_left, text_color,
+                            select_color)
+
+    res = select_loop(screen, selectable)
+    if res is None:
+        # If player hit escape, return None
+        return None
+    return option_keys[res]
 
 
 def render_text(screen, text_file):
@@ -93,40 +214,42 @@ def render_text(screen, text_file):
     with open(text_file, 'r') as input:
         for l in input.readlines():
             text.append(l)
-    image = text_to_img(screen, text)
-    navigable_loop(screen, image)
+    img = text_to_img(screen.get_width(), text)
+    navigable_loop(screen, img, start_pos=-1)
 
 
-def text_to_img(screen, lines):
-    """ Put lines on an image that would fit within the screen """
+def text_to_img(width, lines):
+    """ Put lines on an img that would fit within the screen """
     # Initialize the font
     text_font = pygame.font.Font(None, 18)
     # Calculate the number of characters that can be shown on one row
-    characters = (screen.get_width() - 10) / 7
+    characters = (width - 10) / 7
     text = ['']
     for l in lines:
         text += wrap(l, characters)
         # Add an extra space to clearly show a new line in the file
         text += ['']
 
-    # Create an image the size of the text
-    image = pygame.surface.Surface((screen.get_width(), len(text) * 15))
+    # Create an img the size of the text
+    img = pygame.surface.Surface((width, len(text) * 15))
 
-    # Write the text onto the image
+    # Write the text onto the img
     x, y = 0, 0
     for t in text:
-        image.blit(text_font.render(t, False, (255, 255, 255)), (x, y))
+        img.blit(text_font.render(t, False, (255, 255, 255)), (x, y))
         y += 15
 
-    return image
+    return img
 
 
-def navigable_loop(screen, image):
-    # Disply the image
-    x, y = 5, 5
-    bottom = image.get_height() - screen.get_height()
+def navigable_loop(screen, img, start_pos=0):
+    # Disply the img
+    bottom = - (img.get_height() - screen.get_height())
+    if start_pos == -1:
+        start_pos = bottom
+    x, y = 5, start_pos
     while 1:
-        screen.blit(image, (x, y))
+        screen.blit(img, (x, y))
         pygame.display.flip()
         event = pygame.event.wait()
         if event.type == pygame.KEYUP:
@@ -142,224 +265,6 @@ def navigable_loop(screen, image):
                     y = 0
             if event.key == 274:
                 y -= 30
-                if y <= - bottom:
+                if y <= bottom:
                     # If you're trying to scroll to low, reset to bottom
-                    y = - bottom
-
-
-class CharBox(object):
-    def __init__(self, state):
-        lambda x: create_tile(GREY, (390, 400))
-
-
-def mini_map(state):
-    # TODO
-    pass
-
-
-def char_hp(state):
-    """ Should show the HP for the currently selected character """
-    # TODO add graphical bar
-    total = state.player.max_hp
-    current = state.player.hp
-    image = state.font.render('HP: %s/%s' % (current, total), False,
-                              (255, 255, 255))
-    return image
-
-
-def char_xp(state):
-    """ Shows xp """
-    next_level = 'na'
-    current = state.player.xp
-    image = state.font.render('XP: %s/%s' % (current, next_level), False,
-                              (255, 255, 255))
-    return image
-
-
-def render_column(font, (x, y), rows, row_height=20):
-    img = pygame.Surface([x, y])
-    y = 0
-    for field in rows:
-        img.blit(font.render(field, False, (255, 255, 255)), (0, y))
-        y += row_height
-    return img
-
-
-def str_bonus(val, just=3):
-    """ Returns a justified stringed bonus. eg '3' returns ' +3' by default """
-    if val >= 0:
-        bonus = '+%s' % val
-    else:
-        bonus = str(val)
-    return bonus.rjust(just)
-
-
-def char_stats(state):
-    rows = []
-    for stat in 'str dex con int wis cha'.split():
-        tup = state.player.stats[stat]
-        val = tup[0]
-        bonus = str_bonus(tup[1], just=2)
-        rows.append('%s: [%s] (%s)' % (stat, str(val).rjust(2), bonus))
-    return render_column(state.font, (120, 120), rows)
-
-
-def char_defense(state):
-    p = state.player
-    rows = [
-        'AC:    %s' % p.ac,
-        'Touch: %s' % p.touch_ac,
-        'Flat:  %s' % p.flat_ac
-    ]
-    return render_column(state.font, (65, 300), rows)
-
-
-def char_offense(state):
-    # TODO fix negative number appearance
-    p = state.player
-    rows = [
-        'BAB:  %s' % p.bab,
-        'CMB:    %s' % p.cmb,
-        'CMD:    %s' % p.cmd
-    ]
-    return render_column(state.font, (65, 300), rows)
-
-
-def char_saves(state):
-    p = state.player
-    rows = [
-        'Ref:  %s' % str_bonus(p.ref),
-        'Fort: %s' % str_bonus(p.fort),
-        'Will: %s' % str_bonus(p.will)
-    ]
-    return render_column(state.font, (65, 300), rows)
-
-
-def char_misc(state):
-    p = state.player
-    rows = [
-        'Init: %s' % str_bonus(p.init),
-        'SR:     %s' % p.sr,
-        'DR:     %s' % p.dr
-    ]
-    return render_column(state.font, (65, 300), rows)
-
-
-def equipment(state):
-    """ List equipped items """
-    image = pygame.Surface([state.hud.element_width, 100])
-    weapon = state.player.equipment[state.player.equipped]
-    # TODO player armor
-    from .mechanics.armor import leather_armor
-    armor = leather_armor
-    equip_strs = [
-        'Weapon: %s' % weapon.name,
-        'Armor: %s' % armor.name or 'none',
-    ]
-    y = 0
-    for s in equip_strs:
-        image.blit(state.font.render(s, False, (255, 255, 255)), (0, y))
-        y += 12
-    return image
-
-    # new body equip setup
-    image = pygame.Surface([state.hud.element_width, 100])
-    equipped = state.player.equipped
-    equip_strs = [': '.join((k, v)) for k, v in equipped]
-    y = 0
-    for s in equip_strs:
-        image.blit(state.font.render(s, False, (255, 255, 255)), (0, y))
-        y += 12
-    return image
-
-
-class HUD(pygame.sprite.Sprite):
-    """
-    Ideals:
-        equipped weapons
-        map
-        tabbed interface containing inventory, spells, abilities, etc
-        actions
-
-
-    TODOs:
-        Spell resistance
-        speed
-        damage resistance
-        action status (used actions, move points, etc)
-        initiative (roll, bonus?)
-    """
-    def __init__(self, state, pos, x, y):
-        self._state = state
-        self.pos = pos
-        self.width = x
-        self.element_width = x - 6
-        self.height = y
-        self.image = create_tile(BLACK, [x, y])
-        self.rect = self.image.get_rect()
-        # TODO find a decent standard font
-        self.font = state.font
-
-        self.elements = [
-            (
-                lambda x:
-                self.font.render('%s the level %s %s %s' % (
-                                     x.player.name,
-                                     x.player.level,
-                                     x.player.race.name,
-                                     x.player.cclass.name
-                                 ), False, (255, 255, 255)),
-                (5, 5)
-            ),
-            (char_xp, (285, 5)),
-            (char_hp, (5, 32)),
-            (char_stats, (5, 60)),
-            (char_defense, (215, 60)),
-            (char_offense, (215, 120)),
-            (char_saves, (315, 60)),
-            (char_misc, (315, 120)),
-            (equipment, (5, 200)),
-            # TODO finish mini map
-            # (mini_map, (5, 300)),
-            (lambda x: create_tile(GREY, (389, 389)), (5, 500)),
-        ]
-
-    def update(self):
-        self.image = create_tile(BLACK, [self.width, self.height])
-        for e in self.elements:
-            img = e[0](self._state)
-            self.image.blit(img, e[1])
-
-
-class StatusBox(pygame.sprite.Sprite):
-    # TODO on click, run navigable_loop on statusbox image starting at bottom
-    # TODO scroll as output is displayed
-    def __init__(self, pos, x, y):
-        self.pos = pos
-        self.width = x
-        self.height = y
-        self.image = create_tile(BLACK, [x, y])
-        self.rect = self.image.get_rect()
-        self.font = pygame.font.Font(None, 12)
-
-        self.cursor = (5, 5)
-
-    def update(self):
-        pass
-
-    def _print(self, s):
-        tmp = pygame.display.get_surface()
-        x, y = self.cursor
-
-        for l in s:
-            render = self.font.render(l, False, (255, 255, 255))
-            tmp.blit(render, (x, y))
-            self.image.blit(render, (x, y))
-            x += 10
-
-            if (x > self.image.get_width()-5):
-                x = self.rect.left+5
-                y += 10
-        x = 5
-        y += 10  # CR
-        self.cursor = (x, y)
+                    y = bottom

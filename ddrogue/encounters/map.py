@@ -2,13 +2,7 @@ import numpy
 import pygame
 from pygame.transform import scale
 
-
-BLACK = 0, 0, 0
-WHITE = 255, 255, 255
-GREY = 200, 200, 200
-YELLOW = 255, 255, 0
-RED = 255, 0, 0
-BLUE = 0, 0, 255
+from ..colors import BLACK, WHITE, GREY
 
 BLANK_MAP = [[0 for i in range(12)] for i in range(12)]
 
@@ -59,8 +53,9 @@ class EncounterMap:
     can be blitted onto the map as one object, as opposed to creating the map
     from all the tiles each turn.
     """
-    def __init__(self, floorplan, tile_size=32):
+    def __init__(self, objects, floorplan, tile_size=32):
         # Set up units, assumes rectangular matrix
+        self.pos = (0, 0)
         self.unit = tile_size
         self.pixel_width = len(floorplan[0]) * self.unit
         self.pixel_height = len(floorplan) * self.unit
@@ -76,12 +71,15 @@ class EncounterMap:
         self.wall_tile = self.create_tile(color=self.wall_color)
         self.wall_character = 1
 
-        # Create the image
+        # Create the img
         self.walls = self.list_walls()
-        self.image = self.assemble_map_image()
-        self.rect = self.image.get_rect()
+        self.bg_img = self.assemble_map_img()
+        self.rect = self.bg_img.get_rect()
 
-    def assemble_map_image(self):
+        self.objects = objects
+        self.update()
+
+    def assemble_map_img(self):
         """
         Requires self to have the following properties:
             self.floor          Containing the floorplan matrix
@@ -126,14 +124,18 @@ class EncounterMap:
     def grid_pos(self, pos):
         """ Takes pixel coordinates and returns grid coordinates """
         # print('pixel position', pos)
-        # print('returned position', [((p / self.unit) + 0 if p % self.unit else
-        #                            1) for p in pos])
+        # print('returned position', [(
+        #                              (p / self.unit) +
+        #                              (0 if p % self.unit else 1)
+        #                              for p in pos
+        #                            ])
         return [p / self.unit for p in pos]
 
     def pixel_pos(self, grid):
         """ Takes grid coordinates and returns pixel coordinates """
         # print('grid position', grid)
-        # print('returned position', (grid[0] * self.unit, grid[1] * self.unit))
+        # print('returned position', (grid[0] * self.unit, grid[1] *
+        # self.unit))
         return (grid[0] * self.unit, grid[1] * self.unit)
 
     def draw_grid(self, grid, color):
@@ -174,9 +176,17 @@ class EncounterMap:
         if not xy:
             xy = (self.unit, self.unit)
         if img:
-            # If an image for the tile, shrink it to the size of a tile
+            # If an img for the tile, shrink it to the size of a tile
             return scale(img, xy)
-        new_image = pygame.Surface(xy)
-        new_image.fill(edge_color)
-        new_image.fill(color, rect=[1, 1, xy[0] - 2, xy[1] - 2])
-        return new_image
+        new_img = pygame.Surface(xy)
+        new_img.fill(edge_color)
+        new_img.fill(color, rect=[1, 1, xy[0] - 2, xy[1] - 2])
+        return new_img
+
+    def event_handler(self, event):
+        print('map event', event)
+
+    def update(self):
+        self.img = self.bg_img.copy()
+        for obj in self.objects:
+            self.img.blit(obj.img, self.pixel_pos(obj.pos))

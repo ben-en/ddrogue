@@ -1,46 +1,12 @@
 from collections import OrderedDict
 
+import pygame
 from pygame.sprite import Sprite
 
-from .event_management import player_turn
-from .mechanics.dice import roll, die_to_val
-from .mechanics.stats import Stat, StatBlock, stat_bonus
-from .mechanics.skills import SKILL_LIST
-
-
-PLAYER_COLOR = 255, 255, 100
-
-
-# active features should probably activate using similar mechanisms to casting
-# a spell.
-# passive features should apply at object creation, directly to the cha4acter
-# object. perhaps  haracters should maintain a list of effects that affect them
-# each phase or turn
-blank_char_info = {
-    'image': create_tile(BLUE, (16, 16)),
-    'race': Human,
-    'char_levels': ((Fighter, 5), (Wizard, 5)),
-    'abilities': (roll('3d6') for x in range(6)),
-    'skill_ranks': {'skill': 0 for skill in SKILL_LIST},
-    'features': {
-            # All the abilities that would be gained from the class, processed
-            'active': [],
-            'passive': [],
-            'spells': [],
-            'spd': [],
-            'feats_known': [],
-        },
-    'name': 'foo',
-    'description': None,
-    'gold': 0,
-    'equipment': race_weapons,
-    'equipped': {
-        'hand': 0
-    },
-    'xp': 0,
-    'hp': 29
-}
-
+from .events import player_turn
+from ..mechanics.dice import die_to_val
+from ..mechanics.stats import Stat, StatBlock, stat_bonus
+from ..mechanics.skills import SKILL_LIST
 
 
 # The charaxter class will be a wrapper around the data that makes up the core
@@ -59,11 +25,12 @@ class Character(Sprite):
     """
     def __init__(
         self,
-        image,
+        img,
         race,
         char_levels,
-        abilities=(roll('3d6') for x in range(6)),
-        skill_ranks={'skill': 0 for skill in SKILL_LIST},
+        abilities,
+        skill_ranks,
+        equipment,
         features={
             'active': [],
             'passive': [],
@@ -72,30 +39,25 @@ class Character(Sprite):
             'feats_known': [],
         },
         name='foo',
-        description=None,
-        gold=None,
-        equipment=None,
+        description='',
+        gold=0,
         equipped=None,
     ):
         """ Creates a character object """
-        # Image related
+        # img related
         Sprite.__init__(self)
         self.groups = []
-        self.image = image
-        self.rect = self.image.get_rect()
+        self.img = img
+        self.rect = self.img.get_rect()
 
         self.race = race
-        self.cclass = cclass
+        self.clevel = char_levels
         self.speed = race.speed
 
-        self.desc = (
-            (description or 'missing unique description') + '\n\n\n' +
-            cclass.desc + '\n\n\n' + race.desc
-        )
-        self.name = name
+        self.desc = (description or 'missing unique description')
+        self.name = name or 'No Name'
 
-        self.gold = gold or roll(cclass.gold) * 10
-        self.equipment = equipment or cclass.equipment + race.natural_weapons
+        self.equipment = equipment
         self.equipped = equipped or self.equipment.index(
             sorted(self.equipment, key=lambda x: die_to_val(x.dmg))[0]
         )
@@ -126,7 +88,7 @@ class Character(Sprite):
         self.xp = 0
         self._rolled_hd = 0
         self.hp = self.max_hp
-        self.bab = self.cclass.bab[self.level]
+        self.bab = self.clevel[0][0].bab[self.clevel[0][1]]
 
     @property
     def ac(self):
@@ -180,7 +142,7 @@ class Character(Sprite):
             ))
         return skills
 
-    def act(self, state):
+    def act(self):
         # TODO void any kepresses while rendering
-        state = player_turn(state)
-        return state
+        player_turn(self)
+        pygame.event.clear()

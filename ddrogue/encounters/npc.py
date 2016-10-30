@@ -1,31 +1,28 @@
-from pygame.sprite import Sprite, Group
+from pygame.sprite import Sprite
 
-from .event_management import move_to
-from .mechanics.dice import roll
-from .mechanics.stats import Stat, StatBlock
-from .mechanics.sizes import small
-from .mechanics.weapons import sml_unarmed
-
-
-BLACK = 0, 0, 0
-BLUE = 0, 255, 0
-
-WIDTH = HEIGHT = 32  # TODO only define this once
+from ..mechanics.dice import roll
+from ..mechanics.stats import Stat, StatBlock
+from ..mechanics.sizes import small
+from ..mechanics.weapons import sml_unarmed
 
 
 class Goblin(Sprite):
-    def __init__(self, image):
+    def __init__(self, img):
         Sprite.__init__(self)
-        self.image = image
-        self.rect = image.get_rect()
+        self.name = 'Goblin'
+        self.img = img
+        self.rect = img.get_rect()
         self.stats = self.init_stats()
         self.hp = roll('1d4') + self.stats.con.bonus
         self.ac = 10 + self.stats.dex.bonus
         self.bab = 1
+        self.init = 1
         self.size = small
+        self.speed = 4
         self.weapons = [sml_unarmed]
         self.equipped = 0
         # TODO add armor and size values
+        self.ai = 1
 
     def init_stats(self):
         stats = StatBlock(
@@ -38,9 +35,6 @@ class Goblin(Sprite):
         )
         return stats
 
-    def act(self, state):
-        move_to(state, self, state.player.pos, steps=2)
-
-
-class MonsterGroup(Group):
-    pass
+    def act(self):
+        print('Goblin\'s turn')
+        print('Goblin can\'t do anything')
