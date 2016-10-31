@@ -1,8 +1,39 @@
 import pygame
+from pygame.rect import Rect
 
-from ..colors import BLACK, GREY, WHITE
-
+from ..colors import BLACK, GREY, WHITE, LIGHT_BLUE, RED_T, DARK_GREY, RED
 from ..ui import create_tile, navigable_loop, text_to_img, str_bonus
+
+
+def attack_ui(state, steps):
+    state._print('attack ui starting')
+    move_ui(state, state.char, steps, end_pos_func=state.map.enemy_adjacent,
+            COLOR=RED_T)
+
+
+def move_ui(state, target, steps, end_pos_func=None, COLOR=LIGHT_BLUE):
+    state._print('move ui starting')
+    state._print('build list of positions')
+    x, y = target.pos
+    speed = int(target.speed)
+    pos_list = [(x + i - speed/2, y + i - speed/2) for i in range(speed)]
+    state._print('draw base frame')
+    state.draw()
+    state._print('draw new image onto the screen')
+    for p in pos_list:
+        print(p, state.map.unit_t)
+        r = Rect(p, state.map.unit_t)
+        print(r)
+        if end_pos_func:
+            if end_pos_func(p):
+                pygame.draw.rect(state.screen, COLOR, r, 1)
+        else:
+            pygame.draw.rect(state.screen, COLOR, r, 1)
+    pygame.display.flip()
+    while 1:
+        event = pygame.event.wait()
+        if event.type == pygame.KEYUP:
+            break
 
 
 def mini_map(state):
@@ -15,7 +46,7 @@ def char_hp(player, font):
     # TODO add graphical bar
     total = player.max_hp
     current = player.hp
-    img = font.render('HP: %s/%s' % (current, total), False, (255, 255, 255))
+    img = font.render('HP: %s/%s' % (current, total), False, WHITE)
     return img
 
 
@@ -24,7 +55,7 @@ def char_xp(player, font):
     next_level = 'na'
     current = player.xp
     img = font.render('XP: %s/%s' % (current, next_level), False,
-                      (255, 255, 255))
+                      WHITE)
     return img
 
 
@@ -32,7 +63,7 @@ def render_column(font, (x, y), rows, row_height=20):
     img = pygame.Surface([x, y])
     y = 0
     for field in rows:
-        img.blit(font.render(field, False, (255, 255, 255)), (0, y))
+        img.blit(font.render(field, False, WHITE), (0, y))
         y += row_height
     return img
 
@@ -88,6 +119,12 @@ def char_misc(player, font):
     return render_column(font, (65, 300), rows)
 
 
+def char_abilities(player, font):
+    p = player
+    rows = [a.__name__ for a in p.features['active']]
+    return render_column(font, (100, 300), rows)
+
+
 def equipment(player, font):
     """ List equipped items """
     # new body equip setup
@@ -101,8 +138,15 @@ def equipment(player, font):
         equip_strs.append(': '.join([slot, player.equipment[index].s]))
     y = 0
     for s in equip_strs:
-        img.blit(font.render(s, False, (255, 255, 255)), (0, y))
+        img.blit(font.render(s, False, WHITE), (0, y))
         y += 12
+    return img
+
+
+def end_turn(_, font):
+    img = pygame.Surface((400, 40))
+    img.fill(DARK_GREY)
+    img.blit(font.render('End Player Turn', False, RED), (100, 10))
     return img
 
 
@@ -124,7 +168,7 @@ class HUD(pygame.sprite.Sprite):
     """
     def __init__(self, players, font, pos, x, y):
         self.players = players
-        self.selected = 0
+        self.selected_player = 0
         self.pos = pos
         self.width = x
         self.element_width = x - 6
@@ -145,7 +189,7 @@ class HUD(pygame.sprite.Sprite):
                                      sum([l for c, l in player.clevel]),
                                      player.race.s,
                                      '/'.join([c.s for c, l in player.clevel])
-                                 ), False, (255, 255, 255)),
+                                 ), False, WHITE),
                 (5, 40)
             ),
             (char_xp, (285, 40)),
@@ -155,10 +199,12 @@ class HUD(pygame.sprite.Sprite):
             (char_offense, (215, 150)),
             (char_saves, (315, 90)),
             (char_misc, (315, 150)),
-            (equipment, (5, 230)),
+            (char_abilities, (5, 230)),
+            (equipment, (5, 530)),
             # TODO finish mini map
             # (mini_map, (5, 300)),
-            (lambda x, y: create_tile(GREY, (389, 389)), (5, 500)),
+            # (lambda x, y: create_tile(GREY, (389, 389)), (5, 500)),
+            (end_turn, (0, self.height - 40)),
         ]
         self.update()
 
@@ -167,14 +213,39 @@ class HUD(pygame.sprite.Sprite):
         x, y = 5, 5
         for icon in self.header:
             self.img.blit(icon, (x, y))
+            if self.header.index(icon) == self.selected_player + 1:
+                pygame.draw.rect(
+                    self.img,
+                    WHITE,
+                    pygame.rect.Rect((x, y), icon.get_size()),
+                    5
+                )
             x += icon.get_width() + 5
         for e in self.elements:
-            img = e[0](self.players[self.selected], self.font)
+            img = e[0](self.players[self.selected_player], self.font)
             self.img.blit(img, e[1])
 
     def event_handler(self, event):
         if event.type == pygame.MOUSEBUTTONUP:
-            print('clicked on the hud', event.pos)
+            return
+        elif event.type == pygame.KEYUP:
+            if event.key == 275:
+                self.adjust_selected_player(1)
+            if event.key == 276:
+                self.adjust_selected_player(-1)
+            self.update()
+            return
+        return event
+
+    def adjust_selected_player(self, val):
+        self.selected_player += val
+        # TODO find method that only steps in the list and
+        # automatically resets if out of range
+        if self.selected_player < 0:
+            self.selected_player = len(self.players) - 1
+        elif self.selected_player == len(self.players):
+            self.selected_player = 0
+        self.update()
 
 
 class StatusBox(pygame.sprite.Sprite):
@@ -183,45 +254,59 @@ class StatusBox(pygame.sprite.Sprite):
     def __init__(self, screen, font, pos, x, y):
         self.screen = screen
         self.pos = pos
-        self.width = x
-        self.height = y
-        self.img = create_tile(BLACK, [x, y])
+        self.size = self.width, self.height = x, y
+        self.img = pygame.Surface(self.size)
         self.rect = self.img.get_rect()
         self.font = font
         self.lines = []
 
-        self.cursor = (5, 5)
-
     def update(self):
-        pass
+        pygame.draw.rect(self.img, GREY,
+                         pygame.rect.Rect((0, 0), (self.width + 20,
+                                                   self.height + 20)), 1)
+
+    def cr(self, y, incr=20):
+        y += incr
+        self.img.scroll(0, -incr)
+        return 5, y
 
     def _print(self, s):
+        """ write given string to output box """
+        # Put the text into the list of lines for fullscreen status
         self.lines.append(s)
-        tmp = pygame.display.get_surface()
-        x, y = self.cursor
+        tmp = pygame.Surface(self.size)
+        x = 5
+        y = 0
 
+        # Print each character
         for l in s:
-            render = self.font.render(l, False, (255, 255, 255))
+            if l == '\n':
+                x, y = self.cr(y)
+                self.img.blit(tmp, (1, self.height - 20))
+                continue
+            # Render the character
+            render = self.font.render(l, False, WHITE)
+            # Blit the character on the temporary surface
             tmp.blit(render, (x, y))
-            self.img.blit(render, (x, y))
+            # Adjust the cursor to the right
             x += 10
 
+            # If the cursor is 5px to the edge of the surface, carriage return
             if (x > self.width - 5):
-                x = self.rect.left+5
-                if (y > self.height - 5):
-                    self.img.scroll(0, 10)
-                    y -= 10
-                else:
-                    y += 10
-        x = 5
-        y += 10  # CR
-        self.cursor = (x, y)
+                x, y = self.cr(y)
+                self.img.blit(tmp, (1, self.height - 20))
+
+        x, y = self.cr(y)
+        self.img.blit(tmp, (0, self.height - 20))
+        self.update()
+        # After writing text, carriage return.
+        # Set cursor property
 
     def event_handler(self, event):
         if event.type == pygame.MOUSEBUTTONUP:
             self.fullscreen()
         elif event.type == pygame.KEYUP:
-            if event.key == 32:  # TODO space
+            if event.key in [ord(c) for c in '\n ']:
                 self.fullscreen()
 
     def fullscreen(self):

@@ -3,7 +3,7 @@ import os
 import shelve
 import re
 
-from .encounters.main import encounter_loop, init_encounter
+from .encounters.main import encounter_loop
 from .ui import render_text, menu
 
 # TODO relative file paths
@@ -74,8 +74,7 @@ def debug(screen):
 
 def new_game(screen):
     """ Create a state object and start a game loop with it """
-    screen, floor_plan, keymap_file, players, npcs = init_encounter()
-    encounter_loop(screen, floor_plan, keymap_file, players, npcs)
+    encounter_loop()
 
 
 def main_menu(screen):
@@ -88,5 +87,4 @@ def main_menu(screen):
     options["Legal"] = legal
     options["Exit"] = quit
     func = options[menu(screen, options)]
-    print('func is', func.__name__)
     func(screen)

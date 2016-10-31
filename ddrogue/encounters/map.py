@@ -44,9 +44,6 @@ def create_map_matrix():
     return MAP
 
 
-# TODO make map completely grid based, shouldn't be dealing with pixels when
-# putting things onto the map.
-# see game.py l83
 class EncounterMap:
     """
     This class takes a floor plan and creates a completed map Image object that
@@ -57,6 +54,7 @@ class EncounterMap:
         # Set up units, assumes rectangular matrix
         self.pos = (0, 0)
         self.unit = tile_size
+        self.unit_t = (tile_size, tile_size)
         self.pixel_width = len(floorplan[0]) * self.unit
         self.pixel_height = len(floorplan) * self.unit
         self.pixel_size = [self.pixel_width, self.pixel_height]
@@ -185,8 +183,21 @@ class EncounterMap:
 
     def event_handler(self, event):
         print('map event', event)
+        return event
 
     def update(self):
         self.img = self.bg_img.copy()
         for obj in self.objects:
             self.img.blit(obj.img, self.pixel_pos(obj.pos))
+
+    def enemy_adjacent(self, grid_pos):
+        """
+        return true only if given position is adjacent to an enemy or object
+        """
+        for enemy_position in [e.pos for e in self.npcs if e.enemy]:
+            if (grid_pos[0] >= enemy_position[0] + 1) or \
+               (grid_pos[0] <= enemy_position[0] - 1):
+                if (grid_pos[1] >= enemy_position[1] + 1) or \
+                   (grid_pos[1] <= enemy_position[1] - 1):
+                    return True
+        return False

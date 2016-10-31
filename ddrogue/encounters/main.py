@@ -1,9 +1,9 @@
 import re
 
-import pygame
-
 from ..colors import GREEN, YELLOW, RED, BLUE
-from .events import EncounterState, set_events
+from .combat import (withdraw, total_defense, five_foot_step, run, charge,
+                     move)
+from .events import EncounterState
 from .map import EncounterMap, create_map_matrix
 from ..mechanics.classes import Fighter, Wizard
 from ..mechanics.dice import roll
@@ -12,7 +12,6 @@ from ..mechanics.races import Human
 from ..mechanics.weapons import Equipment
 from .npc import Goblin
 from .player import Character
-from .ui import StatusBox, HUD
 
 
 # TODO relative file paths
@@ -31,29 +30,14 @@ ACTIONS = {}
 SAVE_DIR = './saves'
 
 
-def encounter_loop(screen, floor_plan, keymap_path, players, npcs=[]):
-    set_events()
-    s_width, s_height = screen.get_size()
-    characters = npcs[:] + players[:]
-    characters.sort(key=lambda x: roll('1d20+%s' % x.init))
-    font = pygame.font.SysFont(FONT_NAME, FONT_SIZE)
-
-    m = EncounterMap(characters, floor_plan)
-    hud = HUD(players, font, (s_width - UI_SIZE, 0), UI_SIZE, s_height)
-    output = StatusBox(
-        screen,
-        font,
-        (0, s_height - UI_SIZE / 2),
-        s_width - UI_SIZE,
-        UI_SIZE / 2
-    )
-    state = EncounterState(players, npcs, m, output, hud, keymap_path)
+def encounter_loop():
+    players, npcs, floor_plan, keymap_path = init_encounter()
+    state = EncounterState(players, npcs, floor_plan, keymap_path)
     while not state.quit:
         state.next_turn()
 
 
 def init_encounter():
-    screen = pygame.display.get_surface()
     m = EncounterMap([], create_map_matrix())
     goblin_img = m.create_tile(color=GREEN)
     goblin = Goblin(goblin_img)
@@ -66,7 +50,7 @@ def init_encounter():
         Human.natural_weapons,
         name='Player A',
         features={
-            'active': [],
+            'active': [move, withdraw, total_defense, five_foot_step, run, charge],
             'passive': [],
             'spells': [],
             'spd': [],
@@ -84,7 +68,7 @@ def init_encounter():
         Human.natural_weapons,
         name='Player B',
         features={
-            'active': [],
+            'active': [move, withdraw, total_defense, five_foot_step, run, charge],
             'passive': [],
             'spells': [],
             'spd': [],
@@ -102,7 +86,7 @@ def init_encounter():
         Human.natural_weapons,
         name='Player C',
         features={
-            'active': [],
+            'active': [move, withdraw, total_defense, five_foot_step, run, charge],
             'passive': [],
             'spells': [],
             'spd': [],
@@ -116,4 +100,4 @@ def init_encounter():
     playerc.pos = [9, 1]
     players = [playera, playerb, playerc]
     goblin.pos = [1, 1]
-    return screen, create_map_matrix(), KEYMAP_FILE, players, [goblin]
+    return players, [goblin], create_map_matrix(), KEYMAP_FILE

@@ -37,6 +37,7 @@ class Character(Sprite):
             'spells': [],
             'spd': [],
             'feats_known': [],
+            'levelup': [],
         },
         name='foo',
         description='',
@@ -65,6 +66,7 @@ class Character(Sprite):
         self.stats = StatBlock([Stat(i, stat_bonus(i)) for i in abilities])
         self.skill_ranks = skill_ranks
         self.features = features
+        self.effects = []
 
         self._fort_mods = [0]
         self._ref_mods = [0]

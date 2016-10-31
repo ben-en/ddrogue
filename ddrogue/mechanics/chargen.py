@@ -125,7 +125,7 @@ class AttributeRoller(object):
         self.img = pygame.surface.Surface(self.xy)
         x, y = 10, 10
         for t in rows:
-            self.img.blit(self.font.render(t, False, (255, 255, 255)), (x, y))
+            self.img.blit(self.font.render(t, False, WHITE), (x, y))
             y += 15
 
     def event_handler(self, event):

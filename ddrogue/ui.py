@@ -59,7 +59,6 @@ def multi_panel_ui(screen, panels):
     main game screen.
 
     """
-    # TODO this is more complicated, should be Rect(pos, img.xy)
     panel_areas = [Rect(p.pos, p.img.get_size()) for p in panels]
     area = 0
     # Enter main loop
@@ -236,7 +235,7 @@ def text_to_img(width, lines):
     # Write the text onto the img
     x, y = 0, 0
     for t in text:
-        img.blit(text_font.render(t, False, (255, 255, 255)), (x, y))
+        img.blit(text_font.render(t, False, WHITE), (x, y))
         y += 15
 
     return img
@@ -268,3 +267,4 @@ def navigable_loop(screen, img, start_pos=0):
                 if y <= bottom:
                     # If you're trying to scroll to low, reset to bottom
                     y = bottom
+            # TODO page up/down

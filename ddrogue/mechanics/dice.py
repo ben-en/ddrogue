@@ -27,7 +27,7 @@ def roll(notation, split_results=False):
 
     if split_results:
         return roll
-    return sum(roll)  # TODO sum
+    return sum(roll)
 
 
 def perform_action(bonus, difficulty):

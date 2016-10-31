@@ -1,4 +1,3 @@
-from collections import OrderedDict
 import json
 import shelve
 from time import sleep
@@ -6,11 +5,14 @@ import re
 import random
 
 import pygame
-from pygame.rect import Rect
 
-from ..colors import BLACK
+from ..colors import BLACK, LIGHT_BLUE
 from ..pathfinding import astar
 from ..ui import menu
+from ..mechanics.dice import roll
+from .combat import move
+from .map import EncounterMap
+from .ui import StatusBox, HUD
 
 
 FONT_NAME = 'ubuntumono'
@@ -41,15 +43,28 @@ def action(func):
 
 
 @action
-def quit(state, event):
+def quit(state, _):
     """ Tell the state to exit after user dialog """
     save_game(state)
-    # TODO user dialog
-    options = OrderedDict()
-    options['Yes'] = lambda x: True
-    options['No'] = lambda x: False
-    if menu(pygame.display.get_surface(), options):
-        return 'quit'
+    state._print('Would you like to quit? (Y/n)')
+    sleep(0.1)
+    while 1:
+        state.draw()
+        pygame.event.clear()
+        event = pygame.event.wait()
+        if event.type == pygame.KEYUP:
+            if not hasattr(event, 'key'):
+                continue
+            if event.key == ord('y'):
+                if event.mod == 1:
+                    return 'quit'
+                else:
+                    state._print("shift and y, to mimize accidents")
+                    continue
+            if event.key == ord('n'):
+                return
+            else:
+                state._print("'n' or 'Y' only")
 
 
 @action
@@ -160,14 +175,13 @@ def process_key_press(state, event):
 
 
 def process_click(state, event):
-    move_to(state, state.char, state.map.grid_pos(event.pos))
-    return 'done'
+    move(state)
 
 
 EVENT_MAP = {
     pygame.QUIT: quit,
-    pygame.KEYDOWN: process_key_press,
-    pygame.KEYUP: lambda x, y: None,
+    pygame.KEYUP: process_key_press,
+    pygame.KEYDOWN: lambda x, y: None,
     pygame.MOUSEBUTTONUP: process_click,
 }
 
@@ -206,32 +220,38 @@ def load_keymap(file_path):
 # TODO: State should duplicate itself and store its history somewhere whenever
 # something changes, without events having to do something themselves.
 class EncounterState:
-    def __init__(self, players, npcs, m, output, hud, keymap_file):
+    def __init__(self, players, npcs, floor_plan, keymap_file):
         """
         Keeps track of turns and object state in an encounter
         """
-        # TODO font should be global
-        self.font = pygame.font.SysFont(FONT_NAME, FONT_SIZE)
-        # screen might do well as a global too
-        self.screen = pygame.display.get_surface()
-
-        self.output = output
-        # Assign _print method to self for easy access
-        self._print = self.output._print
-        self.hud = hud
-        self.map = m
-        self.ui = [self.output, self.hud, self.map]
-        self.keymap = load_keymap(keymap_file)
-        self.panel_areas = [Rect(e.pos, e.img.get_size()) for e in self.ui]
-        self.selected_element = 0
-
+        # Characters
         self.players = players
         self.npcs = npcs
         self.actors = players + npcs
+        # Initiative order
+        self.actors.sort(key=lambda x: roll('1d20+%s' % x.init))
         self.active_player = 0
         self.turn = 0
-
+        # When true, exit the game
         self.quit = 0
+        # UI
+        self.font = pygame.font.SysFont(FONT_NAME, FONT_SIZE)
+        self.screen = pygame.display.get_surface()
+        set_events()
+        s_width, s_height = self.screen.get_size()
+        self.map = EncounterMap(self.actors, floor_plan)
+        self.hud = HUD(self.players, self.font, (s_width - UI_SIZE, 0),
+                       UI_SIZE, s_height)
+        self.output = StatusBox(self.screen, self.font,
+                                (0, s_height - UI_SIZE / 2), s_width - UI_SIZE,
+                                UI_SIZE / 2)
+        # Assign _print method to self for easy access
+        self._print = self.output._print
+        self.ui = [self.map, self.output, self.hud]
+        self.keymap = load_keymap(keymap_file)
+        self.panel_areas = [pygame.rect.Rect(e.pos, e.img.get_size()) for e in
+                            self.ui]
+        self.selected_element = 0
 
     @property
     def char(self):
@@ -242,8 +262,12 @@ class EncounterState:
         # Draw the panels on the screen
         for e in self.ui:
             e.update()
-            self._print(str(e.__class__) + str(e.pos))
             self.screen.blit(e.img, e.pos)
+        selected_element = self.ui[self.selected_element]
+        pygame.draw.rect(
+            self.screen, LIGHT_BLUE,
+            (selected_element.pos, selected_element.img.get_size()), 1
+        )
         pygame.display.flip()
 
     def interact_until_action(self):
@@ -258,10 +282,13 @@ class EncounterState:
             event = pygame.event.wait()
             if event.type == pygame.KEYUP:
                 print('keycode: ', event.key)
-                print('key: ', chr(event.key))
+                try:
+                    print('key: ', chr(event.key))
+                except ValueError:
+                    print('non-alphanumeric key')
                 if event.key == 27:  # esc
                     # break out returning a quit event
-                    break
+                    return event
                 elif event.key == ord('\t'):
                     # If tab, switch to the next ui element
                     self.selected_element += 1
@@ -271,27 +298,41 @@ class EncounterState:
                         self.selected_element = len(self.ui) - 1
                     continue
             elif event.type == pygame.QUIT:
-                break
+                return 'quit'
             elif event.type in [pygame.MOUSEMOTION, pygame.MOUSEBUTTONUP]:
                 for index in range(len(self.panel_areas)):
                     if self.panel_areas[index].collidepoint(event.pos):
-                        area = index
+                        self.selected_element = index
                         self.ui[index].event_handler(event)
                         continue
-            self.ui[area].event_handler(event)
+            # Run the event handler on the event, if the event is returned by
+            # the handler it is returned as the final event
+            element = self.ui[self.selected_element]
+            returned_event = element.event_handler(event)
+            if returned_event:
+                break
         return event
 
     def next_turn(self):
         self._print('%s\'s turn' % self.char.name)
+        if len(self.char.effects):
+            for e in self.char.effects.pop[0]:
+                e(self)
         if hasattr(self.char, 'ai'):
             ai_turn(self)
         else:
+            # [0] is whether a 5ft step is available (any move action negates)
+            # [1] is whether a move action is available
+            # [2] is whether a standard action is available
+            # a move action plus a standard action equals a full round action,
+            # and as they're typically stationary you still get a free 5ft step
+            # [3] is whether a swift action is available
+            self.actions = [1, 1, 1, 1]
             while 1:
                 self.hud.selected = self.hud.players.index(self.char)
                 self._print('player loop start')
                 event = self.interact_until_action()
                 res = player_turn(self, event)
-                self._print(res)
                 if res == 'quit':
                     self.quit = True
                     break

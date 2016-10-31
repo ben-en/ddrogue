@@ -1,19 +1,9 @@
+Note: totally  non-functional
+
+
 This is a simple game made with pygame. Hopefully, it may one day implment a
 d20-like system. The title is short for "double dungeons rogue" because i
 wanted a quick name. Improvements are welcome.
-
-So far:
-    Menu                            [x]
-    Movement                        [\]
-    Information display             [\]
-    Combat                          [\]
-    Feats                           [\]
-    Spells                          [ ]
-    Skills                          [\]
-    Classes                         [\]
-    Enemies                         [\]
-    Map creation                    [ ]
-    Items                           [ ]
 
 guide: 
     \: partially done
@@ -26,6 +16,7 @@ Controls:
     \/, k: move down
     ->, l: move right
     ESC: quit
+    Tab: switch focused UI element
     click to move to that location
 
 
@@ -35,17 +26,6 @@ immediate list:
     functionality from standard character actions (move, bull rush, disarm)
     rudimentary ai that will move and attack the closest/weakest character
 
-
-First that probably needs to be done is the character objects. They need to be
-created properly the first time to implement all the features necessary to a
-classic DnD adventure. Specifically, multiple classes, efficient temporary and
-permanent effects on things like attributes which affect a wide range of
-character features from skills to spells per day.
-
-An object containing the state of the encounter will be necessary, though not 
-in the way it was currently implmented. The state will need to have things like
-initiative order, all the objects in the map, time based area effects, and so
-on. 
 
 Next on the list is flush out the UI for the encounter scenes. A basic UI has
 been implemented containing an event log, a map, and a heads up display

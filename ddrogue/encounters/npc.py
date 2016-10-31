@@ -23,6 +23,7 @@ class Goblin(Sprite):
         self.equipped = 0
         # TODO add armor and size values
         self.ai = 1
+        self.effects = []
 
     def init_stats(self):
         stats = StatBlock(
