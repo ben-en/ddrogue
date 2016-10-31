@@ -206,7 +206,11 @@ class HUD(pygame.sprite.Sprite):
             # (lambda x, y: create_tile(GREY, (389, 389)), (5, 500)),
             (end_turn, (0, self.height - 40)),
         ]
+        self.selected_element = -1
         self.update()
+        self.element_areas = [
+            Rect(p, e.get_size()) for e, p in self.compiled
+        ]
 
     def update(self):
         self.img = create_tile(BLACK, [self.width, self.height])
@@ -221,12 +225,25 @@ class HUD(pygame.sprite.Sprite):
                     5
                 )
             x += icon.get_width() + 5
-        for e in self.elements:
-            img = e[0](self.players[self.selected_player], self.font)
-            self.img.blit(img, e[1])
+        self.compiled = []
+        for e, pos in self.elements:
+            img = e(self.players[self.selected_player], self.font)
+            self.img.blit(img, pos)
+            self.compiled.append((img, pos))
+        if self.selected_element >= 0:
+            pygame.draw.rect(
+                self.img, WHITE, self.element_areas[self.selected_element], 5
+            )
 
     def event_handler(self, event):
         if event.type == pygame.MOUSEBUTTONUP:
+            for index in range(len(self.elements)):
+                if self.element_areas[index].collidepoint(event.pos):
+                    self.selected_element = index
+                    func = self.element_functions.get(index, None)
+                    if func:
+                        func(event)
+                    continue
             return
         elif event.type == pygame.KEYUP:
             if event.key == 275:
@@ -249,8 +266,6 @@ class HUD(pygame.sprite.Sprite):
 
 
 class StatusBox(pygame.sprite.Sprite):
-    # TODO on click, run navigable_loop on statusbox img starting at bottom
-    # TODO scroll as output is displayed
     def __init__(self, screen, font, pos, x, y):
         self.screen = screen
         self.pos = pos

@@ -182,7 +182,12 @@ def menu(screen, options, xy=(1000, 1000), top_left=(0, 0), text_color=WHITE,
     # Create a blank surface to draw the menu on
     menu_img = pygame.surface.Surface(xy)
     # Create imgs for each option provided
-    option_keys = options.keys()
+    print(options)
+    if hasattr(options, 'keys'):
+        print('hasattr')
+        option_keys = options.keys()
+    else:
+        option_keys = options
     imgs = [font.render(x, False, text_color) for x in options]
     # TODO Find the optimal location to start writing the menu
     cursor_start = (10, 10)
@@ -252,8 +257,7 @@ def navigable_loop(screen, img, start_pos=0):
         pygame.display.flip()
         event = pygame.event.wait()
         if event.type == pygame.KEYUP:
-            # Esc key or ??
-            # TODO figure out keycode 13
+            # Esc key or enter
             if event.key in [27, 13]:
                 break
             # Arrow keys
@@ -267,4 +271,19 @@ def navigable_loop(screen, img, start_pos=0):
                 if y <= bottom:
                     # If you're trying to scroll to low, reset to bottom
                     y = bottom
-            # TODO page up/down
+            # page up/down
+            if event.key == 280:
+                y += 150
+                if y >= 0:
+                    # If you're trying to scroll too high, reset to 0
+                    y = 0
+            if event.key == 281:
+                y -= 150
+                if y <= bottom:
+                    # If you're trying to scroll to low, reset to bottom
+                    y = bottom
+
+
+def func_to_str(l):
+    """ for function in list, return funcion.__name__ """
+    return [i.__name__ for i in l]

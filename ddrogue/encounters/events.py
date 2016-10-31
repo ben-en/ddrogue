@@ -8,7 +8,7 @@ import pygame
 
 from ..colors import BLACK, LIGHT_BLUE
 from ..pathfinding import astar
-from ..ui import menu
+from ..ui import menu, func_to_str
 from ..mechanics.dice import roll
 from .combat import move
 from .map import EncounterMap
@@ -80,7 +80,7 @@ def spell(state, event):
     """
     offer a list of abilities to activate
     """
-    ability_list = state.char.features['spells'].keys()
+    ability_list = func_to_str(state.char.features['spells'])
     index = menu(pygame.display.get_surface(), ability_list)
     import ipdb
     ipdb.set_trace()
@@ -93,11 +93,11 @@ def ability(state, event):
     """
     offer a list of abilities to activate
     """
-    ability_list = state.char.features['active'].keys()
+    ability_list = func_to_str(state.char.features['active'])
     index = menu(pygame.display.get_surface(), ability_list)
     import ipdb
     ipdb.set_trace()
-    res = state.char.features['active'][ability_list[index]]()
+    res = state.char.features['active'][index]()
     return res
 
 
@@ -105,6 +105,11 @@ def ability(state, event):
 def char_info(state, event):
     """
     display a character sheet loke view
+
+    list:
+        desc,
+        stats,
+        image
     """
     print('not implemented')
 

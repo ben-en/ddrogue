@@ -1,8 +1,15 @@
         {
+                "104": "move_up",
+                "106": "move_down",
+                "107": "move_right",
+                "108": "move_left",
                 "273": "move_up",
                 "274": "move_down",
                 "275": "move_right",
                 "276": "move_left",
+		"97": "ability",
+		"105": "char_info",
+		"122": "spell",
 		"59": "debug",
                 "27": "quit"
         }
