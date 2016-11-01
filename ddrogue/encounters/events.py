@@ -8,7 +8,7 @@ import pygame
 from ..colors import BLACK, LIGHT_BLUE
 from ..ui import menu, func_to_str
 from ..mechanics.dice import roll
-from .combat import move, move_to
+from .combat import move, move_to, charge
 from .map import EncounterMap
 from .ui import StatusBox, HUD
 
@@ -141,6 +141,8 @@ def process_key_press(state, event):
 
 def process_click(state, event):
     move(state)
+    if not state.actions[0]:
+        return 'done'
 
 
 EVENT_MAP = {
@@ -285,7 +287,7 @@ class EncounterState:
         if hasattr(self.char, 'ai'):
             ai_turn(self)
         else:
-            # [0] is whether a 5ft step is available (any move action negates)
+            # [0] is whether a 5ft step is available (any movement negates)
             # [1] is whether a move action is available
             # [2] is whether a standard action is available
             # a move action plus a standard action equals a full round action,
@@ -293,8 +295,7 @@ class EncounterState:
             # [3] is whether a swift action is available
             self.actions = [1, 1, 1, 1]
             while 1:
-                self.hud.selected = self.hud.players.index(self.char)
-                self._print('player loop start')
+                self.hud.selected_player = self.hud.players.index(self.char)
                 event = self.interact_until_action()
                 res = player_turn(self, event)
                 if res == 'quit':

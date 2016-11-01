@@ -102,7 +102,7 @@ class EncounterMap:
             for x_label in row:
                 if x_label == self.wall_character:
                     x = x_val * self.unit
-                    walls.append(pygame.Rect(
+                    walls.append(Rect(
                         [x, y, self.unit, self.unit]))
                 x_val += 1
             y_val += 1
@@ -110,7 +110,7 @@ class EncounterMap:
 
     def is_wall(self, pos):
         # TODO only create a Rect if one hasn't been created already
-        pos_rect = pygame.Rect(pos[0], pos[1], 1, 1)
+        pos_rect = Rect(pos[0], pos[1], 1, 1)
         ret = pos_rect.collidelist(self.walls)
         if ret == -1:
             return False
@@ -118,13 +118,10 @@ class EncounterMap:
 
     def grid_pos(self, pos):
         """ Takes pixel coordinates and returns grid coordinates """
-        # print('pixel position', pos)
-        # print('returned position', [(
-        #                              (p / self.unit) +
-        #                              (0 if p % self.unit else 1)
-        #                              for p in pos
-        #                            ])
-        return [p / self.unit for p in pos]
+        new_pos = [
+            (p / self.unit) + (0 if p % self.unit else 1) for p in pos
+        ]
+        return new_pos
 
     def pixel_pos(self, grid):
         """ Takes grid coordinates and returns pixel coordinates """
@@ -160,7 +157,7 @@ class EncounterMap:
                 x += 1
                 if not point == 1:
                     continue
-                rect = pygame.Rect([x, y, self.unit, self.unit])
+                rect = Rect([x, y, self.unit, self.unit])
                 new.blit(tile, rect)
         return new
 
@@ -179,7 +176,6 @@ class EncounterMap:
         return new_img
 
     def event_handler(self, event):
-        print('map event', event)
         return event
 
     def update(self):
@@ -204,10 +200,19 @@ class EncounterMap:
         """
         return true only if given position is adjacent to an enemy or object
         """
-        for enemy_position in [e.pos for e in self.npcs if e.enemy]:
-            if (grid_pos[0] >= enemy_position[0] + 1) or \
-               (grid_pos[0] <= enemy_position[0] - 1):
-                if (grid_pos[1] >= enemy_position[1] + 1) or \
-                   (grid_pos[1] <= enemy_position[1] - 1):
-                    return True
-        return False
+        possible_locations = []
+        for enemy_position in [
+            e.pos for e in self.objects if hasattr(e, 'ai') and e.hostile
+        ]:
+            x, y = enemy_position
+            possible_locations.append(enemy_position)
+            for i in range(3):
+                for n in range(3):
+                    offset_pos = (x + (i - 2), y + (n - 2))
+                    possible_locations.append(offset_pos)
+        print(possible_locations)
+        print(grid_pos)
+        if grid_pos in possible_locations:
+            return True
+        else:
+            return False

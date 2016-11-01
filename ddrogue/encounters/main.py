@@ -34,7 +34,6 @@ def encounter_loop():
     players, npcs, floor_plan, keymap_path = init_encounter()
     state = EncounterState(players, npcs, floor_plan, keymap_path)
     while not state.quit:
-        print('quit in encounter_loop', state.quit)
         state.next_turn()
 
 
@@ -51,7 +50,8 @@ def init_encounter():
         Human.natural_weapons,
         name='Player A',
         features={
-            'active': [move, withdraw, total_defense, five_foot_step, run, charge],
+            'active': [move, withdraw, total_defense, five_foot_step, run,
+                       charge],
             'passive': [],
             'spells': [],
             'spd': [],
@@ -69,7 +69,8 @@ def init_encounter():
         Human.natural_weapons,
         name='Player B',
         features={
-            'active': [move, withdraw, total_defense, five_foot_step, run, charge],
+            'active': [move, withdraw, total_defense, five_foot_step, run,
+                       charge],
             'passive': [],
             'spells': [],
             'spd': [],
@@ -87,7 +88,8 @@ def init_encounter():
         Human.natural_weapons,
         name='Player C',
         features={
-            'active': [move, withdraw, total_defense, five_foot_step, run, charge],
+            'active': [move, withdraw, total_defense, five_foot_step, run,
+                       charge],
             'passive': [],
             'spells': [],
             'spd': [],

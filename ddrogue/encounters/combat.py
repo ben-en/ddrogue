@@ -10,8 +10,6 @@ def move_to(state, char, pos, steps=None):
     """
     Using state's access to the map, move given `char` to `pos`, max `steps`
     """
-    state._print('character trying to move from %s to %s' % (tuple(char.pos),
-                                                             tuple(pos)))
     path = astar(state.map.floor.transpose(), tuple(char.pos), tuple(pos))
     # For some reason astar figures the path backwards. Dunno why,
     path.reverse()
@@ -97,13 +95,13 @@ def move(state):
     while 1:
         move_pos = grid_select(state, state.char, state.char.speed)
         if not move_pos:
+            state._print('aborted')
             return
         if not state.map.is_occupied(move_pos):
             break
         else:
             state._print('Can\'t move there')
-    print(move_pos)
-    move_to(state, state.char, state.char.pos)
+    move_to(state, state.char, move_pos)
     state.actions[0] = 0
     state.actions[1] = 0
 
@@ -125,10 +123,13 @@ def charge(state):
     state._print('Charge')
     npc = None
     while not npc:
-        move_pos = grid_select(state.char, state.char.speed * 4,
+        move_pos = grid_select(state, state.char, (state.char.speed * 4),
                                end_pos_func=state.map.enemy_adjacent)
+        if not move_pos:
+            state._print('aborted')
+            return
         npc = state.map.obj_at(move_pos)
-        if not npc.hostile:
+        if npc and not npc.hostile:
             if not state.output.ask('Are you sure you want to attack a '
                                     'non-hostile npc?'):
                 npc = None
