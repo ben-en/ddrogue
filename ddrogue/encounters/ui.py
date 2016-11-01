@@ -1,29 +1,32 @@
+from time import sleep
+
 import pygame
 from pygame.rect import Rect
 
-from ..colors import BLACK, GREY, WHITE, LIGHT_BLUE, RED_T, DARK_GREY, RED
+from ..colors import BLACK, GREY, WHITE, LIGHT_BLUE, DARK_GREY, RED
 from ..ui import create_tile, navigable_loop, text_to_img, str_bonus
 
 
-def attack_ui(state, steps):
-    state._print('attack ui starting')
-    move_ui(state, state.char, steps, end_pos_func=state.map.enemy_adjacent,
-            COLOR=RED_T)
-
-
-def move_ui(state, target, steps, end_pos_func=None, COLOR=LIGHT_BLUE):
-    state._print('move ui starting')
-    state._print('build list of positions')
+def grid_select(state, target, steps, end_pos_func=None, COLOR=LIGHT_BLUE):
     x, y = target.pos
     speed = int(target.speed)
-    pos_list = [(x + i - speed/2, y + i - speed/2) for i in range(speed)]
-    state._print('draw base frame')
+    speed_offset = speed/2 + (1 if (speed % 2) else 0)
+    pos_list = []
+    rect_list = []
+    for i in range(speed + 1):
+        for n in range(speed + 1):
+            p = (
+                (
+                    (x + i - speed_offset) * state.map.unit,
+                    (y + n - speed_offset) * state.map.unit
+                )
+            )
+            pos_list.append(p)
+            rect_list.append(Rect(p, state.map.unit_t))
     state.draw()
-    state._print('draw new image onto the screen')
-    for p in pos_list:
-        print(p, state.map.unit_t)
-        r = Rect(p, state.map.unit_t)
-        print(r)
+    for i in range(len(pos_list)):
+        p = pos_list[i]
+        r = rect_list[i]
         if end_pos_func:
             if end_pos_func(p):
                 pygame.draw.rect(state.screen, COLOR, r, 1)
@@ -33,7 +36,13 @@ def move_ui(state, target, steps, end_pos_func=None, COLOR=LIGHT_BLUE):
     while 1:
         event = pygame.event.wait()
         if event.type == pygame.KEYUP:
-            break
+            if event.key == 27:  # esc
+                return None
+        if event.type == pygame.MOUSEBUTTONUP:
+            r = Rect(event.pos, (1, 1))
+            index = r.collidelist(rect_list)
+            if not index == -1:
+                return state.map.grid_pos(event.pos)
 
 
 def mini_map(state):
@@ -166,7 +175,8 @@ class HUD(pygame.sprite.Sprite):
         action status (used actions, move points, etc)
         initiative (roll, bonus?)
     """
-    def __init__(self, players, font, pos, x, y):
+    def __init__(self, state, players, font, pos, x, y):
+        self.state = state
         self.players = players
         self.selected_player = 0
         self.pos = pos
@@ -185,7 +195,7 @@ class HUD(pygame.sprite.Sprite):
             (
                 lambda player, font:
                 font.render('%s the level %s %s %s' % (
-                                     player.name,
+                                     player.s,
                                      sum([l for c, l in player.clevel]),
                                      player.race.s,
                                      '/'.join([c.s for c, l in player.clevel])
@@ -266,7 +276,8 @@ class HUD(pygame.sprite.Sprite):
 
 
 class StatusBox(pygame.sprite.Sprite):
-    def __init__(self, screen, font, pos, x, y):
+    def __init__(self, state, screen, font, pos, x, y):
+        self.state = state
         self.screen = screen
         self.pos = pos
         self.size = self.width, self.height = x, y
@@ -332,3 +343,24 @@ class StatusBox(pygame.sprite.Sprite):
             text_to_img(self.screen.get_width(), self.lines),
             start_pos=-1
         )
+
+    def ask(self, str):
+        self._print(str + ' (Y or n)')
+        sleep(0.1)
+        while 1:
+            self.state.draw()
+            pygame.event.clear()
+            event = pygame.event.wait()
+            if event.type == pygame.KEYUP:
+                if not hasattr(event, 'key'):
+                    continue
+                if event.key == ord('y'):
+                    if event.mod == 1:
+                        return True
+                    else:
+                        self._print("shift and y, to mimize accidents")
+                        continue
+                if event.key == ord('n'):
+                    return False
+                else:
+                    self._print("'n' or 'Y' only")

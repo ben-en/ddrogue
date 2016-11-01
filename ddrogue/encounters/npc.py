@@ -9,7 +9,7 @@ from ..mechanics.weapons import sml_unarmed
 class Goblin(Sprite):
     def __init__(self, img):
         Sprite.__init__(self)
-        self.name = 'Goblin'
+        self.s = 'Goblin'
         self.img = img
         self.rect = img.get_rect()
         self.stats = self.init_stats()
@@ -23,6 +23,7 @@ class Goblin(Sprite):
         self.equipped = 0
         # TODO add armor and size values
         self.ai = 1
+        self.hostile = 1
         self.effects = []
 
     def init_stats(self):

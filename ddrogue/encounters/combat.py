@@ -1,13 +1,56 @@
-from .ui import move_ui, attack_ui
+from time import sleep
+
+from ..colors import RED_T
+from ..pathfinding import astar
+
+from .ui import grid_select
 
 
+def move_to(state, char, pos, steps=None):
+    """
+    Using state's access to the map, move given `char` to `pos`, max `steps`
+    """
+    state._print('character trying to move from %s to %s' % (tuple(char.pos),
+                                                             tuple(pos)))
+    path = astar(state.map.floor.transpose(), tuple(char.pos), tuple(pos))
+    # For some reason astar figures the path backwards. Dunno why,
+    path.reverse()
+    if steps:
+        path = path[:steps]
+    state._print(', '.join([str(p) for p in path]))
+    for step in path:
+        char.pos = step
+        state._print(str(char.pos))
+        state._print(str(state.char.pos))
+        state.draw()
+        sleep(0.1)
+
+
+def attack_ui(state, steps):
+    state._print('attack ui starting')
+    enemy = None
+    while not enemy:
+        grid_pos = grid_select(state, state.char, steps,
+                               end_pos_func=state.map.enemy_adjacent,
+                               COLOR=RED_T)
+        for npc in state.npcs:
+            if npc.pos == grid_pos:
+                enemy = npc
+    attack(state, npc)
+
+
+def attack(state, defender):
+    state._print('%s attacking %s' % (state.char.s, defender.s))
+
+
+# Combat actions
 def withdraw(state):
     """
     a full round action that prevents attacks of opportunity by aby characters
     in reach when the movement is started. other enemies attack normally
     """
     state._print('Withdrawing')
-    move_ui(state, state.char.speed * 2)
+    grid_select(state, state.char.speed * 2)
     # No 5ft step after, full round action so no move or standard actions.
     # Swift action is the same.
     state.actions = [0, 0, 0, state.actions[3]]
@@ -42,7 +85,7 @@ def five_foot_step(state):
     actions and is not specially prohobited from taking it
     """
     state._print('Five foot step')
-    move_ui(state.char, 1)
+    grid_select(state.char, 1)
     state.actions[0] = 0
 
 
@@ -50,8 +93,17 @@ def move(state):
     """
     full round action to move at 4x speed
     """
-    state._print('Regular move')
-    move_ui(state, state.char, state.char.speed)
+    state._print('Select where you\'d to move to')
+    while 1:
+        move_pos = grid_select(state, state.char, state.char.speed)
+        if not move_pos:
+            return
+        if not state.map.is_occupied(move_pos):
+            break
+        else:
+            state._print('Can\'t move there')
+    print(move_pos)
+    move_to(state, state.char, state.char.pos)
     state.actions[0] = 0
     state.actions[1] = 0
 
@@ -60,8 +112,8 @@ def run(state):
     """
     full round action to move at 4x speed
     """
-    state._print('Five foot step')
-    move_ui(state.char, state.char.speed * 4)
+    state._print('Run')
+    grid_select(state.char, state.char.speed * 4)
     state.actions = [0, 0, 0, state.actions[3]]
 
 
@@ -70,10 +122,17 @@ def charge(state):
     full round action that lets you move up to twice your speed in a straight
     line then attack
     """
-    state._print('Five foot step')
-    move_ui(state.char, state.char.speed * 4,
-            end_pos_func=state.map.enemy_adjacent)
-    attack_ui(state.char)
+    state._print('Charge')
+    npc = None
+    while not npc:
+        move_pos = grid_select(state.char, state.char.speed * 4,
+                               end_pos_func=state.map.enemy_adjacent)
+        npc = state.map.obj_at(move_pos)
+        if not npc.hostile:
+            if not state.output.ask('Are you sure you want to attack a '
+                                    'non-hostile npc?'):
+                npc = None
+    attack_ui(state.char, npc)
     state.actions = [0, 0, 0, state.actions[3]]
 
 

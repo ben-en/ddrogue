@@ -33,7 +33,7 @@ def skilled():
 
 Human = Race(
     medium,       # size
-    '30',           # speed in feet per turn
+    6,              # speed in tiles per turn
     {},             # ability modifiers
     {               # racial features
      'creation': [
@@ -74,7 +74,7 @@ def halfling_proficiency():
 
 Halfling = Race(
     small,       # size
-    '20',           # speed in feet per turn
+    '4',           # speed in tiles per turn
     {'dex': 2, 'cha': 2, 'str': -2},             # ability modifiers
     {               # racial features
      'persistent': [

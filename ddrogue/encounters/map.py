@@ -1,5 +1,6 @@
 import numpy
 import pygame
+from pygame import Rect
 from pygame.transform import scale
 
 from ..colors import BLACK, WHITE, GREY
@@ -93,7 +94,6 @@ class EncounterMap:
         return new_map
 
     def list_walls(self):
-        print('assembling walls')
         walls = []
         y_val = 0
         for row in self.floor:
@@ -114,9 +114,6 @@ class EncounterMap:
         ret = pos_rect.collidelist(self.walls)
         if ret == -1:
             return False
-        print('Is wall #%s in the list' % ret)
-        print(pos_rect, self.walls[ret])
-        print(self.walls[ret].colliderect(pos_rect))
         return True
 
     def grid_pos(self, pos):
@@ -189,6 +186,19 @@ class EncounterMap:
         self.img = self.bg_img.copy()
         for obj in self.objects:
             self.img.blit(obj.img, self.pixel_pos(obj.pos))
+
+    def obj_at(self, pos):
+        """ return the object at the given position, if any """
+        object_pos = [o.pos for o in self.objects]
+        if pos in object_pos:
+            print('something at', pos)
+            print('something', self.objects[object_pos.index(pos)].s)
+            return self.objects[object_pos.index(pos)]
+        return None
+        print('no match')
+
+    def is_occupied(self, pos):
+        return bool(self.obj_at(pos))
 
     def enemy_adjacent(self, grid_pos):
         """

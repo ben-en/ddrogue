@@ -1,16 +1,14 @@
 import json
 import shelve
-from time import sleep
 import re
 import random
 
 import pygame
 
 from ..colors import BLACK, LIGHT_BLUE
-from ..pathfinding import astar
 from ..ui import menu, func_to_str
 from ..mechanics.dice import roll
-from .combat import move
+from .combat import move, move_to
 from .map import EncounterMap
 from .ui import StatusBox, HUD
 
@@ -31,7 +29,7 @@ SAVE_DIR = './saves'
 def save_game(state, filename=None):
     """ write game to file """
     if not filename:
-        filename = state.char.name + '.save'
+        filename = state.char.s + '.save'
     f = shelve.open(SAVE_DIR + filename, 'n')
     f['foo'] = 'saves aren\'t functional yet'
     f.close
@@ -46,25 +44,8 @@ def action(func):
 def quit(state, _):
     """ Tell the state to exit after user dialog """
     save_game(state)
-    state._print('Would you like to quit? (Y/n)')
-    sleep(0.1)
-    while 1:
-        state.draw()
-        pygame.event.clear()
-        event = pygame.event.wait()
-        if event.type == pygame.KEYUP:
-            if not hasattr(event, 'key'):
-                continue
-            if event.key == ord('y'):
-                if event.mod == 1:
-                    return 'quit'
-                else:
-                    state._print("shift and y, to mimize accidents")
-                    continue
-            if event.key == ord('n'):
-                return
-            else:
-                state._print("'n' or 'Y' only")
+    if state.output.ask('Would you like to quit?'):
+        return 'quit'
 
 
 @action
@@ -146,33 +127,12 @@ def move_right(state, event):
     return 'done'
 
 
-def move_to(state, char, pos, steps=None):
-    """
-    Using state's access to the map, move given `char` to `pos`, max `steps`
-    """
-    state._print('character trying to move from %s to %s' % (tuple(char.pos),
-                                                             tuple(pos)))
-    path = astar(state.map.floor.transpose(), tuple(char.pos), tuple(pos))
-    # For some reason astar figures the path backwards. Dunno why,
-    path.reverse()
-    if steps:
-        path = path[:steps]
-    state._print(', '.join([str(p) for p in path]))
-    for step in path:
-        char.pos = step
-        state._print(str(char.pos))
-        state._print(str(state.char.pos))
-        state.draw()
-        sleep(0.1)
-
-
 def process_key_press(state, event):
     # print('Key pressed', event.key)
     try:
         func = state.keymap[event.key]
     except KeyError:
         print('Unknown key')
-        print(event.key, event.unicode)
         return
     res = func(state, event)
     return res
@@ -217,7 +177,6 @@ def load_keymap(file_path):
         for key, value in json.load(json_file).items():
                 # JSON requires key names to be strings
                 key = int(key)
-                print(key, value)
                 skel[key] = ACTIONS[value.lower()]
     return skel
 
@@ -245,9 +204,9 @@ class EncounterState:
         set_events()
         s_width, s_height = self.screen.get_size()
         self.map = EncounterMap(self.actors, floor_plan)
-        self.hud = HUD(self.players, self.font, (s_width - UI_SIZE, 0),
+        self.hud = HUD(self, self.players, self.font, (s_width - UI_SIZE, 0),
                        UI_SIZE, s_height)
-        self.output = StatusBox(self.screen, self.font,
+        self.output = StatusBox(self, self.screen, self.font,
                                 (0, s_height - UI_SIZE / 2), s_width - UI_SIZE,
                                 UI_SIZE / 2)
         # Assign _print method to self for easy access
@@ -319,7 +278,7 @@ class EncounterState:
         return event
 
     def next_turn(self):
-        self._print('%s\'s turn' % self.char.name)
+        self._print('%s\'s turn' % self.char.s)
         if len(self.char.effects):
             for e in self.char.effects.pop[0]:
                 e(self)

@@ -56,7 +56,7 @@ class Character(Sprite):
         self.speed = race.speed
 
         self.desc = (description or 'missing unique description')
-        self.name = name or 'No Name'
+        self.s = name or 'No Name'
 
         self.equipment = equipment
         self.equipped = equipped or self.equipment.index(

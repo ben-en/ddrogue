@@ -34,6 +34,7 @@ def encounter_loop():
     players, npcs, floor_plan, keymap_path = init_encounter()
     state = EncounterState(players, npcs, floor_plan, keymap_path)
     while not state.quit:
+        print('quit in encounter_loop', state.quit)
         state.next_turn()
 
 
