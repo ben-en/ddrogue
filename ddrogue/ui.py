@@ -1,10 +1,9 @@
-from collections import OrderedDict
 from textwrap import wrap
 
 import pygame
 from pygame.rect import Rect
 
-from .colors import BLACK, GREY, WHITE, BLUE, LIGHT_BLUE
+from .colors import BLACK, GREY, WHITE, BLUE
 
 
 def create_tile(color, xy):
@@ -22,80 +21,6 @@ def str_bonus(val, just=3):
     else:
         bonus = str(val)
     return bonus.rjust(just)
-
-
-def confirm(screen):
-    """ user dialog, ask yes/no """
-    options = OrderedDict()
-    options['Yes'] = True
-    options['No'] = False
-    res = fullscreen_menu(screen, options)
-    return options.get(res, False)
-
-
-def multi_panel_ui(screen, panels):
-    """
-    For each panel presented, expect a panel that functions similarly to pick
-    or the player HUD.
-
-    Attributes:
-        pos
-        img
-    Methods:
-        event_handler
-        resolve
-
-
-    Specifically, they should have size/location rects, a list of clickable
-    areas coupled with the function to execute if the area is clicked, and
-    probably their own selections.
-
-    Primary use case is in character generation, where skills need to be
-    +/-'able, abilities should be rerollable, classess and races need to be
-    selectable, and most fields need a hover feature to display help info
-
-    In theory if implemented properly, could also handle the main game screen.
-    Or something that copies a lot of the main functionality could handle the
-    main game screen.
-
-    """
-    panel_areas = [Rect(p.pos, p.img.get_size()) for p in panels]
-    area = 0
-    # Enter main loop
-    while 1:
-        screen.fill(BLACK)
-        # Draw the panels on the screen
-        for p in panels:
-            screen.blit(p.img, p.pos)
-        pygame.draw.rect(screen, LIGHT_BLUE, panel_areas[area], 2)
-        pygame.display.flip()
-
-        # Wait for the next state
-        event = pygame.event.wait()
-        if event.type == pygame.KEYUP:
-            print('keycode: ', event.key)
-            print('key: ', chr(event.key))
-            if event.key == 27:  # esc
-                if confirm(screen):
-                    break
-            elif event.key == ord('\t'):
-                area += 1
-                if area >= len(panels):
-                    area = 0
-                elif area < 0:
-                    area = len(panels) - 1
-                continue
-        elif event.type == pygame.QUIT:
-            break
-        elif event.type in [pygame.MOUSEMOTION, pygame.MOUSEBUTTONUP]:
-            for index in range(len(panel_areas)):
-                if panel_areas[index].collidepoint(event.pos):
-                    area = index
-                    panels[index].event_handler(event)
-                    continue
-        panels[area].event_handler(event)
-    # When finished in the while loop, return selected values
-    return [p.resolve() for p in panels]
 
 
 def select_loop(screen, selectable):
@@ -158,12 +83,6 @@ class Selectable(object):
         self.select_color = select_color
 
 
-def fullscreen_menu(screen, options, **kwargs):
-    # blank the screen
-    screen.fill(BLACK)
-    return menu(screen, options, **kwargs)
-
-
 def menu(screen, options, xy=(1000, 1000), top_left=(0, 0), text_color=WHITE,
          font=None, select_color=BLUE,
          loop_func=select_loop):
@@ -182,9 +101,7 @@ def menu(screen, options, xy=(1000, 1000), top_left=(0, 0), text_color=WHITE,
     # Create a blank surface to draw the menu on
     menu_img = pygame.surface.Surface(xy)
     # Create imgs for each option provided
-    print(options)
     if hasattr(options, 'keys'):
-        print('hasattr')
         option_keys = options.keys()
     else:
         option_keys = options
@@ -282,8 +199,3 @@ def navigable_loop(screen, img, start_pos=0):
                 if y <= bottom:
                     # If you're trying to scroll to low, reset to bottom
                     y = bottom
-
-
-def func_to_str(l):
-    """ for function in list, return funcion.__name__ """
-    return [i.__name__ for i in l]
