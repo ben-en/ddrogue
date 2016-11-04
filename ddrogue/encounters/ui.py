@@ -46,6 +46,98 @@ def grid_select(state, target, steps, end_pos_func=None, COLOR=LIGHT_BLUE):
                 return state.map.grid_pos(event.pos)
 
 
+class StatusBox(pygame.sprite.Sprite):
+    def __init__(self, state, screen, font, pos, x, y):
+        self.state = state
+        self.screen = screen
+        self.pos = pos
+        self.size = self.width, self.height = x, y
+        self.img = pygame.Surface(self.size)
+        self.rect = self.img.get_rect()
+        self.font = font
+        self.lines = []
+
+    def update(self):
+        pygame.draw.rect(self.img, GREY,
+                         pygame.rect.Rect((0, 0), (self.width + 20,
+                                                   self.height + 20)), 1)
+
+    def cr(self, y, incr=20):
+        y += incr
+        self.img.scroll(0, -incr)
+        return 5, y
+
+    def _print(self, s):
+        """ write given string to output box """
+        # Put the text into the list of lines for fullscreen status
+        self.lines.append(s)
+        tmp = pygame.Surface(self.size)
+        x = 5
+        y = 0
+
+        # Print each character
+        for l in s:
+            if l == '\n':
+                x, y = self.cr(y)
+                self.img.blit(tmp, (1, self.height - 20))
+                continue
+            # Render the character
+            render = self.font.render(l, False, WHITE)
+            # Blit the character on the temporary surface
+            tmp.blit(render, (x, y))
+            # Adjust the cursor to the right
+            x += 10
+
+            # If the cursor is 5px to the edge of the surface, carriage return
+            if (x > self.width - 5):
+                x, y = self.cr(y)
+                self.img.blit(tmp, (1, self.height - 20))
+
+        x, y = self.cr(y)
+        self.img.blit(tmp, (0, self.height - 20))
+        self.update()
+        # After writing text, carriage return.
+        # Set cursor property
+
+    def event_handler(self, event):
+        if event.type == pygame.MOUSEBUTTONUP:
+            self.fullscreen()
+        elif event.type == pygame.KEYUP:
+            if event.key in [ord(c) for c in '\n ']:
+                self.fullscreen()
+
+    def fullscreen(self):
+        # TODO find out why you have to hit esc twice
+        self.screen.fill(BLACK)
+        navigable_loop(
+            self.screen,
+            text_to_img(self.screen.get_width(), self.lines),
+            start_pos=-1
+        )
+
+    def ask(self, str):
+        self._print(str + ' (Y or n)')
+        sleep(0.1)
+        while 1:
+            self.state.draw()
+            pygame.event.clear()
+            event = pygame.event.wait()
+            if event.type == pygame.KEYUP:
+                if not hasattr(event, 'key'):
+                    continue
+                if event.key == ord('y'):
+                    if event.mod == 1:
+                        return True
+                    else:
+                        self._print("shift and y, to mimize accidents")
+                        continue
+                if event.key == ord('n'):
+                    return False
+                else:
+                    self._print("'n' or 'Y' only")
+
+
+# HUD
 def mini_map(state):
     # TODO
     pass
@@ -274,94 +366,3 @@ class HUD(pygame.sprite.Sprite):
         elif self.selected_player == len(self.players):
             self.selected_player = 0
         self.update()
-
-
-class StatusBox(pygame.sprite.Sprite):
-    def __init__(self, state, screen, font, pos, x, y):
-        self.state = state
-        self.screen = screen
-        self.pos = pos
-        self.size = self.width, self.height = x, y
-        self.img = pygame.Surface(self.size)
-        self.rect = self.img.get_rect()
-        self.font = font
-        self.lines = []
-
-    def update(self):
-        pygame.draw.rect(self.img, GREY,
-                         pygame.rect.Rect((0, 0), (self.width + 20,
-                                                   self.height + 20)), 1)
-
-    def cr(self, y, incr=20):
-        y += incr
-        self.img.scroll(0, -incr)
-        return 5, y
-
-    def _print(self, s):
-        """ write given string to output box """
-        # Put the text into the list of lines for fullscreen status
-        self.lines.append(s)
-        tmp = pygame.Surface(self.size)
-        x = 5
-        y = 0
-
-        # Print each character
-        for l in s:
-            if l == '\n':
-                x, y = self.cr(y)
-                self.img.blit(tmp, (1, self.height - 20))
-                continue
-            # Render the character
-            render = self.font.render(l, False, WHITE)
-            # Blit the character on the temporary surface
-            tmp.blit(render, (x, y))
-            # Adjust the cursor to the right
-            x += 10
-
-            # If the cursor is 5px to the edge of the surface, carriage return
-            if (x > self.width - 5):
-                x, y = self.cr(y)
-                self.img.blit(tmp, (1, self.height - 20))
-
-        x, y = self.cr(y)
-        self.img.blit(tmp, (0, self.height - 20))
-        self.update()
-        # After writing text, carriage return.
-        # Set cursor property
-
-    def event_handler(self, event):
-        if event.type == pygame.MOUSEBUTTONUP:
-            self.fullscreen()
-        elif event.type == pygame.KEYUP:
-            if event.key in [ord(c) for c in '\n ']:
-                self.fullscreen()
-
-    def fullscreen(self):
-        # TODO find out why you have to hit esc twice
-        self.screen.fill(BLACK)
-        navigable_loop(
-            self.screen,
-            text_to_img(self.screen.get_width(), self.lines),
-            start_pos=-1
-        )
-
-    def ask(self, str):
-        self._print(str + ' (Y or n)')
-        sleep(0.1)
-        while 1:
-            self.state.draw()
-            pygame.event.clear()
-            event = pygame.event.wait()
-            if event.type == pygame.KEYUP:
-                if not hasattr(event, 'key'):
-                    continue
-                if event.key == ord('y'):
-                    if event.mod == 1:
-                        return True
-                    else:
-                        self._print("shift and y, to mimize accidents")
-                        continue
-                if event.key == ord('n'):
-                    return False
-                else:
-                    self._print("'n' or 'Y' only")
