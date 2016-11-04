@@ -3,47 +3,8 @@ from time import sleep
 import pygame
 from pygame.rect import Rect
 
-from ..colors import BLACK, GREY, WHITE, LIGHT_BLUE, DARK_GREY, RED
+from ..colors import BLACK, GREY, WHITE, DARK_GREY, RED
 from ..ui import create_tile, navigable_loop, text_to_img, str_bonus
-
-
-def grid_select(state, target, steps, end_pos_func=None, COLOR=LIGHT_BLUE):
-    x, y = target.pos
-    speed = steps
-    speed_offset = speed/2 + (1 if (speed % 2) else 0)
-    pos_list = []
-    rect_list = []
-    for i in range(speed + 1):
-        for n in range(speed + 1):
-            p = ((x + i - speed_offset), (y + n - speed_offset))
-            pos_list.append(p)
-            pixel_p = tuple(axis * state.map.unit for axis in p)
-            rect_list.append(Rect(pixel_p, state.map.unit_t))
-    state.draw()
-    end_pos_found = False
-    for i in range(len(pos_list)):
-        p = pos_list[i]
-        r = rect_list[i]
-        if end_pos_func:
-            if end_pos_func(p):
-                pygame.draw.rect(state.screen, COLOR, r, 1)
-                end_pos_found = True
-        else:
-            pygame.draw.rect(state.screen, COLOR, r, 1)
-    pygame.display.flip()
-    if end_pos_func and not end_pos_found:
-        state._print('End position not found, cannot perform action')
-        return
-    while 1:
-        event = pygame.event.wait()
-        if event.type == pygame.KEYUP:
-            if event.key == 27:  # esc
-                return None
-        if event.type == pygame.MOUSEBUTTONUP:
-            r = Rect(event.pos, (1, 1))
-            index = r.collidelist(rect_list)
-            if not index == -1:
-                return state.map.grid_pos(event.pos)
 
 
 class StatusBox(pygame.sprite.Sprite):
