@@ -95,36 +95,6 @@ def char_info(state, event):
     print('not implemented')
 
 
-@action
-def move_down(state, event):
-    """ Move the player down by adding one unit to its y value.
-    """
-    state.char.pos = (state.char.pos[0], state.char.pos[1] + 1)
-    return 'done'
-
-
-@action
-def move_up(state, event):
-    """ Move the player up by subracting one unit from its y value.
-    """
-    state.char.pos = (state.char.pos[0], state.char.pos[1] - 1)
-    return 'done'
-
-
-@action
-def move_left(state, event):
-    """ Move the player left by subracting one unit from its x value.
-    """
-    state.char.pos = (state.char.pos[0] - 1, state.char.pos[1])
-    return 'done'
-
-
-@action
-def move_right(state, event):
-    """ Move the player right by adding one unit to its x value.
-    """
-    state.char.pos = (state.char.pos[0] + 1, state.char.pos[1])
-    return 'done'
 
 
 def process_key_press(state, event):
