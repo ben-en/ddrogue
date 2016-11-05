@@ -191,7 +191,6 @@ class EncounterMap:
             print('something', self.objects[object_pos.index(pos)].s)
             return self.objects[object_pos.index(pos)]
         return None
-        print('no match')
 
     def is_occupied(self, pos):
         return bool(self.obj_at(pos))
@@ -208,10 +207,12 @@ class EncounterMap:
             possible_locations.append(enemy_position)
             for i in range(3):
                 for n in range(3):
-                    offset_pos = (x + (i - 2), y + (n - 2))
+                    offset_pos = (x + (i - 1), y + (n - 1))
+                    print(offset_pos)
                     possible_locations.append(offset_pos)
+        print('possible loctaions an enemy could be adjacent to')
         print(possible_locations)
-        print(grid_pos)
+        print('grid position', grid_pos)
         if grid_pos in possible_locations:
             return True
         else:
