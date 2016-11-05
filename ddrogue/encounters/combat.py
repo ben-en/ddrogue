@@ -7,15 +7,17 @@ from ..colors import RED_T, LIGHT_BLUE
 from ..pathfinding import astar
 
 
+COMBAT_ACTIONS = {}
+
+
 def grid_select(state, start_pos, steps, end_pos_func=None, COLOR=LIGHT_BLUE):
     x, y = start_pos
     speed = steps
-    speed_offset = speed/2 + (1 if (speed % 2) else 0)
     pos_list = []
     rect_list = []
-    for i in range(speed + 1):
-        for n in range(speed + 1):
-            p = ((x + i - speed_offset), (y + n - speed_offset))
+    for i in range((speed * 2) + 1):
+        for n in range((speed * 2) + 1):
+            p = ((x + i - speed), (y + n - speed))
             pos_list.append(p)
             pixel_p = tuple(axis * state.map.unit for axis in p)
             rect_list.append(Rect(pixel_p, state.map.unit_t))
@@ -55,43 +57,65 @@ def move_to(state, char, pos, steps=None):
     path.reverse()
     if steps:
         path = path[:steps]
-    state._print(', '.join([str(p) for p in path]))
     for step in path:
         char.pos = step
-        state._print(str(char.pos))
-        state._print(str(state.char.pos))
         state.draw()
         sleep(0.1)
 
 
-def attack_ui(state, steps):
-    state._print('attack ui starting')
-    enemy = None
-    while not enemy:
-        grid_pos = grid_select(state, state.char, steps,
-                               end_pos_func=state.map.enemy_adjacent,
-                               COLOR=RED_T)
-        for npc in state.npcs:
-            if npc.pos == grid_pos:
-                enemy = npc
-    attack(state, npc)
-
-
-def attack(state, defender):
+def resolve_attack(state, defender):
     state._print('%s attacking %s' % (state.char.s, defender.s))
 
 
 # Combat actions
+def combat_action(func):
+    COMBAT_ACTIONS[func.__name__] = func
+    return func
+
+
+@combat_action
+def attack(state):
+    if not state.char.standard_action:
+        state._print('No standard action available')
+        return
+    state._print('Attack who?')
+    enemy = None
+    weapon = state.char.equipment[state.char.equipped['r_hand']]
+    if 'reach' in weapon.tags:
+        range = 2
+    else:
+        range = 1
+    while not enemy:
+        grid_pos = grid_select(state, state.char.pos, range,
+                               end_pos_func=state.map.enemy_adjacent,
+                               COLOR=RED_T)
+        if not grid_pos:
+            break
+        for npc in state.npcs:
+            if npc.pos == grid_pos:
+                enemy = npc
+    state._print('selected %s' % enemy.s)
+    resolve_attack(state, npc)
+
+
+@combat_action
 def withdraw(state):
     """
     a full round action that prevents attacks of opportunity by aby characters
     in reach when the movement is started. other enemies attack normally
     """
+    if not (state.char.standard_action and state.char.move_action):
+        state._print('Withdrawing is a full round action, you do not have'
+                     'enough actions to perform a full round action.')
+        return
     state._print('Withdrawing')
-    grid_select(state, state.char.speed * 2)
+    move_pos = grid_select(state, state.char.pos, state.char.speed * 2)
     # No 5ft step after, full round action so no move or standard actions.
     # Swift action is the same.
-    state.actions = [0, 0, 0, state.actions[3]]
+    move_to(state, state.char, move_pos)
+    state.char.moved = 1
+    state.char.standard_action = 0
+    state.char.move_action = 0
 
 
 def total_defense_debuff(state):
@@ -99,41 +123,47 @@ def total_defense_debuff(state):
     state.char.ac -= 4
 
 
+@combat_action
 def total_defense(state):
     """
     full round action that gives +4 dodge bonus to ac
     """
+    if not (state.char.standard_action and state.char.move_action):
+        state._print('Total defense is a full round action, you do not have'
+                     'enough actions to perform a full round action.')
+        return
     state._print('Total defense')
     state.char.ac += 4
     # Next turn reduce AC to normal
     state.char.effects[0] = total_defense_debuff
-    state.actions[2] = 0
+    state.char.standard_action = 0
 
 
-def stand_up(state):
-    """
-    move action that provokes an attack of opportunity
-    """
-    print('not implemented')
-
-
+@combat_action
 def five_foot_step(state):
     """
     free action that may be taken when a character has made no other nove
     actions and is not specially prohobited from taking it
     """
+    if state.char.moved:
+        state._print('You have already moved this turn.')
+        return
     state._print('Five foot step')
-    grid_select(state.char, 1)
-    state.actions[0] = 0
+    grid_select(state, state.char.pos, 1)
+    state.char.moved = 1
 
 
+@combat_action
 def move(state):
     """
     full round action to move at 4x speed
     """
+    if not state.char.move_action:
+        state._print('No move action available.')
+        return
     state._print('Select where you\'d to move to')
     while 1:
-        move_pos = grid_select(state, state.char, state.char.speed)
+        move_pos = grid_select(state, state.char.pos, state.char.speed)
         if not move_pos:
             state._print('aborted')
             return
@@ -142,28 +172,40 @@ def move(state):
         else:
             state._print('Can\'t move there')
     move_to(state, state.char, move_pos)
-    state.actions[0] = 0
-    state.actions[1] = 0
+    state.char.moved = 1
+    state.char.move_action = 0
 
 
+@combat_action
 def run(state):
     """
     full round action to move at 4x speed
     """
+    if not (state.char.standard_action and state.char.move_action):
+        state._print('Run is a full round action, you do not have'
+                     'enough actions to perform a full round action.')
+        return
     state._print('Run')
-    grid_select(state.char, state.char.speed * 4)
-    state.actions = [0, 0, 0, state.actions[3]]
+    grid_select(state, state.char.pos, state.char.speed * 4)
+    state.char.moved = 1
+    state.char.standard_action = 0
+    state.char.move_action = 0
 
 
+@combat_action
 def charge(state):
     """
     full round action that lets you move up to twice your speed in a straight
     line then attack
     """
+    if not (state.char.standard_action and state.char.move_action):
+        state._print('Charge is a full round action, you do not have'
+                     'enough actions to perform a full round action.')
+        return
     state._print('Charge')
     npc = None
     while not npc:
-        move_pos = grid_select(state, state.char, (state.char.speed * 4),
+        move_pos = grid_select(state, state.char.pos, (state.char.speed * 4),
                                end_pos_func=state.map.enemy_adjacent)
         if not move_pos:
             state._print('aborted')
@@ -173,10 +215,21 @@ def charge(state):
             if not state.output.ask('Are you sure you want to attack a '
                                     'non-hostile npc?'):
                 npc = None
-    attack_ui(state.char, npc)
-    state.actions = [0, 0, 0, state.actions[3]]
+    resolve_attack(state, npc)
+    state.char.moved = 1
+    state.char.standard_action = 0
+    state.char.move_action = 0
 
 
+@combat_action
+def stand_up(state):
+    """
+    move action that provokes an attack of opportunity
+    """
+    print('not implemented')
+
+
+@combat_action
 def aid_another(state):
     """
     +2 to an ally's attack or ac against an enemy
@@ -184,6 +237,7 @@ def aid_another(state):
     print('not implemented')
 
 
+@combat_action
 def bull_rush(state):
     """
     combat maneuver to push an enemy
@@ -191,6 +245,7 @@ def bull_rush(state):
     print('not implemented')
 
 
+@combat_action
 def disarm(state):
     """
     combat maneuver to force an enemu to drop their equopped weapon
@@ -198,13 +253,7 @@ def disarm(state):
     print('not implemented')
 
 
-def grapple(state):
-    """
-    initiate a grapple with the chosen enemy
-    """
-    print('not implemented')
-
-
+@combat_action
 def overrun(state):
     """
     attempt to force through an enemy's square
@@ -212,6 +261,7 @@ def overrun(state):
     print('not implemented')
 
 
+@combat_action
 def trip(state):
     """
     try to trip an enemy, knocking them prone
@@ -219,6 +269,7 @@ def trip(state):
     print('not implemented')
 
 
+@combat_action
 def feint(state):
     """
     trick your opponent and knock the off balance,leaving them flatfooted
@@ -227,6 +278,15 @@ def feint(state):
     print('not implemented')
 
 
+@combat_action
+def grapple(state):
+    """
+    initiate a grapple with the chosen enemy
+    """
+    print('not implemented')
+
+
+@combat_action
 def throw(state):
     """
     throw something at the enemy
@@ -234,8 +294,17 @@ def throw(state):
     print('not implemented')
 
 
+@combat_action
 def ready(state):
     """
     prepare a spear, counterspell, bow, or similar
+    """
+    print('not implemented')
+
+
+@combat_action
+def delay(state):
+    """
+    delay your action until later in the initiative order
     """
     print('not implemented')

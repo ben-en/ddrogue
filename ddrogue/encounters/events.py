@@ -6,7 +6,7 @@ import random
 import pygame
 
 from ..colors import BLACK, LIGHT_BLUE
-from ..ui import menu, func_to_str
+from ..ui import menu
 from ..mechanics.dice import roll
 from .combat import move, move_to, charge
 from .map import EncounterMap
@@ -45,7 +45,8 @@ def quit(state, _):
     """ Tell the state to exit after user dialog """
     save_game(state)
     if state.output.ask('Would you like to quit?'):
-        return 'quit'
+        state.quit = True
+        return 'done'
 
 
 @action
@@ -61,12 +62,12 @@ def spell(state, event):
     """
     offer a list of abilities to activate
     """
-    ability_list = func_to_str(state.char.features['spells'])
-    index = menu(pygame.display.get_surface(), ability_list)
-    import ipdb
-    ipdb.set_trace()
-    res = state.char.features['spells'][ability_list[index]]()
-    return res
+    if not state.char.features['spells']:
+        state._print('No spells known')
+    spell_list = map(state.char.features['spells'], lambda x: x.__name__)
+    spell = menu(state.screen, spell_list)
+    res = state.char.features['spells'][spell_list.index(spell)]
+    return res(state)
 
 
 @action
@@ -74,12 +75,10 @@ def ability(state, event):
     """
     offer a list of abilities to activate
     """
-    ability_list = func_to_str(state.char.features['active'])
-    index = menu(pygame.display.get_surface(), ability_list)
-    import ipdb
-    ipdb.set_trace()
-    res = state.char.features['active'][index]()
-    return res
+    ability_list = map(lambda x: x.__name__, state.char.features['active'])
+    ability = menu(pygame.display.get_surface(), ability_list)
+    res = state.char.features['active'][ability_list.index(ability)]
+    return res(state)
 
 
 @action
@@ -92,9 +91,7 @@ def char_info(state, event):
         stats,
         image
     """
-    print('not implemented')
-
-
+    state._print('char_info not implemented')
 
 
 def process_key_press(state, event):
@@ -110,9 +107,7 @@ def process_key_press(state, event):
 
 
 def process_click(state, event):
-    move(state)
-    if not state.actions[0]:
-        return 'done'
+    ability(state, event)
 
 
 EVENT_MAP = {
@@ -123,13 +118,19 @@ EVENT_MAP = {
 }
 
 
-def player_turn(state, event):
-    """
-    Wait for an event, try to execute a command and return True to quit.
-    """
-    # Wait for an event
-    func = EVENT_MAP[event.type]
-    return func(state, event)
+def player_turn(state):
+    done = 0
+    while not done:
+        # Wait for an event
+        while 1:
+            event = state.interact_with_user()
+            if event:
+                break
+        print('found event', event)
+        func = EVENT_MAP[event.type]
+        res = func(state, event)
+        if res == 'done':
+            done = True
 
 
 def ai_turn(state):
@@ -183,7 +184,7 @@ class EncounterState:
                                 UI_SIZE / 2)
         # Assign _print method to self for easy access
         self._print = self.output._print
-        self.ui = [self.map, self.output, self.hud]
+        self.ui = [self.map, self.hud, self.output]
         self.keymap = load_keymap(keymap_file)
         self.panel_areas = [pygame.rect.Rect(e.pos, e.img.get_size()) for e in
                             self.ui]
@@ -206,48 +207,45 @@ class EncounterState:
         )
         pygame.display.flip()
 
-    def interact_until_action(self):
+    def interact_with_user(self):
         """
         Interact with the user (help dialogs etc) until a character acction
         occurs.
         """
-        while 1:
-            # Draw the frame
-            self.draw()
-            # Wait for an event
-            event = pygame.event.wait()
-            if event.type == pygame.KEYUP:
-                print('keycode: ', event.key)
-                try:
-                    print('key: ', chr(event.key))
-                except ValueError:
-                    print('non-alphanumeric key')
-                if event.key == 27:  # esc
-                    # break out returning a quit event
-                    return event
-                elif event.key == ord('\t'):
-                    # If tab, switch to the next ui element
-                    self.selected_element += 1
-                    if self.selected_element >= len(self.ui):
-                        self.selected_element = 0
-                    elif self.selected_element < 0:
-                        self.selected_element = len(self.ui) - 1
-                    continue
-            elif event.type == pygame.QUIT:
-                return 'quit'
-            elif event.type in [pygame.MOUSEMOTION, pygame.MOUSEBUTTONUP]:
-                for index in range(len(self.panel_areas)):
-                    if self.panel_areas[index].collidepoint(event.pos):
-                        self.selected_element = index
-                        self.ui[index].event_handler(event)
-                        continue
-            # Run the event handler on the event, if the event is returned by
-            # the handler it is returned as the final event
-            element = self.ui[self.selected_element]
-            returned_event = element.event_handler(event)
-            if returned_event:
-                break
-        return event
+        # Draw the frame
+        self.draw()
+        # Wait for an event
+        event = pygame.event.wait()
+        if event.type == pygame.KEYUP:
+            print('keycode: ', event.key)
+            try:
+                print('key: ', chr(event.key))
+            except ValueError:
+                print('non-alphanumeric key')
+            if event.key == 27:  # esc
+                # break out returning a quit event
+                return event
+            elif event.key == ord('\t'):
+                # If tab, switch to the next ui element
+                self.selected_element += 1
+                if self.selected_element >= len(self.ui):
+                    self.selected_element = 0
+                elif self.selected_element < 0:
+                    self.selected_element = len(self.ui) - 1
+                return
+        elif event.type == pygame.QUIT:
+            return event
+        elif event.type in [pygame.MOUSEMOTION, pygame.MOUSEBUTTONUP]:
+            for index in range(len(self.panel_areas)):
+                if self.panel_areas[index].collidepoint(event.pos):
+                    print('%s over %s' % (event,
+                                          self.panel_areas[index]))
+                    self.selected_element = index
+                    return self.ui[index].event_handler(event)
+        # Run the event handler on the event, if the event is returned
+        # by the handler it is returned as the final event
+        element = self.ui[self.selected_element]
+        return element.event_handler(event)
 
     def next_turn(self):
         self._print('%s\'s turn' % self.char.s)
@@ -257,27 +255,20 @@ class EncounterState:
         if hasattr(self.char, 'ai'):
             ai_turn(self)
         else:
-            # [0] is whether a 5ft step is available (any movement negates)
-            # [1] is whether a move action is available
-            # [2] is whether a standard action is available
-            # a move action plus a standard action equals a full round action,
-            # and as they're typically stationary you still get a free 5ft step
-            # [3] is whether a swift action is available
-            self.actions = [1, 1, 1, 1]
-            while 1:
-                self.hud.selected_player = self.hud.players.index(self.char)
-                event = self.interact_until_action()
-                res = player_turn(self, event)
-                if res == 'quit':
-                    self.quit = True
-                    break
-                elif res == 'done':
-                    break
-        # End turn
+            player_turn(self)
+        self.end_turn()
+
+    def end_turn(self, *args, **kwargs):
         self.active_player += 1
         if self.active_player >= len(self.actors):
             self.turn += 1
             self.active_player = 0
+        self.hud.selected_player = self.hud.players.index(self.char)
+        # Reset actions
+        self.char.moved = 0
+        self.char.move_action = 1
+        self.char.standard_action = 1
+        self.char.swift_action = 1
 
 
 def set_events():

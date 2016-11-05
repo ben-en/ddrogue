@@ -1,8 +1,7 @@
 import re
 
 from ..colors import GREEN, YELLOW, RED, BLUE
-from .combat import (withdraw, total_defense, five_foot_step, run, charge,
-                     move)
+from .combat import COMBAT_ACTIONS
 from .events import EncounterState
 from .map import EncounterMap, create_map_matrix
 from ..mechanics.classes import Fighter, Wizard
@@ -50,8 +49,7 @@ def init_encounter():
         Human.natural_weapons,
         name='Player A',
         features={
-            'active': [move, withdraw, total_defense, five_foot_step, run,
-                       charge],
+            'active': COMBAT_ACTIONS.values(),
             'passive': [],
             'spells': [],
             'spd': [],
@@ -69,8 +67,7 @@ def init_encounter():
         Human.natural_weapons,
         name='Player B',
         features={
-            'active': [move, withdraw, total_defense, five_foot_step, run,
-                       charge],
+            'active': COMBAT_ACTIONS.values(),
             'passive': [],
             'spells': [],
             'spd': [],
@@ -88,8 +85,7 @@ def init_encounter():
         Human.natural_weapons,
         name='Player C',
         features={
-            'active': [move, withdraw, total_defense, five_foot_step, run,
-                       charge],
+            'active': COMBAT_ACTIONS.values(),
             'passive': [],
             'spells': [],
             'spd': [],

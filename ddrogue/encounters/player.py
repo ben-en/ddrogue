@@ -92,6 +92,11 @@ class Character(Sprite):
         self.hp = self.max_hp
         self.bab = self.clevel[0][0].bab[self.clevel[0][1]]
 
+        self.moved = 0
+        self.move_action = 1
+        self.standard_action = 1
+        self.swift_action = 1
+
     @property
     def ac(self):
         return 10 + self.stats['dex'].bonus + sum(self._ac_mods)
