@@ -56,7 +56,6 @@ class StatusBox(pygame.sprite.Sprite):
 
         x, y = self.cr(y)
         self.img.blit(tmp, (0, self.height - 20))
-        self.update()
         # After writing text, carriage return.
         # Set cursor property
 
@@ -87,7 +86,7 @@ class StatusBox(pygame.sprite.Sprite):
                 if not hasattr(event, 'key'):
                     continue
                 if event.key == ord('y'):
-                    if event.mod == 1:
+                    if event.mod == 1: #TODO add right shift compatibility
                         return True
                     else:
                         self._print("shift and y, to mimize accidents")
@@ -99,12 +98,20 @@ class StatusBox(pygame.sprite.Sprite):
 
 
 # HUD
-def mini_map(state):
+def current_turn(state, player, font):
+    rows = [
+        'T:%s' % str(state.turn + 1).rjust(6),
+        'P:     %s' % state.active_player,
+    ]
+    return render_column(font, (60, 40), rows)
+
+
+def mini_map(state, player, font):
     # TODO
     pass
 
 
-def char_hp(player, font):
+def char_hp(state, player, font):
     """ Should show the HP for the currently selected character """
     # TODO add graphical bar
     total = player.max_hp
@@ -113,7 +120,7 @@ def char_hp(player, font):
     return img
 
 
-def char_xp(player, font):
+def char_xp(state, player, font):
     """ Shows xp """
     next_level = 'na'
     current = player.xp
@@ -131,7 +138,7 @@ def render_column(font, (x, y), rows, row_height=20):
     return img
 
 
-def char_stats(player, font):
+def char_stats(state, player, font):
     rows = []
     for stat in 'str dex con int wis cha'.split():
         tup = player.stats[stat]
@@ -141,7 +148,7 @@ def char_stats(player, font):
     return render_column(font, (120, 120), rows)
 
 
-def char_defense(player, font):
+def char_defense(state, player, font):
     p = player
     rows = [
         'AC:    %s' % p.ac,
@@ -151,7 +158,7 @@ def char_defense(player, font):
     return render_column(font, (65, 300), rows)
 
 
-def char_offense(player, font):
+def char_offense(state, player, font):
     # TODO fix negative number appearance
     p = player
     rows = [
@@ -162,7 +169,7 @@ def char_offense(player, font):
     return render_column(font, (65, 300), rows)
 
 
-def char_saves(player, font):
+def char_saves(state, player, font):
     p = player
     rows = [
         'Ref:  %s' % str_bonus(p.ref),
@@ -172,7 +179,7 @@ def char_saves(player, font):
     return render_column(font, (65, 300), rows)
 
 
-def char_misc(player, font):
+def char_misc(state, player, font):
     p = player
     rows = [
         'Init: %s' % str_bonus(p.init),
@@ -182,18 +189,18 @@ def char_misc(player, font):
     return render_column(font, (65, 300), rows)
 
 
-def char_abilities(player, font):
+def char_abilities(state, player, font):
     p = player
     rows = [a.__name__ for a in p.features['active']]
     return render_column(font, (100, 300), rows)
 
 
-def equipment(player, font):
+def equipment(state, player, font):
     """ List equipped items """
     # new body equip setup
-    img = pygame.Surface([200, 200])
+    img = pygame.Surface([160, 160])
     equipped = player.equipped.items()
-    equip_strs = []
+    equip_strs = ['Equipment Slots']
     for slot, index in equipped:
         if index == -1:
             equip_strs.append(': '.join([slot, "unequipped"]))
@@ -206,7 +213,36 @@ def equipment(player, font):
     return img
 
 
-def end_turn(_, font):
+def turn_ui(state, player, font):
+    p = player
+    rows = [
+        'Available actions',
+        'Move action:     %s' % bool(p.move_action),
+        'Standard Action: %s' % bool(p.standard_action),
+        'Swift Action:    %s' % bool(p.swift_action),
+        'Has moved:       %s' % bool(p.moved),
+    ]
+    first_column = render_column(font, (200, 100), rows)
+    # Show initiative order because actors is sorted
+    rows = ['Initiative order']
+    rows += ['%s:\t%s' % (i + 1, state.actors[i].s)
+             for i in range(len(state.actors))]
+    second_column = render_column(font, (120, 100), rows)
+    tmp = pygame.Surface([360, 100])
+    tmp.blit(first_column, (0, 0))
+    tmp.blit(second_column, (200, 0))
+    return tmp
+
+
+def end_turn_func(state, *args):
+    if (state.char.standard_action or state.char.move_action or
+            state.char.swift_action):
+        state._print('%s still has actions available.' % state.char.s)
+        if state.output.ask('Are you sure you want to end the turn?'):
+            return state.end_turn()
+
+
+def end_turn(_, x, font):
     img = pygame.Surface((400, 40))
     img.fill(DARK_GREY)
     img.blit(font.render('End Player Turn', False, RED), (100, 10))
@@ -245,36 +281,40 @@ class HUD(pygame.sprite.Sprite):
         self.header = [font.render('Party: ', False, WHITE)]
         self.header += [p.img for p in players]
 
-        self.elements = [
+        self.elements = (
+            (current_turn, (335, 5)),
             (
-                lambda player, font:
+                lambda state, player, font:
                 font.render('%s the level %s %s %s' % (
                                      player.s,
                                      sum([l for c, l in player.clevel]),
                                      player.race.s,
                                      '/'.join([c.s for c, l in player.clevel])
                                  ), False, WHITE),
-                (5, 40)
+                (60, 45)
             ),
-            (char_xp, (285, 40)),
-            (char_hp, (5, 62)),
-            (char_stats, (5, 90)),
-            (char_defense, (215, 90)),
-            (char_offense, (215, 150)),
-            (char_saves, (315, 90)),
-            (char_misc, (315, 150)),
-            (char_abilities, (5, 230)),
-            (equipment, (5, 530)),
+            (char_xp, (10, 65)),
+            (char_hp, (10, 85)),
+            (char_stats, (20, 110)),
+            (char_defense, (200, 110)),
+            (char_offense, (200, 170)),
+            (char_saves, (310, 110)),
+            (char_misc, (310, 170)),
+            (equipment, (20, 280)),
             # TODO finish mini map
             # (mini_map, (5, 300)),
-            # (lambda x, y: create_tile(GREY, (389, 389)), (5, 500)),
+            (turn_ui, (20, 460)),
             (end_turn, (0, self.height - 40)),
-        ]
+        )
         self.selected_element = -1
         self.update()
         self.element_areas = [
-            Rect(p, e.get_size()) for e, p in self.compiled
+            Rect((p[0] + pos[0], p[1] + pos[1]), e.get_size()) for e, p in
+            self.compiled
         ]
+        self.element_functions = {
+            12: end_turn_func
+        }
 
     def update(self):
         self.img = create_tile(BLACK, [self.width, self.height])
@@ -291,7 +331,7 @@ class HUD(pygame.sprite.Sprite):
             x += icon.get_width() + 5
         self.compiled = []
         for e, pos in self.elements:
-            img = e(self.players[self.selected_player], self.font)
+            img = e(self.state, self.players[self.selected_player], self.font)
             self.img.blit(img, pos)
             self.compiled.append((img, pos))
         if self.selected_element >= 0:
@@ -306,16 +346,15 @@ class HUD(pygame.sprite.Sprite):
                     self.selected_element = index
                     func = self.element_functions.get(index, None)
                     if func:
-                        func(event)
-                    continue
+                        return func(self.state, event)
+            # Don't pass the event back
             return
         elif event.type == pygame.KEYUP:
             if event.key == 275:
                 self.adjust_selected_player(1)
             if event.key == 276:
                 self.adjust_selected_player(-1)
-            self.update()
-            return
+        # Return the event at the end
         return event
 
     def adjust_selected_player(self, val):
@@ -326,4 +365,3 @@ class HUD(pygame.sprite.Sprite):
             self.selected_player = len(self.players) - 1
         elif self.selected_player == len(self.players):
             self.selected_player = 0
-        self.update()
