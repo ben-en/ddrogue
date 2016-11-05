@@ -5,19 +5,10 @@ This is a simple game made with pygame. Hopefully, it may one day implment a
 d20-like system. The title is short for "double dungeons rogue" because i
 wanted a quick name. Improvements are welcome.
 
-guide: 
-    \: partially done
-    x: done
-
-
 Controls:
-    <-, h: move left
-    /\, j: move up
-    \/, k: move down
-    ->, l: move right
     ESC: quit
     Tab: switch focused UI element
-    click to move to that location
+    click on stuff
 
 
 immediate list:
