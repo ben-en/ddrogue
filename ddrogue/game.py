@@ -65,11 +65,12 @@ def load_game(_):
 def debug(screen):
     """ drop into ipdb to debug an unknown event. """
     print('Entered debug')
-    from .mechanics.chargen import chargen
-    player = chargen(screen)
-    print(player)
-    # import ipdb
-    # ipdb.set_trace()
+    from mechanics.armor import load_armor
+    from mechanics.weapons import load_weapons
+    armor = load_armor()
+    weapons = load_weapons()
+    print(armor)
+    print(weapons)
 
 
 def new_game(screen):
@@ -79,8 +80,8 @@ def new_game(screen):
 
 def main_menu(screen):
     options = OrderedDict()
-    options["New Game"] = new_game
     options["debug"] = debug
+    options["New Game"] = new_game
     options["Load Game"] = load_game
     options["Settings"] = settings
     options["Guide"] = guide

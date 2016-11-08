@@ -1,5 +1,7 @@
 from collections import namedtuple, OrderedDict
 
+from ..ogc.loader import load_file, prep_section
+
 
 class Equipment(OrderedDict):
     def __init__(self, h=-1, c=-1, t=-1, l_a=-1, r_a=-1, l_h=-1, r_h=-1, l=-1,
@@ -64,45 +66,24 @@ Weapon = namedtuple('Weapon', [
     'tags'
 ])
 
-sml_unarmed = Weapon('Unarmed', 0, '1d2', 20, 2, 0, 0, 1, 'b', ['nonlethal'])
-med_unarmed = Weapon('Unarmed', 0, '1d3', 20, 2, 0, 0, 1, 'b', ['nonlethal'])
-lrg_unarmed = Weapon('Unarmed', 0, '1d4', 20, 2, 0, 0, 1, 'b', ['nonlethal'])
 
-bolas = Weapon(
-    'Bolas',
-    5,
-    '1d4',
-    20,
-    2,
-    10,
-    2,
-    2,
-    'b',
-    'ranged nonlethal trip'.split()
-)
+PREP = [
+    str,
+    int,
+    str,
+    int,
+    int,
+    int,
+    int,
+    int,
+    str,
+    str.split
+]
 
-quarterstaff = Weapon(
-    'Quarterstaff',
-    0,
-    ['1d6', '1d6'],
-    20,
-    2,
-    0,
-    4,
-    2,
-    'b',
-    'double monk'.split()
-)
 
-longspear = Weapon(
-    'Longspear',
-    5,
-    '1d8',
-    20,
-    3,
-    0,
-    9,
-    2,
-    'p',
-    'brace reach'.split()
-)
+def load_weapons():
+    config = load_file('ogc/weapons.ini')
+    weapons = {
+        k: Weapon(*prep_section(v.values(), PREP)) for k, v in config.items()
+    }
+    return weapons

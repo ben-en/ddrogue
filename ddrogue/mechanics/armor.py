@@ -1,8 +1,10 @@
 from collections import namedtuple
 
+from ..ogc.loader import load_file, prep_section
+
 
 Armor = namedtuple('Armor', [
-    'name',
+    's',
     'cost',
     'bonus',
     'max_dex',
@@ -13,5 +15,23 @@ Armor = namedtuple('Armor', [
     'weight'
 ])
 
-leather_armor = Armor('Leather Armor', 5, 2, 6, 0, 10, 0, 'body', 15)
-buckler = Armor('Buckler', 5, 1, None, -1, 5, 0, 'arm', 5)
+
+PREP = [
+    str,    # s
+    int,    # cost
+    int,    # bonus
+    int,    # max_dex
+    int,    # check_pen
+    int,    # spell_fail
+    int,    # speed_pen
+    str,    # slot
+    int     # weight
+]
+
+
+def load_armor():
+    config = load_file('ogc/armor.ini')
+    armor = {
+        k: Armor(*prep_section(v.values(), PREP)) for k, v in config.items()
+    }
+    return armor
