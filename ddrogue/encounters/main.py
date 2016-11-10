@@ -1,5 +1,7 @@
 import re
 
+from pygame import image
+
 from ..colors import GREEN, YELLOW, RED, BLUE
 from .combat import COMBAT_ACTIONS
 from .events import EncounterState
@@ -37,11 +39,9 @@ def encounter_loop():
 
 
 def init_encounter():
-    m = EncounterMap([], create_map_matrix())
-    goblin_img = m.create_tile(color=GREEN)
-    goblin = Goblin(goblin_img)
+    goblin = Goblin(image.load('rltiles/mon/goblin.png'))
     playera = Character(
-        m.create_tile(color=RED),
+        image.load('tiles/fighter.png'),
         Human,
         [(Fighter, 1)],
         (roll('1d6') for x in range(6)),
@@ -59,7 +59,7 @@ def init_encounter():
         equipped=Equipment(r_h=0),
     )
     playerb = Character(
-        m.create_tile(color=YELLOW),
+        image.load('tiles/wizard.png'),
         Human,
         [(Wizard, 2)],
         (roll('1d6') for x in range(6)),
@@ -77,7 +77,7 @@ def init_encounter():
         equipped=Equipment(r_h=0),
     )
     playerc = Character(
-        m.create_tile(color=BLUE),
+        image.load('tiles/wizard.png'),
         Human,
         [(Fighter, 1), (Wizard, 2)],
         (roll('1d6') for x in range(6)),

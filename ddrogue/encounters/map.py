@@ -1,6 +1,6 @@
 import numpy
 import pygame
-from pygame import Rect
+from pygame import Rect, image
 from pygame.transform import scale
 
 from ..colors import BLACK, WHITE, GREY
@@ -66,8 +66,7 @@ class EncounterMap:
         # Set up misc variables
         self.floor = floorplan
         self.floor_color = GREY
-        self.wall_color = BLACK
-        self.wall_tile = self.create_tile(color=self.wall_color)
+        self.wall_tile = image.load('tiles/wall.png')
         self.wall_character = 1
 
         # Create the img
