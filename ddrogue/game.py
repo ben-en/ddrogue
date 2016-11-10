@@ -65,11 +65,25 @@ def load_game(_):
 def debug(screen):
     """ drop into ipdb to debug an unknown event. """
     print('Entered debug')
-    from .mechanics.chargen import chargen
-    player = chargen(screen)
-    print(player)
-    # import ipdb
-    # ipdb.set_trace()
+    from .tiles.loader import load_tileset, select_tile
+    from colors import BLACK
+    from pygame import display
+    from time import sleep
+    import ipdb
+    ipdb.set_trace()
+    for f in 'feat wall floor player'.split():
+        try:
+            t = load_tileset('tiles/%s.png' % f)
+        except:
+            print(f, 'failed')
+            continue
+        screen.fill(BLACK)
+        for y in range(len(t)):
+            for x in range(len(t[y])):
+                screen.blit(select_tile(t, (x, y)), (x*32, y*32))
+            display.flip()
+            sleep(0.1)
+            raw_input()
 
 
 def new_game(screen):
