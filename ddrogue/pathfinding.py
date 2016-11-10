@@ -2,21 +2,22 @@
 # A* Pathfinding in Python (2.7)
 # Please give credit if used
 
-import numpy
-from heapq import *
+from heapq import heappush, heappop
 
 
 def heuristic(a, b):
     return (b[0] - a[0]) ** 2 + (b[1] - a[1]) ** 2
 
+
 def astar(array, start, goal):
 
-    neighbors = [(0,1),(0,-1),(1,0),(-1,0),(1,1),(1,-1),(-1,1),(-1,-1)]
+    neighbors = [(0, 1), (0, -1), (1, 0), (-1, 0), (1, 1), (1, -1), (-1, 1),
+                 (-1, -1)]
 
     close_set = set()
     came_from = {}
-    gscore = {start:0}
-    fscore = {start:heuristic(start, goal)}
+    gscore = {start: 0}
+    fscore = {start: heuristic(start, goal)}
     oheap = []
 
     heappush(oheap, (fscore[start], start))
@@ -47,32 +48,34 @@ def astar(array, start, goal):
                 # array bound x walls
                 continue
 
-            if neighbor in close_set and tentative_g_score >= gscore.get(neighbor, 0):
+            if neighbor in close_set and (tentative_g_score >=
+                                          gscore.get(neighbor, 0)):
                 continue
 
-            if  tentative_g_score < gscore.get(neighbor, 0) or neighbor not in [i[1]for i in oheap]:
+            if tentative_g_score < gscore.get(neighbor, 0) or (
+                    neighbor not in [i[1]for i in oheap]):
                 came_from[neighbor] = current
                 gscore[neighbor] = tentative_g_score
-                fscore[neighbor] = tentative_g_score + heuristic(neighbor, goal)
+                fscore[neighbor] = tentative_g_score + heuristic(neighbor,
+                                                                 goal)
                 heappush(oheap, (fscore[neighbor], neighbor))
 
     return False
 
-'''Here is an example of using my algo with a numpy array,
-   astar(array, start, destination)
-   astar function returns a list of points (shortest path)'''
+# Example
 
-nmap = numpy.array([
-    [0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-    [1,1,1,1,1,1,1,1,1,1,1,1,0,1],
-    [0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-    [1,0,1,1,1,1,1,1,1,1,1,1,1,1],
-    [0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-    [1,1,1,1,1,1,1,1,1,1,1,1,0,1],
-    [0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-    [1,0,1,1,1,1,1,1,1,1,1,1,1,1],
-    [0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-    [1,1,1,1,1,1,1,1,1,1,1,1,0,1],
-    [0,0,0,0,0,0,0,0,0,0,0,0,0,0]])
+# import numpy
+# nmap = numpy.array([
+#     [0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+#     [1,1,1,1,1,1,1,1,1,1,1,1,0,1],
+#     [0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+#     [1,0,1,1,1,1,1,1,1,1,1,1,1,1],
+#     [0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+#     [1,1,1,1,1,1,1,1,1,1,1,1,0,1],
+#     [0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+#     [1,0,1,1,1,1,1,1,1,1,1,1,1,1],
+#     [0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+#     [1,1,1,1,1,1,1,1,1,1,1,1,0,1],
+#     [0,0,0,0,0,0,0,0,0,0,0,0,0,0]])
 
-print astar(nmap, (0,0), (10,13))
+# print astar(nmap, (0,0), (10,13))
