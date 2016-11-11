@@ -48,6 +48,7 @@ class Character(Sprite):
         # img related
         Sprite.__init__(self)
         self.groups = []
+        self.hostile = 0
         self.img = img
         self.rect = self.img.get_rect()
 
