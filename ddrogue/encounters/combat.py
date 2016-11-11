@@ -10,17 +10,23 @@ from ..pathfinding import astar
 COMBAT_ACTIONS = {}
 
 
-def grid_select(state, start_pos, steps, end_pos_func=None, COLOR=LIGHT_BLUE):
+def grid_select(state, start_pos, steps, area_func=None, end_pos_func=None,
+                color=LIGHT_BLUE):
+    """
+    A function that displays a grid on the screen and only returns if the
+    clicked point is within the grid list.
+
+    Can be given an area_func to determine what area is allowed to be clicked
+    on. Defaults to state.map.movable_area
+    """
     x, y = start_pos
-    speed = steps
-    pos_list = []
     rect_list = []
-    for i in range((speed * 2) + 1):
-        for n in range((speed * 2) + 1):
-            p = ((x + i - speed), (y + n - speed))
-            pos_list.append(p)
-            pixel_p = tuple(axis * state.map.unit for axis in p)
-            rect_list.append(Rect(pixel_p, state.map.unit_t))
+    if not area_func:
+        area_func = state.map.movable_area
+    pos_list = area_func(start_pos, steps)
+    for p in pos_list:
+        pixel_p = tuple(axis * state.map.unit for axis in p)
+        rect_list.append(Rect(pixel_p, state.map.unit_t))
     state.draw()
     end_pos_found = False
     for i in range(len(pos_list)):
@@ -28,14 +34,15 @@ def grid_select(state, start_pos, steps, end_pos_func=None, COLOR=LIGHT_BLUE):
         r = rect_list[i]
         if end_pos_func:
             if end_pos_func(p):
-                pygame.draw.rect(state.screen, COLOR, r, 1)
+                pygame.draw.rect(state.screen, color, r, 2)
                 end_pos_found = True
         else:
-            pygame.draw.rect(state.screen, COLOR, r, 1)
-    pygame.display.flip()
+            pygame.draw.rect(state.screen, color, r, 2)
     if end_pos_func and not end_pos_found:
         state._print('End position not found, cannot perform action')
+        pygame.display.flip()
         return
+    pygame.display.flip()
     while 1:
         event = pygame.event.wait()
         if event.type == pygame.KEYUP:
