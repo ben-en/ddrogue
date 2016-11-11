@@ -45,6 +45,13 @@ def create_map_matrix():
     return MAP
 
 
+def points_around(point):
+    neighbors = [(0, 1), (0, -1), (1, 0), (-1, 0), (1, 1), (1, -1),
+                 (-1, 1), (-1, -1)]
+    x, y = point
+    return [((x + n_x), (y + n_y)) for n_x, n_y in neighbors]
+
+
 class EncounterMap:
     """
     This class takes a floor plan and creates a completed map Image object that
@@ -109,9 +116,7 @@ class EncounterMap:
         return walls
 
     def is_wall(self, pos):
-        # TODO only create a Rect if one hasn't been created already
-        pos_rect = Rect(pos[0], pos[1], 1, 1)
-        ret = pos_rect.collidelist(self.walls)
+        ret = Rect(pos, (1, 1)).collidelist(self.walls)
         if ret == -1:
             return False
         return True
@@ -125,9 +130,6 @@ class EncounterMap:
 
     def pixel_pos(self, grid):
         """ Takes grid coordinates and returns pixel coordinates """
-        # print('grid position', grid)
-        # print('returned position', (grid[0] * self.unit, grid[1] *
-        # self.unit))
         return (grid[0] * self.unit, grid[1] * self.unit)
 
     def draw_grid(self, grid, color):
@@ -185,10 +187,8 @@ class EncounterMap:
 
     def obj_at(self, pos):
         """ return the object at the given position, if any """
-        object_pos = [o.pos for o in self.objects]
+        object_pos = [tuple(o.pos) for o in self.objects]
         if pos in object_pos:
-            print('something at', pos)
-            print('something', self.objects[object_pos.index(pos)].s)
             return self.objects[object_pos.index(pos)]
         return None
 
@@ -208,12 +208,42 @@ class EncounterMap:
             for i in range(3):
                 for n in range(3):
                     offset_pos = (x + (i - 1), y + (n - 1))
-                    print(offset_pos)
                     possible_locations.append(offset_pos)
-        print('possible loctaions an enemy could be adjacent to')
-        print(possible_locations)
-        print('grid position', grid_pos)
         if grid_pos in possible_locations:
             return True
         else:
             return False
+
+    def visible_area(self, start, area):
+        x, y = start
+        area_list = []
+        potentials = [(p, 1) for p in points_around(start)]
+        while potentials:
+            pos, steps = potentials.pop(0)
+            if steps >= area:
+                continue
+            if self.is_wall(self.pixel_pos(pos)):
+                continue
+            new_potentials = [p for p in points_around(pos) if
+                              p not in area_list]
+            potentials.extend([(p, steps + 1) for p in new_potentials])
+            area_list.append(pos)
+        return area_list
+
+    def movable_area(self, start, speed):
+        x, y = start
+        area_list = []
+        potentials = [(p, 1) for p in points_around(start)]
+        while potentials:
+            pos, steps = potentials.pop(0)
+            if steps >= speed:
+                continue
+            if self.is_occupied(pos) and not self.obj_at(pos).hostile:
+                continue
+            if self.is_wall(self.pixel_pos(pos)):
+                continue
+            new_potentials = [p for p in points_around(pos) if
+                              p not in area_list]
+            potentials.extend([(p, steps + 1) for p in new_potentials])
+            area_list.append(pos)
+        return area_list
