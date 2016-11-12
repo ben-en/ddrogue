@@ -78,6 +78,9 @@ def ability(state, event):
     ability_list = map(lambda x: x.__name__, state.char.features['active'])
     ability = menu(pygame.display.get_surface(), ability_list)
     res = state.char.features['active'][ability_list.index(ability)]
+    if not res:
+        state._print('No event selected')
+        return
     return res(state)
 
 
@@ -190,6 +193,10 @@ class EncounterState:
                             self.ui]
         self.selected_element = 0
 
+        # Set the selected player (if one exists)
+        if self.actors[0] in self.players:
+            self.hud.selected_player = self.hud.players.index(self.char)
+
     @property
     def char(self):
         return self.actors[self.active_player]
@@ -238,8 +245,6 @@ class EncounterState:
         elif event.type in [pygame.MOUSEMOTION, pygame.MOUSEBUTTONUP]:
             for index in range(len(self.panel_areas)):
                 if self.panel_areas[index].collidepoint(event.pos):
-                    print('%s over %s' % (event,
-                                          self.panel_areas[index]))
                     self.selected_element = index
                     return self.ui[index].event_handler(event)
         # Run the event handler on the event, if the event is returned
@@ -263,7 +268,11 @@ class EncounterState:
         if self.active_player >= len(self.actors):
             self.turn += 1
             self.active_player = 0
-        self.hud.selected_player = self.hud.players.index(self.char)
+        try:
+            self.hud.selected_player = self.hud.players.index(self.char)
+        except ValueError:
+            # isn't a player
+            pass
         # Reset actions
         self.char.moved = 0
         self.char.move_action = 1

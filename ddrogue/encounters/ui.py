@@ -313,7 +313,7 @@ class HUD(pygame.sprite.Sprite):
             self.compiled
         ]
         self.element_functions = {
-            12: end_turn_func
+            11: end_turn_func
         }
 
     def update(self):
@@ -343,6 +343,7 @@ class HUD(pygame.sprite.Sprite):
         if event.type == pygame.MOUSEBUTTONUP:
             for index in range(len(self.elements)):
                 if self.element_areas[index].collidepoint(event.pos):
+                    print('clicked on ', index)
                     self.selected_element = index
                     func = self.element_functions.get(index, None)
                     if func:

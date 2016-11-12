@@ -238,7 +238,7 @@ class EncounterMap:
             pos, steps = potentials.pop(0)
             if steps >= speed:
                 continue
-            if self.is_occupied(pos) and not self.obj_at(pos).hostile:
+            if self.is_occupied(pos) and self.obj_at(pos).hostile:
                 continue
             if self.is_wall(self.pixel_pos(pos)):
                 continue
