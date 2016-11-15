@@ -27,7 +27,6 @@ def select_loop(screen, selectable):
     selected = 0
     # Enter main loop
     while 1:
-        screen.fill(BLACK)
         # Draw the img on the screen
         screen.blit(selectable.img, selectable.top_left)
         # Draw the selection box on the screen
@@ -100,6 +99,7 @@ def menu(screen, options, xy=(1000, 1000), top_left=(0, 0), text_color=WHITE,
     font = font or pygame.font.Font(None, 24)
     # Create a blank surface to draw the menu on
     menu_img = pygame.surface.Surface(xy)
+    menu_img.fill(BLACK)
     # Create imgs for each option provided
     if hasattr(options, 'keys'):
         option_keys = options.keys()
