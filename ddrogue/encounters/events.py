@@ -1,11 +1,11 @@
 import json
 import shelve
-import re
 import random
 
 import pygame
 
 from ..colors import BLACK, LIGHT_BLUE
+from ..constants import UI_SIZE, SAVE_DIR, FONT_NAME, FONT_SIZE
 from ..ui import menu
 from ..mechanics.dice import roll
 from .combat import move, move_to, charge
@@ -13,17 +13,7 @@ from .map import EncounterMap
 from .ui import StatusBox, HUD
 
 
-FONT_NAME = 'ubuntumono'
-FONT_SIZE = 14
-
-MOVEMENT_EVENTS = 'UP DOWN LEFT RIGHT'.split()
-
-ALPHA_RE = re.compile("[a-zA-Z0-9]")
-
-UI_SIZE = 400
-
 ACTIONS = {}
-SAVE_DIR = './saves'
 
 
 def save_game(state, filename=None):
@@ -182,7 +172,7 @@ class EncounterState:
         s_width, s_height = self.screen.get_size()
         self.map = EncounterMap(self.actors, floor_plan,
                                 (self.screen.get_width() - UI_SIZE,
-                                 self.screen_get_height() - UI_SIZE))
+                                 self.screen.get_height() - UI_SIZE))
         self.hud = HUD(self, self.players, self.font, (s_width - UI_SIZE, 0),
                        UI_SIZE, s_height)
         self.output = StatusBox(self, self.screen, self.font,

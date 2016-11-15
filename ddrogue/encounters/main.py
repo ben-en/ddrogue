@@ -1,6 +1,5 @@
-import re
-
-from ..colors import GREEN, YELLOW, RED, BLUE
+from ..colors import GREEN, YELLOW, RED
+from ..constants import KEYMAP_FILE
 from .combat import COMBAT_ACTIONS
 from .events import EncounterState
 from .map import EncounterMap, create_map_matrix
@@ -13,20 +12,7 @@ from .npc import Goblin
 from .player import Character
 
 
-# TODO relative file paths
-KEYMAP_FILE = './controls.json'
-SAVE_DIR = './saves'
-FONT_NAME = 'ubuntumono'
-FONT_SIZE = 14
-
-MOVEMENT_EVENTS = 'UP DOWN LEFT RIGHT'.split()
-
-ALPHA_RE = re.compile("[a-zA-Z0-9]")
-
-UI_SIZE = 400
-
 ACTIONS = {}
-SAVE_DIR = './saves'
 
 
 def encounter_loop():
@@ -37,7 +23,7 @@ def encounter_loop():
 
 
 def init_encounter():
-    m = EncounterMap([], create_map_matrix())
+    m = EncounterMap([], create_map_matrix(), (100, 100))
     goblin_img = m.create_tile(color=GREEN)
     goblin = Goblin(goblin_img)
     playera = Character(

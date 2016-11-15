@@ -1,25 +1,10 @@
 from collections import OrderedDict
 import os
 import shelve
-import re
 
+from .constants import SAVE_DIR
 from .encounters.main import encounter_loop
 from .ui import render_text, menu
-
-# TODO relative file paths
-KEYMAP_FILE = './controls.json'
-SAVE_DIR = './saves'
-FONT_NAME = 'ubuntumono'
-FONT_SIZE = 14
-
-MOVEMENT_EVENTS = 'UP DOWN LEFT RIGHT'.split()
-
-ALPHA_RE = re.compile("[a-zA-Z0-9]")
-
-UI_SIZE = 400
-
-ACTIONS = {}
-SAVE_DIR = './saves'
 
 
 def settings(screen):
@@ -47,7 +32,7 @@ def legal(screen):
 
 
 def quit(_):
-    """ Hard quit, takes one argument that is ignored """
+    """ Quit, takes one argument that is ignored """
     return
 
 
