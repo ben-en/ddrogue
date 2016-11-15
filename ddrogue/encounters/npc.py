@@ -25,6 +25,7 @@ class Goblin(Sprite):
         self.ai = 1
         self.hostile = 1
         self.effects = []
+        self.features = {}
 
     def init_stats(self):
         stats = StatBlock(

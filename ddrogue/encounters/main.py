@@ -58,6 +58,7 @@ def init_encounter():
         description="fighter player character",
         equipped=Equipment(r_h=0),
     )
+    playera.pos = [8, 1]
     playerb = Character(
         m.create_tile(color=YELLOW),
         Human,
@@ -76,27 +77,27 @@ def init_encounter():
         description="wizard player character",
         equipped=Equipment(r_h=0),
     )
-    playerc = Character(
-        m.create_tile(color=BLUE),
-        Human,
-        [(Fighter, 1), (Wizard, 2)],
-        (roll('1d6') for x in range(6)),
-        {'skill': 1 for skill in SKILL_LIST},
-        Human.natural_weapons,
-        name='Player C',
-        features={
-            'active': COMBAT_ACTIONS.values(),
-            'passive': [],
-            'spells': [],
-            'spd': [],
-            'feats_known': [],
-        },
-        description="multiclass player character",
-        equipped=Equipment(r_h=0),
-    )
-    playera.pos = [8, 1]
     playerb.pos = [8, 2]
-    playerc.pos = [9, 1]
-    players = [playera, playerb, playerc]
+    # playerc = Character(
+    #     m.create_tile(color=BLUE),
+    #     Human,
+    #     [(Fighter, 1), (Wizard, 2)],
+    #     (roll('1d6') for x in range(6)),
+    #     {'skill': 1 for skill in SKILL_LIST},
+    #     Human.natural_weapons,
+    #     name='Player C',
+    #     features={
+    #         'active': COMBAT_ACTIONS.values(),
+    #         'passive': [],
+    #         'spells': [],
+    #         'spd': [],
+    #         'feats_known': [],
+    #     },
+    #     description="multiclass player character",
+    #     equipped=Equipment(r_h=0),
+    # )
+    # playerc.pos = [9, 1]
+    # players = [playera, playerb, playerc]
+    players = [playera, playerb]
     goblin.pos = [1, 1]
     return players, [goblin], create_map_matrix(), KEYMAP_FILE

@@ -97,6 +97,7 @@ def attack(state):
                                end_pos_func=state.map.enemy_adjacent,
                                COLOR=RED_T)
         if not grid_pos:
+            state._print('Aborting')
             break
         for npc in state.npcs:
             if npc.pos == grid_pos:

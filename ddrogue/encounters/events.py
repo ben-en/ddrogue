@@ -76,11 +76,12 @@ def ability(state, event):
     offer a list of abilities to activate
     """
     ability_list = map(lambda x: x.__name__, state.char.features['active'])
-    ability = menu(pygame.display.get_surface(), ability_list)
-    res = state.char.features['active'][ability_list.index(ability)]
-    if not res:
+    ability = menu(pygame.display.get_surface(), ability_list,
+                   xy=state.map.pixel_pos(state.map.size))
+    if not ability:
         state._print('No event selected')
         return
+    res = state.char.features['active'][ability_list.index(ability)]
     return res(state)
 
 
@@ -179,7 +180,9 @@ class EncounterState:
         self.screen = pygame.display.get_surface()
         set_events()
         s_width, s_height = self.screen.get_size()
-        self.map = EncounterMap(self.actors, floor_plan)
+        self.map = EncounterMap(self.actors, floor_plan,
+                                (self.screen.get_width() - UI_SIZE,
+                                 self.screen_get_height() - UI_SIZE))
         self.hud = HUD(self, self.players, self.font, (s_width - UI_SIZE, 0),
                        UI_SIZE, s_height)
         self.output = StatusBox(self, self.screen, self.font,
@@ -192,6 +195,8 @@ class EncounterState:
         self.panel_areas = [pygame.rect.Rect(e.pos, e.img.get_size()) for e in
                             self.ui]
         self.selected_element = 0
+
+        self.update_player_ui()
 
         # Set the selected player (if one exists)
         if self.actors[0] in self.players:
@@ -268,16 +273,19 @@ class EncounterState:
         if self.active_player >= len(self.actors):
             self.turn += 1
             self.active_player = 0
-        try:
-            self.hud.selected_player = self.hud.players.index(self.char)
-        except ValueError:
-            # isn't a player
-            pass
+        self.update_player_ui()
         # Reset actions
         self.char.moved = 0
         self.char.move_action = 1
         self.char.standard_action = 1
         self.char.swift_action = 1
+
+    def update_player_ui(self):
+        try:
+            self.hud.selected_player = self.hud.players.index(self.char)
+        except ValueError:
+            # isn't a player
+            pass
 
 
 def set_events():
