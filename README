@@ -12,7 +12,7 @@ Controls:
 
 
 immediate list:
-    OGC compliance: move all game content out of code and into text files
+    OGC compliance: move all game content out of code and into text files (OR DUPLICATE)
     turn UI (5-ft step, move/swift/immediate/full round/standard actions)
     functionality from standard character actions (move, bull rush, disarm)
     rudimentary ai that will move and attack the closest/weakest character
@@ -20,9 +20,10 @@ immediate list:
 
 Next on the list is flush out the UI for the encounter scenes. A basic UI has
 been implemented containing an event log, a map, and a heads up display
-containing player character information. An interface for abilities is required
-next. This will include special abilities that all characters get, such as trip
-or bull rush.
+containing player character information. Centering the map is an important
+stepping stone to larger encounter areas. An interface for abilities is 
+required next. This will include special abilities that all characters get, 
+such as trip or bull rush.
 
 Once encounter combat is finished and character creation has been established,
 i will pronounce that version 0.1 and tag it as the most likely place to fork
