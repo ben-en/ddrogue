@@ -1,10 +1,16 @@
+from os import path
 from textwrap import wrap
 
 import pygame
+from pygame import image
 from pygame.rect import Rect
 
 from .colors import BLACK, GREY, WHITE, BLUE
-from .constants import SCREEN, FONT
+from .constants import SCREEN, FONT, TILES_DIR
+
+
+def load_tile(name):
+    return image.load(path.join(TILES_DIR, name + '.png'))
 
 
 def create_tile(color, xy):

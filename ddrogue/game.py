@@ -2,7 +2,7 @@ from collections import OrderedDict
 import os
 import shelve
 
-from .constants import SAVE_DIR
+from .constants import SAVE_DIR, OGC_DIR
 from .encounters.main import encounter_loop
 from .ui import render_text, menu
 
@@ -21,14 +21,12 @@ def guide():
     files, description texts of characters, races, or other features of the
     game.
     """
-    # TODO relative file paths
-    render_text('./ogc/mechanics.txt')
+    render_text(os.path.join(OGC_DIR, 'mechanics.txt'))
 
 
 def legal():
     """ Loads legal text """
-    # TODO relative file paths
-    render_text('./ogc/license.txt')
+    render_text(os.path.join(OGC_DIR, 'license.txt'))
 
 
 def quit(_):

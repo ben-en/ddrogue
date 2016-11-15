@@ -3,7 +3,8 @@ import pygame
 from pygame import Rect
 from pygame.transform import scale
 
-from ..colors import BLACK, WHITE, GREY
+from ..colors import BLACK, WHITE, LIGHT_GREY, GREY
+from ..ui import load_tile
 
 BLANK_MAP = [[0 for i in range(12)] for i in range(12)]
 
@@ -61,6 +62,7 @@ def points_around(point):
     return [((x + n_x), (y + n_y)) for n_x, n_y in neighbors]
 
 
+# TODO: centering
 class EncounterMap:
     """
     This class takes a floor plan and creates a completed map Image object that
@@ -81,9 +83,9 @@ class EncounterMap:
 
         # Set up misc variables
         self.floor = floorplan
-        self.floor_color = GREY
+        self.floor_color = LIGHT_GREY
         self.wall_color = BLACK
-        self.wall_tile = self.create_tile(color=self.wall_color)
+        self.wall_tile = load_tile('wall')
         self.wall_character = 1
 
         # Create the img

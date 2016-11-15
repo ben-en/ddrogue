@@ -1,8 +1,7 @@
-from ..colors import GREEN, YELLOW, RED
 from ..constants import KEYMAP_FILE
 from .combat import COMBAT_ACTIONS
 from .events import EncounterState
-from .map import EncounterMap, create_map_matrix
+from .map import create_map_matrix
 from ..mechanics.classes import Fighter, Wizard
 from ..mechanics.dice import roll
 from ..mechanics.skills import SKILL_LIST
@@ -10,6 +9,7 @@ from ..mechanics.races import Human
 from ..mechanics.weapons import Equipment
 from .npc import Goblin
 from .player import Character
+from ..ui import load_tile
 
 
 ACTIONS = {}
@@ -23,11 +23,9 @@ def encounter_loop():
 
 
 def init_encounter():
-    m = EncounterMap([], create_map_matrix(), (100, 100))
-    goblin_img = m.create_tile(color=GREEN)
-    goblin = Goblin(goblin_img)
+    goblin = Goblin(load_tile('goblin'))
     playera = Character(
-        m.create_tile(color=RED),
+        load_tile('fighter'),
         Human,
         [(Fighter, 1)],
         (roll('1d6') for x in range(6)),
@@ -46,7 +44,7 @@ def init_encounter():
     )
     playera.pos = [8, 1]
     playerb = Character(
-        m.create_tile(color=YELLOW),
+        load_tile('wizard'),
         Human,
         [(Wizard, 2)],
         (roll('1d6') for x in range(6)),
@@ -65,7 +63,7 @@ def init_encounter():
     )
     playerb.pos = [8, 2]
     # playerc = Character(
-    #     m.create_tile(color=BLUE),
+    #     load_tile('wizard'),
     #     Human,
     #     [(Fighter, 1), (Wizard, 2)],
     #     (roll('1d6') for x in range(6)),

@@ -1,0 +1,4 @@
+These tiles are not created by me (Ben), but taken from the Open Source game
+'Dungeon Crawl Stone Soup'; crawl.develz.org
+
+Afaik they are GPL, and any attribution is professional courtesy.
