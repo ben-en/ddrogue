@@ -7,12 +7,12 @@ from .encounters.main import encounter_loop
 from .ui import render_text, menu
 
 
-def settings(screen):
+def settings():
     """ Simple things like fullscreen/windowed, keybinding """
     pass
 
 
-def guide(screen):
+def guide():
     """
     Load the help interface
 
@@ -22,13 +22,13 @@ def guide(screen):
     game.
     """
     # TODO relative file paths
-    render_text(screen, './ogc/mechanics.txt')
+    render_text('./ogc/mechanics.txt')
 
 
-def legal(screen):
+def legal():
     """ Loads legal text """
     # TODO relative file paths
-    render_text(screen, './ogc/license.txt')
+    render_text('./ogc/license.txt')
 
 
 def quit(_):
@@ -47,22 +47,22 @@ def load_game(_):
         encounter_loop(f['state'])
 
 
-def debug(screen):
+def debug():
     """ drop into ipdb to debug an unknown event. """
     print('Entered debug')
     from .mechanics.chargen import chargen
-    player = chargen(screen)
+    player = chargen()
     print(player)
     # import ipdb
     # ipdb.set_trace()
 
 
-def new_game(screen):
+def new_game():
     """ Create a state object and start a game loop with it """
     encounter_loop()
 
 
-def main_menu(screen):
+def main_menu():
     options = OrderedDict()
     options["New Game"] = new_game
     options["debug"] = debug
@@ -71,5 +71,5 @@ def main_menu(screen):
     options["Guide"] = guide
     options["Legal"] = legal
     options["Exit"] = quit
-    func = options[menu(screen, options)]
-    func(screen)
+    func = options[menu(options)]
+    func()

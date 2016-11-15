@@ -5,7 +5,7 @@ import random
 import pygame
 
 from ..colors import BLACK, LIGHT_BLUE
-from ..constants import UI_SIZE, SAVE_DIR, FONT_NAME, FONT_SIZE
+from ..constants import UI_SIZE, SAVE_DIR, SCREEN
 from ..ui import menu
 from ..mechanics.dice import roll
 from .combat import move, move_to, charge
@@ -55,7 +55,7 @@ def spell(state, event):
     if not state.char.features['spells']:
         state._print('No spells known')
     spell_list = map(state.char.features['spells'], lambda x: x.__name__)
-    spell = menu(state.screen, spell_list)
+    spell = menu(spell_list)
     res = state.char.features['spells'][spell_list.index(spell)]
     return res(state)
 
@@ -166,16 +166,13 @@ class EncounterState:
         # When true, exit the game
         self.quit = 0
         # UI
-        self.font = pygame.font.SysFont(FONT_NAME, FONT_SIZE)
-        self.screen = pygame.display.get_surface()
         set_events()
-        s_width, s_height = self.screen.get_size()
-        self.map = EncounterMap(self.actors, floor_plan,
-                                (self.screen.get_width() - UI_SIZE,
-                                 self.screen.get_height() - UI_SIZE))
-        self.hud = HUD(self, self.players, self.font, (s_width - UI_SIZE, 0),
+        s_width, s_height = SCREEN.get_size()
+        self.map = EncounterMap(self.actors, floor_plan, (s_width - UI_SIZE,
+                                                          s_height - UI_SIZE))
+        self.hud = HUD(self, self.players, (s_width - UI_SIZE, 0),
                        UI_SIZE, s_height)
-        self.output = StatusBox(self, self.screen, self.font,
+        self.output = StatusBox(self,
                                 (0, s_height - UI_SIZE / 2), s_width - UI_SIZE,
                                 UI_SIZE / 2)
         # Assign _print method to self for easy access
@@ -197,14 +194,14 @@ class EncounterState:
         return self.actors[self.active_player]
 
     def draw(self):
-        self.screen.fill(BLACK)
+        SCREEN.fill(BLACK)
         # Draw the panels on the screen
         for e in self.ui:
             e.update()
-            self.screen.blit(e.img, e.pos)
+            SCREEN.blit(e.img, e.pos)
         selected_element = self.ui[self.selected_element]
         pygame.draw.rect(
-            self.screen, LIGHT_BLUE,
+            SCREEN, LIGHT_BLUE,
             (selected_element.pos, selected_element.img.get_size()), 1
         )
         pygame.display.flip()

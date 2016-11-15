@@ -4,6 +4,7 @@ import pygame
 from pygame.rect import Rect
 
 from .colors import BLACK, GREY, WHITE, BLUE
+from .constants import SCREEN, FONT
 
 
 def create_tile(color, xy):
@@ -23,14 +24,14 @@ def str_bonus(val, just=3):
     return bonus.rjust(just)
 
 
-def select_loop(screen, selectable):
+def select_loop(selectable):
     selected = 0
     # Enter main loop
     while 1:
         # Draw the img on the screen
-        screen.blit(selectable.img, selectable.top_left)
+        SCREEN.blit(selectable.img, selectable.top_left)
         # Draw the selection box on the screen
-        pygame.draw.rect(screen, selectable.select_color,
+        pygame.draw.rect(SCREEN, selectable.select_color,
                          selectable.positions[selected], 2)
         # Flip the staging area to the display
         pygame.display.flip()
@@ -82,8 +83,8 @@ class Selectable(object):
         self.select_color = select_color
 
 
-def menu(screen, options, xy=(1000, 1000), top_left=(0, 0), text_color=WHITE,
-         font=None, select_color=BLUE,
+def menu(options, xy=(1000, 1000), top_left=(0, 0), text_color=WHITE,
+         select_color=BLUE,
          loop_func=select_loop):
     """
     Generic selection menu
@@ -95,8 +96,6 @@ def menu(screen, options, xy=(1000, 1000), top_left=(0, 0), text_color=WHITE,
 
     TODO use txt_to_img to create the img instead of duplicating
     """
-    # Font
-    font = font or pygame.font.Font(None, 24)
     # Create a blank surface to draw the menu on
     menu_img = pygame.surface.Surface(xy)
     menu_img.fill(BLACK)
@@ -105,7 +104,7 @@ def menu(screen, options, xy=(1000, 1000), top_left=(0, 0), text_color=WHITE,
         option_keys = options.keys()
     else:
         option_keys = options
-    imgs = [font.render(x, False, text_color) for x in options]
+    imgs = [FONT.render(x, False, text_color) for x in options]
     # TODO Find the optimal location to start writing the menu
     cursor_start = (10, 10)
     img_positions = []  # Empty list to hold rects of the imgs
@@ -120,14 +119,14 @@ def menu(screen, options, xy=(1000, 1000), top_left=(0, 0), text_color=WHITE,
     selectable = Selectable(menu_img, img_positions, top_left, text_color,
                             select_color)
 
-    res = select_loop(screen, selectable)
+    res = select_loop(selectable)
     if res is None:
         # If player hit escape, return None
         return None
     return option_keys[res]
 
 
-def render_text(screen, text_file):
+def render_text(text_file):
     """ Render the text file on the screen in a readable format """
     # Add a header that shows the path of the text file so the user can look it
     # up for manual inspection at their discretion
@@ -135,14 +134,12 @@ def render_text(screen, text_file):
     with open(text_file, 'r') as input:
         for l in input.readlines():
             text.append(l)
-    img = text_to_img(screen.get_width(), text)
-    navigable_loop(screen, img, start_pos=-1)
+    img = text_to_img(SCREEN.get_width(), text)
+    navigable_loop(img, start_pos=-1)
 
 
 def text_to_img(width, lines):
     """ Put lines on an img that would fit within the screen """
-    # Initialize the font
-    text_font = pygame.font.Font(None, 18)
     # Calculate the number of characters that can be shown on one row
     characters = (width - 10) / 7
     text = ['']
@@ -157,20 +154,20 @@ def text_to_img(width, lines):
     # Write the text onto the img
     x, y = 0, 0
     for t in text:
-        img.blit(text_font.render(t, False, WHITE), (x, y))
+        img.blit(FONT.render(t, False, WHITE), (x, y))
         y += 15
 
     return img
 
 
-def navigable_loop(screen, img, start_pos=0):
+def navigable_loop(img, start_pos=0):
     # Disply the img
-    bottom = - (img.get_height() - screen.get_height())
+    bottom = - (img.get_height() - SCREEN.get_height())
     if start_pos == -1:
         start_pos = bottom
     x, y = 5, start_pos
     while 1:
-        screen.blit(img, (x, y))
+        SCREEN.blit(img, (x, y))
         pygame.display.flip()
         event = pygame.event.wait()
         if event.type == pygame.KEYUP:

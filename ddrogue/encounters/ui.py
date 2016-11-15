@@ -4,18 +4,17 @@ import pygame
 from pygame.rect import Rect
 
 from ..colors import BLACK, GREY, WHITE, DARK_GREY, RED
+from ..constants import SCREEN, FONT
 from ..ui import create_tile, navigable_loop, text_to_img, str_bonus
 
 
 class StatusBox(pygame.sprite.Sprite):
-    def __init__(self, state, screen, font, pos, x, y):
+    def __init__(self, state, pos, x, y):
         self.state = state
-        self.screen = screen
         self.pos = pos
         self.size = self.width, self.height = x, y
         self.img = pygame.Surface(self.size)
         self.rect = self.img.get_rect()
-        self.font = font
         self.lines = []
 
     def update(self):
@@ -43,7 +42,7 @@ class StatusBox(pygame.sprite.Sprite):
                 self.img.blit(tmp, (1, self.height - 20))
                 continue
             # Render the character
-            render = self.font.render(l, False, WHITE)
+            render = FONT.render(l, False, WHITE)
             # Blit the character on the temporary surface
             tmp.blit(render, (x, y))
             # Adjust the cursor to the right
@@ -68,10 +67,9 @@ class StatusBox(pygame.sprite.Sprite):
 
     def fullscreen(self):
         # TODO find out why you have to hit esc twice
-        self.screen.fill(BLACK)
+        SCREEN.fill(BLACK)
         navigable_loop(
-            self.screen,
-            text_to_img(self.screen.get_width(), self.lines),
+            text_to_img(SCREEN.get_width(), self.lines),
             start_pos=-1
         )
 
@@ -98,67 +96,67 @@ class StatusBox(pygame.sprite.Sprite):
 
 
 # HUD
-def current_turn(state, player, font):
+def current_turn(state, player):
     rows = [
         'T:%s' % str(state.turn + 1).rjust(6),
         'P:     %s' % state.active_player,
     ]
-    return render_column(font, (60, 40), rows)
+    return render_column((60, 40), rows)
 
 
-def mini_map(state, player, font):
+def mini_map(state, player):
     # TODO
     pass
 
 
-def char_hp(state, player, font):
+def char_hp(state, player):
     """ Should show the HP for the currently selected character """
     # TODO add graphical bar
     total = player.max_hp
     current = player.hp
-    img = font.render('HP: %s/%s' % (current, total), False, WHITE)
+    img = FONT.render('HP: %s/%s' % (current, total), False, WHITE)
     return img
 
 
-def char_xp(state, player, font):
+def char_xp(state, player):
     """ Shows xp """
     next_level = 'na'
     current = player.xp
-    img = font.render('XP: %s/%s' % (current, next_level), False,
+    img = FONT.render('XP: %s/%s' % (current, next_level), False,
                       WHITE)
     return img
 
 
-def render_column(font, (x, y), rows, row_height=20):
+def render_column((x, y), rows, row_height=20):
     img = pygame.Surface([x, y])
     y = 0
     for field in rows:
-        img.blit(font.render(field, False, WHITE), (0, y))
+        img.blit(FONT.render(field, False, WHITE), (0, y))
         y += row_height
     return img
 
 
-def char_stats(state, player, font):
+def char_stats(state, player):
     rows = []
     for stat in 'str dex con int wis cha'.split():
         tup = player.stats[stat]
         val = tup[0]
         bonus = str_bonus(tup[1], just=2)
         rows.append('%s: [%s] (%s)' % (stat, str(val).rjust(2), bonus))
-    return render_column(font, (120, 120), rows)
+    return render_column((120, 120), rows)
 
 
-def char_defense(state, player, font):
+def char_defense(state, player):
     p = player
     rows = [
         'AC:    %s' % p.ac,
         'Touch: %s' % p.touch_ac,
         'Flat:  %s' % p.flat_ac
     ]
-    return render_column(font, (65, 300), rows)
+    return render_column((65, 300), rows)
 
 
-def char_offense(state, player, font):
+def char_offense(state, player):
     # TODO fix negative number appearance
     p = player
     rows = [
@@ -166,36 +164,36 @@ def char_offense(state, player, font):
         'CMB:    %s' % p.cmb,
         'CMD:    %s' % p.cmd
     ]
-    return render_column(font, (65, 300), rows)
+    return render_column((65, 300), rows)
 
 
-def char_saves(state, player, font):
+def char_saves(state, player):
     p = player
     rows = [
         'Ref:  %s' % str_bonus(p.ref),
         'Fort: %s' % str_bonus(p.fort),
         'Will: %s' % str_bonus(p.will)
     ]
-    return render_column(font, (65, 300), rows)
+    return render_column((65, 300), rows)
 
 
-def char_misc(state, player, font):
+def char_misc(state, player):
     p = player
     rows = [
         'Init: %s' % str_bonus(p.init),
         'SR:     %s' % p.sr,
         'DR:     %s' % p.dr
     ]
-    return render_column(font, (65, 300), rows)
+    return render_column((65, 300), rows)
 
 
-def char_abilities(state, player, font):
+def char_abilities(state, player):
     p = player
     rows = [a.__name__ for a in p.features['active']]
-    return render_column(font, (100, 300), rows)
+    return render_column((100, 300), rows)
 
 
-def equipment(state, player, font):
+def equipment(state, player):
     """ List equipped items """
     # new body equip setup
     img = pygame.Surface([160, 160])
@@ -208,12 +206,12 @@ def equipment(state, player, font):
         equip_strs.append(': '.join([slot, player.equipment[index].s]))
     y = 0
     for s in equip_strs:
-        img.blit(font.render(s, False, WHITE), (0, y))
+        img.blit(FONT.render(s, False, WHITE), (0, y))
         y += 12
     return img
 
 
-def turn_ui(state, player, font):
+def turn_ui(state, player):
     p = player
     rows = [
         'Available actions',
@@ -222,12 +220,12 @@ def turn_ui(state, player, font):
         'Swift Action:    %s' % bool(p.swift_action),
         'Has moved:       %s' % bool(p.moved),
     ]
-    first_column = render_column(font, (200, 100), rows)
+    first_column = render_column((200, 100), rows)
     # Show initiative order because actors is sorted
     rows = ['Initiative order']
     rows += ['%s:\t%s' % (i + 1, state.actors[i].s)
              for i in range(len(state.actors))]
-    second_column = render_column(font, (120, 100), rows)
+    second_column = render_column((120, 100), rows)
     tmp = pygame.Surface([360, 100])
     tmp.blit(first_column, (0, 0))
     tmp.blit(second_column, (200, 0))
@@ -242,10 +240,10 @@ def end_turn_func(state, *args):
             return state.end_turn()
 
 
-def end_turn(_, x, font):
+def end_turn(_, x):
     img = pygame.Surface((400, 40))
     img.fill(DARK_GREY)
-    img.blit(font.render('End Player Turn', False, RED), (100, 10))
+    img.blit(FONT.render('End Player Turn', False, RED), (100, 10))
     return img
 
 
@@ -265,7 +263,7 @@ class HUD(pygame.sprite.Sprite):
         action status (used actions, move points, etc)
         initiative (roll, bonus?)
     """
-    def __init__(self, state, players, font, pos, x, y):
+    def __init__(self, state, players, pos, x, y):
         self.state = state
         self.players = players
         self.selected_player = 0
@@ -276,16 +274,15 @@ class HUD(pygame.sprite.Sprite):
         self.img = create_tile(BLACK, [x, y])
         self.rect = self.img.get_rect()
         # TODO find a decent standard font
-        self.font = font
 
-        self.header = [font.render('Party: ', False, WHITE)]
+        self.header = [FONT.render('Party: ', False, WHITE)]
         self.header += [p.img for p in players]
 
         self.elements = (
             (current_turn, (335, 5)),
             (
-                lambda state, player, font:
-                font.render('%s the level %s %s %s' % (
+                lambda state, player:
+                FONT.render('%s the level %s %s %s' % (
                                      player.s,
                                      sum([l for c, l in player.clevel]),
                                      player.race.s,
@@ -331,7 +328,7 @@ class HUD(pygame.sprite.Sprite):
             x += icon.get_width() + 5
         self.compiled = []
         for e, pos in self.elements:
-            img = e(self.state, self.players[self.selected_player], self.font)
+            img = e(self.state, self.players[self.selected_player])
             self.img.blit(img, pos)
             self.compiled.append((img, pos))
         if self.selected_element >= 0:

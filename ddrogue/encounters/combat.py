@@ -4,6 +4,7 @@ import pygame
 from pygame.rect import Rect
 
 from ..colors import RED_T, LIGHT_BLUE
+from ..constants import SCREEN
 from ..pathfinding import astar
 
 
@@ -34,10 +35,10 @@ def grid_select(state, start_pos, steps, area_func=None, end_pos_func=None,
         r = rect_list[i]
         if end_pos_func:
             if end_pos_func(p):
-                pygame.draw.rect(state.screen, color, r, 2)
+                pygame.draw.rect(SCREEN, color, r, 2)
                 end_pos_found = True
         else:
-            pygame.draw.rect(state.screen, color, r, 2)
+            pygame.draw.rect(SCREEN, color, r, 2)
     if end_pos_func and not end_pos_found:
         state._print('End position not found, cannot perform action')
         pygame.display.flip()
