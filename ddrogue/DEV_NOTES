@@ -1,5 +1,13 @@
 Encounter flow:
 
+With the players, npcs, floor_plan, and keymap_path, an EncounterState object
+can be initialize. EncounterState contains all the user interface elements,
+turn control mechanisms, and drawing mechanism.
+
+Combat actions take a state and nothing else. They use EncounterState.char to
+determine what character is taking the action. Actions are expected to be
+player actions.
+
 When EncounterState is initialized, all the properties are initialized and 
 characters are sorted by rolling initiative. Next the game enters a loop while
 loop, while not state.quit infinitely calling state.next_turn().
@@ -13,3 +21,13 @@ returning the event when the UI returns an event.
 For instance, if you click on the map, the event would be returned and used as
 an argument for the action mapped (in this case pygame.MOUSEBUTTONUP). When you
 push left or right, the event is returned so it can be mapped to the keymap.
+
+
+
+# Init
+screen, font
+
+# World State
+
+# Encounter State
+players, npcs, floor_plan, keymap_file
