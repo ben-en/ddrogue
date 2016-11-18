@@ -1,6 +1,7 @@
 import json
 import shelve
 import random
+from time import sleep
 
 import pygame
 from pygame import draw
@@ -133,6 +134,7 @@ def ai_turn(state):
     npc = state.char
     move_to(state, state.char, random.choice(state.players).pos,
             steps=npc.speed)
+    sleep(0.2)
 
 
 def load_keymap(file_path):
@@ -264,6 +266,7 @@ class EncounterState:
         return event
 
     def next_turn(self):
+        self.draw()
         self._print('%s\'s turn' % self.char.s)
         if len(self.char.effects):
             for e in self.char.effects.pop[0]:

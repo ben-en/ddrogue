@@ -62,6 +62,7 @@ def move_to(state, char, pos, steps=None):
     """
     Using state's access to the map, move given `char` to `pos`, max `steps`
     """
+    state.draw()
     path = astar(state.map.floor.transpose(), tuple(char.pos), tuple(pos))
     # For some reason astar figures the path backwards. Dunno why,
     path.reverse()
@@ -71,6 +72,7 @@ def move_to(state, char, pos, steps=None):
         char.pos = step
         state.draw()
         sleep(0.1)
+    sleep(0.2)
 
 
 def resolve_attack(state, defender):
