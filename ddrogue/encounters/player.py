@@ -97,6 +97,7 @@ class Character(Sprite):
         self.move_action = 1
         self.standard_action = 1
         self.swift_action = 1
+        self.prone = 0
 
     @property
     def ac(self):

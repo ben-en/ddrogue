@@ -239,13 +239,35 @@ def stand_up(state):
     """
     move action that provokes an attack of opportunity
     """
+    if not state.char.prone:
+        state._print('Not prone!')
+    state.char.prone = 0
+    state.char.moved = 1
+    state.char.move_action = 0
+
+
+# Not implemented, sorted easier to harder to implement
+@combat_action
+def throw(state):
+    """
+    throw something at the enemy
+    """
     print('not implemented')
 
 
 @combat_action
-def aid_another(state):
+def trip(state):
     """
-    +2 to an ally's attack or ac against an enemy
+    try to trip an enemy, knocking them prone
+    """
+    print('not implemented')
+
+
+@combat_action
+def feint(state):
+    """
+    trick your opponent and knock the off balance,leaving them flatfooted
+    against your next attack
     """
     print('not implemented')
 
@@ -275,23 +297,6 @@ def overrun(state):
 
 
 @combat_action
-def trip(state):
-    """
-    try to trip an enemy, knocking them prone
-    """
-    print('not implemented')
-
-
-@combat_action
-def feint(state):
-    """
-    trick your opponent and knock the off balance,leaving them flatfooted
-    against your next attack
-    """
-    print('not implemented')
-
-
-@combat_action
 def grapple(state):
     """
     initiate a grapple with the chosen enemy
@@ -300,9 +305,9 @@ def grapple(state):
 
 
 @combat_action
-def throw(state):
+def aid_another(state):
     """
-    throw something at the enemy
+    +2 to an ally's attack or ac against an enemy
     """
     print('not implemented')
 
