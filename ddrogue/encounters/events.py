@@ -3,8 +3,10 @@ import shelve
 import random
 
 import pygame
+from pygame import draw
+from pygame import Rect
 
-from ..colors import BLACK, LIGHT_BLUE
+from ..colors import BLACK, LIGHT_BLUE, GREY
 from ..constants import UI_SIZE, SAVE_DIR, SCREEN
 from ..ui import menu
 from ..mechanics.dice import roll
@@ -66,8 +68,7 @@ def ability(state, event):
     offer a list of abilities to activate
     """
     ability_list = map(lambda x: x.__name__, state.char.features['active'])
-    ability = menu(pygame.display.get_surface(), ability_list,
-                   xy=state.map.pixel_pos(state.map.size))
+    ability = menu(ability_list, xy=state.map.ui_size)
     if not ability:
         state._print('No event selected')
         return
@@ -168,8 +169,8 @@ class EncounterState:
         # UI
         set_events()
         s_width, s_height = SCREEN.get_size()
-        self.map = EncounterMap(self.actors, floor_plan, (s_width - UI_SIZE,
-                                                          s_height - UI_SIZE))
+        self.map = EncounterMap(self.actors, floor_plan,
+                                (s_width - UI_SIZE, s_height - UI_SIZE / 2))
         self.hud = HUD(self, self.players, (s_width - UI_SIZE, 0),
                        UI_SIZE, s_height)
         self.output = StatusBox(self,
@@ -196,9 +197,11 @@ class EncounterState:
     def draw(self):
         SCREEN.fill(BLACK)
         # Draw the panels on the screen
+        self.map.update(self.char.pos)
+        self.hud.update()
         for e in self.ui:
-            e.update()
             SCREEN.blit(e.img, e.pos)
+        draw.rect(SCREEN, GREY, Rect((0, 0), self.map.ui_size), 2)
         selected_element = self.ui[self.selected_element]
         pygame.draw.rect(
             SCREEN, LIGHT_BLUE,
@@ -219,8 +222,8 @@ class EncounterState:
             print('keycode: ', event.key)
             try:
                 print('key: ', chr(event.key))
-            except ValueError:
-                print('non-alphanumeric key')
+            except ValueError as e:
+                print(e)
             if event.key == 27:  # esc
                 # break out returning a quit event
                 return event
@@ -232,17 +235,33 @@ class EncounterState:
                 elif self.selected_element < 0:
                     self.selected_element = len(self.ui) - 1
                 return
+            elif event.key in [ord(c) for c in '\n ']:
+                self.output.fullscreen()
+            elif event.key == 275:
+                self.hud.adjust_selected_player(1)
+            elif event.key == 276:
+                self.hud.adjust_selected_player(-1)
         elif event.type == pygame.QUIT:
             return event
         elif event.type in [pygame.MOUSEMOTION, pygame.MOUSEBUTTONUP]:
-            for index in range(len(self.panel_areas)):
-                if self.panel_areas[index].collidepoint(event.pos):
-                    self.selected_element = index
-                    return self.ui[index].event_handler(event)
-        # Run the event handler on the event, if the event is returned
-        # by the handler it is returned as the final event
-        element = self.ui[self.selected_element]
-        return element.event_handler(event)
+            if self.output.area_rect.collidepoint(event.pos):
+                print('output box collision', self.output.rect)
+                self.output.fullscreen()
+            elif self.hud.area_rect.collidepoint(event.pos):
+                print('hud collision', self.hud.rect)
+                for index in range(len(self.hud.elements)):
+                    if self.hud.element_areas[index].collidepoint(event.pos):
+                        print('clicked on ', index)
+                        self.hud.selected_element = index
+                        func = self.hud.element_functions.get(index, None)
+                        if func:
+                            return func(self, event)
+            else:
+                # Pass the mouse event back if it was on the map
+                return event
+            # Don't return the even tif it was in the hud or output
+            return
+        return event
 
     def next_turn(self):
         self._print('%s\'s turn' % self.char.s)

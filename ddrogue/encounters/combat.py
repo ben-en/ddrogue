@@ -26,8 +26,10 @@ def grid_select(state, start_pos, steps, area_func=None, end_pos_func=None,
         area_func = state.map.movable_area
     pos_list = area_func(start_pos, steps)
     for p in pos_list:
-        pixel_p = tuple(axis * state.map.unit for axis in p)
-        rect_list.append(Rect(pixel_p, state.map.unit_t))
+        pixel_p = state.map.pixel_pos((x - p[0], y - p[1]))
+        offset_p = ((state.map.ui_size[0] / 2) - pixel_p[0],
+                    (state.map.ui_size[1] / 2) - pixel_p[1])
+        rect_list.append(Rect(offset_p, state.map.unit_t))
     state.draw()
     end_pos_found = False
     for i in range(len(pos_list)):
@@ -53,7 +55,7 @@ def grid_select(state, start_pos, steps, area_func=None, end_pos_func=None,
             r = Rect(event.pos, (1, 1))
             index = r.collidelist(rect_list)
             if not index == -1:
-                return state.map.grid_pos(event.pos)
+                return pos_list[index]
 
 
 def move_to(state, char, pos, steps=None):

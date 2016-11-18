@@ -15,18 +15,15 @@ class StatusBox(pygame.sprite.Sprite):
         self.size = self.width, self.height = x, y
         self.img = pygame.Surface(self.size)
         self.rect = self.img.get_rect()
+        self.area_rect = Rect(pos, self.size)
         self.lines = []
-
-    def update(self):
-        pygame.draw.rect(self.img, GREY,
-                         pygame.rect.Rect((0, 0), (self.width + 20,
-                                                   self.height + 20)), 1)
 
     def cr(self, y, incr=20):
         y += incr
         self.img.scroll(0, -incr)
         return 5, y
 
+    # TODO find a better name than _print
     def _print(self, s):
         """ write given string to output box """
         # Put the text into the list of lines for fullscreen status
@@ -58,13 +55,6 @@ class StatusBox(pygame.sprite.Sprite):
         # After writing text, carriage return.
         # Set cursor property
 
-    def event_handler(self, event):
-        if event.type == pygame.MOUSEBUTTONUP:
-            self.fullscreen()
-        elif event.type == pygame.KEYUP:
-            if event.key in [ord(c) for c in '\n ']:
-                self.fullscreen()
-
     def fullscreen(self):
         # TODO find out why you have to hit esc twice
         SCREEN.fill(BLACK)
@@ -84,12 +74,13 @@ class StatusBox(pygame.sprite.Sprite):
                 if not hasattr(event, 'key'):
                     continue
                 if event.key == ord('y'):
-                    if event.mod == 1: #TODO add right shift compatibility
+                    if event.mod == 1:  # TODO add right shift compatibility
                         return True
                     else:
                         self._print("shift and y, to mimize accidents")
                         continue
                 if event.key == ord('n'):
+                    self._print('aborting')
                     return False
                 else:
                     self._print("'n' or 'Y' only")
@@ -268,12 +259,11 @@ class HUD(pygame.sprite.Sprite):
         self.players = players
         self.selected_player = 0
         self.pos = pos
-        self.width = x
+        self.size = self.width, self.height = x, y
         self.element_width = x - 6
-        self.height = y
         self.img = create_tile(BLACK, [x, y])
         self.rect = self.img.get_rect()
-        # TODO find a decent standard font
+        self.area_rect = Rect(pos, self.size)
 
         self.header = [FONT.render('Party: ', False, WHITE)]
         self.header += [p.img for p in players]
@@ -335,25 +325,6 @@ class HUD(pygame.sprite.Sprite):
             pygame.draw.rect(
                 self.img, WHITE, self.element_areas[self.selected_element], 5
             )
-
-    def event_handler(self, event):
-        if event.type == pygame.MOUSEBUTTONUP:
-            for index in range(len(self.elements)):
-                if self.element_areas[index].collidepoint(event.pos):
-                    print('clicked on ', index)
-                    self.selected_element = index
-                    func = self.element_functions.get(index, None)
-                    if func:
-                        return func(self.state, event)
-            # Don't pass the event back
-            return
-        elif event.type == pygame.KEYUP:
-            if event.key == 275:
-                self.adjust_selected_player(1)
-            if event.key == 276:
-                self.adjust_selected_player(-1)
-        # Return the event at the end
-        return event
 
     def adjust_selected_player(self, val):
         self.selected_player += val

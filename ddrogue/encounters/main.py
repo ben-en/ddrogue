@@ -42,7 +42,7 @@ def init_encounter():
         description="fighter player character",
         equipped=Equipment(r_h=0),
     )
-    playera.pos = [8, 1]
+    playera.pos = [18, 1]
     playerb = Character(
         load_tile('wizard'),
         Human,
@@ -61,7 +61,7 @@ def init_encounter():
         description="wizard player character",
         equipped=Equipment(r_h=0),
     )
-    playerb.pos = [8, 2]
+    playerb.pos = [8, 12]
     # playerc = Character(
     #     load_tile('wizard'),
     #     Human,

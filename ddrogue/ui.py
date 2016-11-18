@@ -90,8 +90,7 @@ class Selectable(object):
 
 
 def menu(options, xy=(1000, 1000), top_left=(0, 0), text_color=WHITE,
-         select_color=BLUE,
-         loop_func=select_loop):
+         select_color=BLUE, loop_func=select_loop):
     """
     Generic selection menu
 

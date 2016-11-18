@@ -69,7 +69,7 @@ class EncounterMap:
     can be blitted onto the map as one object, as opposed to creating the map
     from all the tiles each turn.
     """
-    def __init__(self, objects, floorplan, xy, tile_size=32):
+    def __init__(self, objects, floorplan, ui_size, tile_size=32):
         # Set up units, assumes rectangular matrix
         self.pos = (0, 0)
         self.unit = tile_size
@@ -80,6 +80,7 @@ class EncounterMap:
         self.width = len(floorplan[0])
         self.height = len(floorplan)
         self.size = [self.width, self.height]
+        self.ui_size = ui_size
 
         # Set up misc variables
         self.floor = floorplan
@@ -94,7 +95,7 @@ class EncounterMap:
         self.rect = self.bg_img.get_rect()
 
         self.objects = objects
-        self.update()
+        self.update((0, 0))
 
     def assemble_map_img(self):
         """
@@ -188,13 +189,18 @@ class EncounterMap:
         new_img.fill(color, rect=[1, 1, xy[0] - 2, xy[1] - 2])
         return new_img
 
-    def event_handler(self, event):
-        return event
-
-    def update(self):
-        self.img = self.bg_img.copy()
+    def update(self, pos):
+        self.full_img = self.bg_img.copy()
         for obj in self.objects:
-            self.img.blit(obj.img, self.pixel_pos(obj.pos))
+            self.full_img.blit(obj.img, self.pixel_pos(obj.pos))
+        self.img = pygame.Surface(self.ui_size)
+        offset_pos = self.center(pos)
+        self.img.blit(self.full_img, (0, 0), Rect(offset_pos, self.ui_size))
+
+    def center(self, pos):
+        p_pos = self.pixel_pos(pos)
+        return (p_pos[0] - (self.ui_size[0] / 2),
+                p_pos[1] - (self.ui_size[1] / 2))
 
     def obj_at(self, pos):
         """ return the object at the given position, if any """
