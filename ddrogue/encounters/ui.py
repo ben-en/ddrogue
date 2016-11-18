@@ -228,7 +228,7 @@ def end_turn_func(state, *args):
             state.char.swift_action):
         state._print('%s still has actions available.' % state.char.s)
         if state.output.ask('Are you sure you want to end the turn?'):
-            return state.end_turn()
+            return 'done'
 
 
 def end_turn(_, x):

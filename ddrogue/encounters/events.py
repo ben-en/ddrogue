@@ -122,11 +122,14 @@ def player_turn(state):
             event = state.interact_with_user()
             if event:
                 break
+        if event == 'done':
+            done = 1
+            continue
         print('found event', event)
         func = EVENT_MAP[event.type]
         res = func(state, event)
         if res == 'done':
-            done = True
+            done = 1
 
 
 def ai_turn(state):
