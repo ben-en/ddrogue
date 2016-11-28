@@ -1,9 +1,7 @@
 from collections import OrderedDict
 
-import pygame
 from pygame.sprite import Sprite
 
-from .events import player_turn
 from ..mechanics.dice import die_to_val
 from ..mechanics.stats import Stat, StatBlock, stat_bonus
 from ..mechanics.skills import SKILL_LIST
@@ -150,8 +148,3 @@ class Character(Sprite):
                 self.check_penalty if check else 0
             ))
         return skills
-
-    def act(self):
-        # TODO void any kepresses while rendering
-        player_turn(self)
-        pygame.event.clear()
