@@ -8,7 +8,12 @@ from ..constants import SCREEN
 from ..pathfinding import astar
 
 
-COMBAT_ACTIONS = {}
+ALL_ACTIONS = {}
+STANDARD_ACTIONS = {}
+FULL_ROUND_ACTIONS = {}
+MOVE_ACTIONS = {}
+SWIFT_ACTIONS = {}
+FREE_ACTIONS = {}
 
 
 def grid_select(state, start_pos, steps, area_func=None, end_pos_func=None,
@@ -80,12 +85,38 @@ def resolve_attack(state, defender):
 
 
 # Combat actions
-def combat_action(func):
-    COMBAT_ACTIONS[func.__name__] = func
+def standard_action(func):
+    # TODO: humanize action labels
+    ALL_ACTIONS[func.__name__] = func
+    STANDARD_ACTIONS[func.__name__] = func
     return func
 
 
-@combat_action
+def full_round_action(func):
+    ALL_ACTIONS[func.__name__] = func
+    FULL_ROUND_ACTIONS[func.__name__] = func
+    return func
+
+
+def move_action(func):
+    ALL_ACTIONS[func.__name__] = func
+    MOVE_ACTIONS[func.__name__] = func
+    return func
+
+
+def swift_action(func):
+    ALL_ACTIONS[func.__name__] = func
+    SWIFT_ACTIONS[func.__name__] = func
+    return func
+
+
+def free_action(func):
+    ALL_ACTIONS[func.__name__] = func
+    FREE_ACTIONS[func.__name__] = func
+    return func
+
+
+@standard_action
 def attack(state):
     if not state.char.standard_action:
         state._print('No standard action available')
@@ -111,7 +142,7 @@ def attack(state):
     resolve_attack(state, npc)
 
 
-@combat_action
+@full_round_action
 def withdraw(state):
     """
     a full round action that prevents attacks of opportunity by aby characters
@@ -136,7 +167,7 @@ def total_defense_debuff(state):
     state.char.ac -= 4
 
 
-@combat_action
+@standard_action
 def total_defense(state):
     """
     full round action that gives +4 dodge bonus to ac
@@ -152,7 +183,7 @@ def total_defense(state):
     state.char.standard_action = 0
 
 
-@combat_action
+@free_action
 def five_foot_step(state):
     """
     free action that may be taken when a character has made no other nove
@@ -166,7 +197,7 @@ def five_foot_step(state):
     state.char.moved = 1
 
 
-@combat_action
+@move_action
 def move(state):
     """
     full round action to move at 4x speed
@@ -189,7 +220,7 @@ def move(state):
     state.char.move_action = 0
 
 
-@combat_action
+@full_round_action
 def run(state):
     """
     full round action to move at 4x speed
@@ -205,7 +236,7 @@ def run(state):
     state.char.move_action = 0
 
 
-@combat_action
+@full_round_action
 def charge(state):
     """
     full round action that lets you move up to twice your speed in a straight
@@ -234,7 +265,7 @@ def charge(state):
     state.char.move_action = 0
 
 
-@combat_action
+@move_action
 def stand_up(state):
     """
     move action that provokes an attack of opportunity
@@ -247,7 +278,7 @@ def stand_up(state):
 
 
 # Not implemented, sorted easier to harder to implement
-@combat_action
+@standard_action
 def throw(state):
     """
     throw something at the enemy
@@ -255,7 +286,7 @@ def throw(state):
     print('not implemented')
 
 
-@combat_action
+@standard_action
 def trip(state):
     """
     try to trip an enemy, knocking them prone
@@ -263,7 +294,7 @@ def trip(state):
     print('not implemented')
 
 
-@combat_action
+@standard_action
 def feint(state):
     """
     trick your opponent and knock the off balance,leaving them flatfooted
@@ -272,7 +303,7 @@ def feint(state):
     print('not implemented')
 
 
-@combat_action
+@standard_action
 def bull_rush(state):
     """
     combat maneuver to push an enemy
@@ -280,7 +311,7 @@ def bull_rush(state):
     print('not implemented')
 
 
-@combat_action
+@standard_action
 def disarm(state):
     """
     combat maneuver to force an enemu to drop their equopped weapon
@@ -288,7 +319,7 @@ def disarm(state):
     print('not implemented')
 
 
-@combat_action
+@standard_action
 def overrun(state):
     """
     attempt to force through an enemy's square
@@ -296,7 +327,7 @@ def overrun(state):
     print('not implemented')
 
 
-@combat_action
+@standard_action
 def grapple(state):
     """
     initiate a grapple with the chosen enemy
@@ -304,7 +335,7 @@ def grapple(state):
     print('not implemented')
 
 
-@combat_action
+@standard_action
 def aid_another(state):
     """
     +2 to an ally's attack or ac against an enemy
@@ -312,7 +343,7 @@ def aid_another(state):
     print('not implemented')
 
 
-@combat_action
+@standard_action
 def ready(state):
     """
     prepare a spear, counterspell, bow, or similar
@@ -320,7 +351,7 @@ def ready(state):
     print('not implemented')
 
 
-@combat_action
+@free_action
 def delay(state):
     """
     delay your action until later in the initiative order

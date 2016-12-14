@@ -64,6 +64,177 @@ def spell(state, event):
 
 
 @action
+def all_actions(state, event):
+    """
+    offer a list of combat actions available to all characters
+    """
+    action_groups = (('Free Actions', FREE_ACTIONS),
+                     ('Swift Actions', SWIFT_ACTIONS),
+                     ('Move Actions', MOVE_ACTIONS),
+                     ('Standard Actions', STANDARD_ACTIONS),
+                     ('Full Round Actions', FULL_ROUND_ACTIONS))
+    x, y = 5, 5
+    img_positions = []
+    final_img = pygame.surface.Surface(state.map.ui_size)
+    final_img.fill(BLACK)
+    for s, d in action_groups:
+        final_img.blit(FONT.render(s, False, WHITE), (x, y))
+        y += 20
+        imgs = [FONT.render(k, False, WHITE) for k in d]
+        for i in imgs:
+            select_box = Rect((x - 4, y - 4), i.get_size())
+            img_positions.append(select_box)
+            final_img.blit(i, (x, y))
+            y += 20
+        y += 20
+    selectable = Selectable(final_img, img_positions)
+    index = select_loop(selectable)
+    if not index:
+        state._print('No action selected')
+        return
+    for s, d in action_groups:
+        if index > len(d):
+            index -= len(d)
+            continue
+        return d.values()[index](state)
+
+
+@action
+def free_actions(state, event):
+    """
+    offer a list of combat actions available to all characters
+    """
+    s, d = ('Free Actions', FREE_ACTIONS)
+    x, y = 5, 5
+    img_positions = []
+    final_img = pygame.surface.Surface(state.map.ui_size)
+    final_img.fill(BLACK)
+    final_img.blit(FONT.render(s, False, WHITE), (x, y))
+    y += 20
+    imgs = [FONT.render(k, False, WHITE) for k in d]
+    for i in imgs:
+        select_box = Rect((x - 4, y - 4), i.get_size())
+        img_positions.append(select_box)
+        final_img.blit(i, (x, y))
+        y += 20
+    y += 20
+    selectable = Selectable(final_img, img_positions)
+    index = select_loop(selectable)
+    if not index:
+        state._print('No action selected')
+        return
+    return d.values()[index](state)
+
+
+@action
+def swift_actions(state, event):
+    """
+    offer a list of combat actions available to all characters
+    """
+    s, d = ('Swift Actions', SWIFT_ACTIONS)
+    x, y = 5, 5
+    img_positions = []
+    final_img = pygame.surface.Surface(state.map.ui_size)
+    final_img.fill(BLACK)
+    final_img.blit(FONT.render(s, False, WHITE), (x, y))
+    y += 20
+    imgs = [FONT.render(k, False, WHITE) for k in d]
+    for i in imgs:
+        select_box = Rect((x - 4, y - 4), i.get_size())
+        img_positions.append(select_box)
+        final_img.blit(i, (x, y))
+        y += 20
+    y += 20
+    selectable = Selectable(final_img, img_positions)
+    index = select_loop(selectable)
+    if not index:
+        state._print('No action selected')
+        return
+    return d.values()[index](state)
+
+
+@action
+def move_actions(state, event):
+    """
+    offer a list of combat actions available to all characters
+    """
+    s, d = ('Move Actions', MOVE_ACTIONS)
+    x, y = 5, 5
+    img_positions = []
+    final_img = pygame.surface.Surface(state.map.ui_size)
+    final_img.fill(BLACK)
+    final_img.blit(FONT.render(s, False, WHITE), (x, y))
+    y += 20
+    imgs = [FONT.render(k, False, WHITE) for k in d]
+    for i in imgs:
+        select_box = Rect((x - 4, y - 4), i.get_size())
+        img_positions.append(select_box)
+        final_img.blit(i, (x, y))
+        y += 20
+    y += 20
+    selectable = Selectable(final_img, img_positions)
+    index = select_loop(selectable)
+    if not index:
+        state._print('No action selected')
+        return
+    return d.values()[index](state)
+
+
+@action
+def full_round_actions(state, event):
+    """
+    offer a list of combat actions available to all characters
+    """
+    s, d = ('Full Round Actions', FULL_ROUND_ACTIONS)
+    x, y = 5, 5
+    img_positions = []
+    final_img = pygame.surface.Surface(state.map.ui_size)
+    final_img.fill(BLACK)
+    final_img.blit(FONT.render(s, False, WHITE), (x, y))
+    y += 20
+    imgs = [FONT.render(k, False, WHITE) for k in d]
+    for i in imgs:
+        select_box = Rect((x - 4, y - 4), i.get_size())
+        img_positions.append(select_box)
+        final_img.blit(i, (x, y))
+        y += 20
+    y += 20
+    selectable = Selectable(final_img, img_positions)
+    index = select_loop(selectable)
+    if not index:
+        state._print('No action selected')
+        return
+    return d.values()[index](state)
+
+
+@action
+def standard_actions(state, event):
+    """
+    offer a list of combat actions available to all characters
+    """
+    s, d = ('Standard Actions', STANDARD_ACTIONS)
+    x, y = 5, 5
+    img_positions = []
+    final_img = pygame.surface.Surface(state.map.ui_size)
+    final_img.fill(BLACK)
+    final_img.blit(FONT.render(s, False, WHITE), (x, y))
+    y += 20
+    imgs = [FONT.render(k, False, WHITE) for k in d]
+    for i in imgs:
+        select_box = Rect((x - 4, y - 4), i.get_size())
+        img_positions.append(select_box)
+        final_img.blit(i, (x, y))
+        y += 20
+    y += 20
+    selectable = Selectable(final_img, img_positions)
+    index = select_loop(selectable)
+    if not index:
+        state._print('No action selected')
+        return
+    return d.values()[index](state)
+
+
+@action
 def ability(state, event):
     """
     offer a list of abilities to activate
@@ -103,7 +274,7 @@ def process_key_press(state, event):
 
 
 def process_click(state, event):
-    ability(state, event)
+    all_actions(state, event)
 
 
 EVENT_MAP = {
