@@ -42,7 +42,6 @@ class Character(Sprite):
         gold=0,
         equipped=None,
     ):
-        """ Creates a character object """
         # img related
         Sprite.__init__(self)
         self.groups = []
@@ -54,13 +53,12 @@ class Character(Sprite):
         self.clevel = char_levels
         self.speed = race.speed
 
-        self.desc = (description or 'missing unique description')
+        self.desc = description or 'missing unique description'
         self.s = name or 'No Name'
 
         self.equipment = equipment
-        self.equipped = equipped or self.equipment.index(
-            sorted(self.equipment, key=lambda x: die_to_val(x.dmg))[0]
-        )
+        self.equipped = equipped or sorted(self.equipment,
+                                           key=lambda x: die_to_val(x.dmg))[0]
 
         self.stats = StatBlock([Stat(i, stat_bonus(i)) for i in abilities])
         self.skill_ranks = skill_ranks
