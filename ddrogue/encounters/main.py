@@ -1,5 +1,4 @@
 from ..constants import KEYMAP_FILE
-from .combat import COMBAT_ACTIONS
 from .events import EncounterState
 from .map import create_map_matrix
 from ..mechanics.classes import Fighter, Wizard
@@ -12,9 +11,6 @@ from .player import Character
 from ..ui import load_tile
 
 
-ACTIONS = {}
-
-
 def encounter_loop():
     players, npcs, floor_plan, keymap_path = init_encounter()
     state = EncounterState(players, npcs, floor_plan, keymap_path)
@@ -23,7 +19,14 @@ def encounter_loop():
 
 
 def init_encounter():
-    goblin = Goblin(load_tile('goblin'))
+    goblin1 = Goblin(load_tile('goblin'))
+    goblin2 = Goblin(load_tile('goblin'))
+    goblin3 = Goblin(load_tile('goblin'))
+    goblin4 = Goblin(load_tile('goblin'))
+    goblin1.pos = [1, 1]
+    goblin2.pos = [1, 2]
+    goblin3.pos = [19, 1]
+    goblin4.pos = [8, 10]
     playera = Character(
         load_tile('fighter'),
         Human,
@@ -33,7 +36,7 @@ def init_encounter():
         Human.natural_weapons,
         name='Player A',
         features={
-            'active': COMBAT_ACTIONS.values(),
+            'active': [],
             'passive': [],
             'spells': [],
             'spd': [],
@@ -47,12 +50,12 @@ def init_encounter():
         load_tile('wizard'),
         Human,
         [(Wizard, 2)],
-        (roll('1d6') for x in range(6)),
+        (roll('4d6') for x in range(6)),
         {'skill': 1 for skill in SKILL_LIST},
         Human.natural_weapons,
         name='Player B',
         features={
-            'active': COMBAT_ACTIONS.values(),
+            'active': [],
             'passive': [],
             'spells': [],
             'spd': [],
@@ -71,7 +74,7 @@ def init_encounter():
     #     Human.natural_weapons,
     #     name='Player C',
     #     features={
-    #         'active': COMBAT_ACTIONS.values(),
+    #         'active': [],
     #         'passive': [],
     #         'spells': [],
     #         'spd': [],
@@ -83,5 +86,5 @@ def init_encounter():
     # playerc.pos = [9, 1]
     # players = [playera, playerb, playerc]
     players = [playera, playerb]
-    goblin.pos = [1, 1]
-    return players, [goblin], create_map_matrix(), KEYMAP_FILE
+    npcs = [goblin1, goblin2, goblin3, goblin4]
+    return players, npcs, create_map_matrix(), KEYMAP_FILE
