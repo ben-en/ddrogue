@@ -118,12 +118,18 @@ def free_action(func):
 
 @standard_action
 def attack(state):
+    """
+    Should use state.char's weilded weapon for the attack, accounting for
+    ranged, unarmed, and regular melee attacks.
+    """
     if not state.char.standard_action:
         state._print('No standard action available')
         return
     state._print('Attack who?')
     enemy = None
-    weapon = state.char.equipment[state.char.equipped['r_hand']]
+    weapon = state.char.equipped
+    print(weapon)
+    state._print(weapon.s)
     if 'reach' in weapon.tags:
         range = 2
     else:
@@ -200,7 +206,7 @@ def five_foot_step(state):
 @move_action
 def move(state):
     """
-    full round action to move at 4x speed
+    move at regular speed
     """
     if not state.char.move_action:
         state._print('No move action available.')
@@ -247,18 +253,16 @@ def charge(state):
                      'enough actions to perform a full round action.')
         return
     state._print('Charge')
-    npc = None
-    while not npc:
-        move_pos = grid_select(state, state.char.pos, (state.char.speed * 4),
-                               end_pos_func=state.map.enemy_adjacent)
-        if not move_pos:
-            state._print('aborted')
-            return
-        npc = state.map.obj_at(move_pos)
-        if npc and not npc.hostile:
-            if not state.output.ask('Are you sure you want to attack a '
-                                    'non-hostile npc?'):
-                npc = None
+    move_pos = grid_select(state, state.char.pos, (state.char.speed * 4),
+                           end_pos_func=state.map.enemy_adjacent)
+    if not move_pos:
+        state._print('aborted')
+        return
+    npc = state.map.obj_at(move_pos)
+    if npc and not npc.hostile:
+        if not state.output.ask('Are you sure you want to attack a '
+                                'non-hostile npc?'):
+            npc = None
     resolve_attack(state, npc)
     state.char.moved = 1
     state.char.standard_action = 0
@@ -279,17 +283,10 @@ def stand_up(state):
 
 # Not implemented, sorted easier to harder to implement
 @standard_action
-def throw(state):
-    """
-    throw something at the enemy
-    """
-    print('not implemented')
-
-
-@standard_action
 def trip(state):
     """
     try to trip an enemy, knocking them prone
+    without feat triggers attack of opportunity
     """
     print('not implemented')
 
@@ -299,6 +296,7 @@ def feint(state):
     """
     trick your opponent and knock the off balance,leaving them flatfooted
     against your next attack
+    without feat triggers attack of opportunity
     """
     print('not implemented')
 
@@ -306,7 +304,8 @@ def feint(state):
 @standard_action
 def bull_rush(state):
     """
-    combat maneuver to push an enemy
+    full round?  combat maneuver to push an enemy
+    without feat triggers attack of opportunity
     """
     print('not implemented')
 
@@ -315,6 +314,7 @@ def bull_rush(state):
 def disarm(state):
     """
     combat maneuver to force an enemu to drop their equopped weapon
+    without feat triggers attack of opportunity
     """
     print('not implemented')
 
@@ -323,6 +323,7 @@ def disarm(state):
 def overrun(state):
     """
     attempt to force through an enemy's square
+    without feat triggers attack of opportunity
     """
     print('not implemented')
 
@@ -331,6 +332,7 @@ def overrun(state):
 def grapple(state):
     """
     initiate a grapple with the chosen enemy
+    without feat triggers attack of opportunity
     """
     print('not implemented')
 
@@ -339,6 +341,7 @@ def grapple(state):
 def aid_another(state):
     """
     +2 to an ally's attack or ac against an enemy
+    might trigger attack of opportunity
     """
     print('not implemented')
 
@@ -355,5 +358,22 @@ def ready(state):
 def delay(state):
     """
     delay your action until later in the initiative order
+    """
+    print('not implemented')
+
+
+@standard_action
+def activate(state):
+    """
+    activate a magic item other than a potion or consumable
+    no attack of opportunity
+    """
+    print('not implemented')
+
+
+@standard_action
+def activate_aoo(state):
+    """
+    activate a consumable, triggers an attack of opportunity
     """
     print('not implemented')
